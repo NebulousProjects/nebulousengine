@@ -1,0 +1,8 @@
+/.idea
+*.iml
+/kotlin/.gradle
+/kotlin/build
+
+/target/
+/crates/editor/target/
+/crates/components/target/

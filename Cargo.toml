@@ -1,0 +1,21 @@
+[package]
+name = "nebulousengine"
+version = "0.1.0"
+edition = "2021"
+
+# [workspace]
+# members = [
+#     "crates/*"
+# ]
+
+[dependencies]
+# bevy
+bevy = "0.10.1"
+
+# egui
+bevy_egui = "0.20"
+egui = "0.21"
+
+# internal
+nebulousengine_components = { path = "./crates/components" }
+nebulousengine_editor = { path = "./crates/editor" }
