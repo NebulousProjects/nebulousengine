@@ -34,4 +34,4 @@ fn convert_json_to_node_bundle(input_json: JsonValue) -> NodeBundle {
 // TODO: convert json to style
 //  - TODO: convert json to Val (https://docs.rs/bevy/latest/bevy/ui/enum.Val.html)
 //  - TODO: convert json to UiRect (https://docs.rs/bevy/latest/bevy/ui/struct.UiRect.html)
-//  - TODO: convert json to size ()
+//  - todo: convert json to size (https://docs.rs/bevy/latest/bevy/ui/struct.Size.html)
