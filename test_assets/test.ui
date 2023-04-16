@@ -1,0 +1,18 @@
+{
+    "type": "node",
+    "background_color": "#EE5500",
+    "style": {
+        "justify_content": "center",
+        "display:": "flex",
+        "flex_direction": "row",
+        "border": 25
+    },
+    "children": [
+        {
+            "type": "text_hello",
+            "text": "hello",
+            "background_color": "#00BB77",
+            "color": "#FFFFFF"
+        }
+    ]
+}

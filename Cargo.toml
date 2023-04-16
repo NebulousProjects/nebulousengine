@@ -19,3 +19,4 @@ egui = "0.21"
 # internal
 nebulousengine_components = { path = "./crates/components" }
 nebulousengine_editor = { path = "./crates/editor" }
+nebulousengine_ui = { path = "./crates/ui" }
