@@ -4,7 +4,7 @@ use bevy::{prelude::*, render::render_resource::{TextureDimension, Extent3d, Tex
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
 use nebulousengine_components::MainCamera;
-use nebulousengine_ui::convert_uifile_to_uibundle;
+// use nebulousengine_ui::convert_uifile_to_uibundle;
 // use nebulousengine_editor::EditorPlugin;
 
 fn main() {

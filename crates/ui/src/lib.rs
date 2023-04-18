@@ -1,5 +1,3 @@
-use std::panic::RefUnwindSafe;
-
 use bevy::prelude::*;
 use enum_utils::{focus_policy, visibility, zindex};
 use json::{ JsonValue };
@@ -8,62 +6,64 @@ use ui_utils::*;
 pub mod ui_utils;
 pub mod enum_utils;
 
-pub fn convert_uifile_to_uibundle<T: Bundle>(path: &str) -> Box<impl Bundle> {
-    let file_contents = std::fs::read_to_string(path).unwrap();
-    let input_json = json::parse(file_contents.as_str()).unwrap();
-    return convert_json_to_uibundle(input_json);
+pub enum UiBundle {
+    Node(NodeBundle),
+    Text(TextBundle)
 }
 
-pub fn convert_json_to_uibundle(input_json: JsonValue) -> Box<impl Bundle> {
-    let type_str = input_json["type"].as_str().unwrap();
+// TODO: Turn json into entities on spawn
+// impl UiBundle  {
+//     fn apply_to_entity(self, commands: &mut Commands) -> Entity {
+//         let entity = commands.spawn_empty();
+//         match self {
+//             Self::Node(bundle) => entity.insert(bundle),
+//             Self::Text(bundle) => entity.insert(bundle)
+//         }
+//         let result = entity.id();
+//         result;
+//     }
+// }
 
-    return match type_str {
-        "node" => Box::new(NodeBundle {
-            style: optional_style(&input_json, "style"),
-            background_color: optional_color(&input_json, "background_color").into(),
-            focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-            transform: optional_transform(&input_json, "transform"),
-            visibility: visibility(optional_string(&input_json, "visibility")),
-            z_index: zindex(optional_string(&input_json, "z_index")),
-            ..Default::default() 
-        }),
-        // "text" => Box::new(TextBundle {
-        //     text: Text::from_section(optional_string(&input_json, "text"), TextStyle::default()),
-        //     calculated_size: optional_calculated_size(&input_json, "calculated_size"),
-        //     style: optional_style(&input_json, "style"),
-        //     background_color: optional_color(&input_json, "background_color").into(),
-        //     focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-        //     transform: optional_transform(&input_json, "transform"),
-        //     visibility: visibility(optional_string(&input_json, "visibility")),
-        //     z_index: zindex(optional_string(&input_json, "z_index")),
-        //     ..Default::default() 
-        //  }),
-         _ => panic!("bob")
+pub enum JsonToUiErr {
+    NoType,
+    CannotConvertToStr,
+    UnknownType,
+}
+
+impl TryFrom<JsonValue> for UiBundle {
+    type Error = JsonToUiErr;
+
+    fn try_from(input_json: JsonValue) -> Result<Self, Self::Error> {
+        // if !value.has_key("type") { JsonToUiErr::NoType }
+
+        let type_str = input_json["type"].as_str().unwrap();
+
+        Ok(match type_str {
+            "node" => Self::Node(
+                NodeBundle {
+                    style: optional_style(&input_json, "style"),
+                    background_color: optional_color(&input_json, "background_color").into(),
+                    focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
+                    transform: optional_transform(&input_json, "transform"),
+                    visibility: visibility(optional_string(&input_json, "visibility")),
+                    z_index: zindex(optional_string(&input_json, "z_index")),
+                    ..Default::default() 
+                }
+            ),
+            "text" => Self::Text(
+                TextBundle {
+                    text: Text::from_section(optional_string(&input_json, "text"), TextStyle::default()),
+                    calculated_size: optional_calculated_size(&input_json, "calculated_size"),
+                    style: optional_style(&input_json, "style"),
+                    background_color: optional_color(&input_json, "background_color").into(),
+                    focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
+                    transform: optional_transform(&input_json, "transform"),
+                    visibility: visibility(optional_string(&input_json, "visibility")),
+                    z_index: zindex(optional_string(&input_json, "z_index")),
+                    ..Default::default() 
+                }
+            ),
+            _ => return Err(JsonToUiErr::UnknownType)
+        })
     }
-}
-
-fn convert_json_to_node_bundle(input_json: JsonValue) -> NodeBundle {
-    return NodeBundle {
-        style: optional_style(&input_json, "style"),
-        background_color: optional_color(&input_json, "background_color").into(),
-        focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-        transform: optional_transform(&input_json, "transform"),
-        visibility: visibility(optional_string(&input_json, "visibility")),
-        z_index: zindex(optional_string(&input_json, "z_index")),
-        ..Default::default() 
-    }
-}
-
-fn convert_json_to_text_bundle(input_json: JsonValue) -> TextBundle {
-    return TextBundle {
-        text: Text::from_section(optional_string(&input_json, "text"), TextStyle::default()),
-        calculated_size: optional_calculated_size(&input_json, "calculated_size"),
-        style: optional_style(&input_json, "style"),
-        background_color: optional_color(&input_json, "background_color").into(),
-        focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-        transform: optional_transform(&input_json, "transform"),
-        visibility: visibility(optional_string(&input_json, "visibility")),
-        z_index: zindex(optional_string(&input_json, "z_index")),
-        ..Default::default() 
-     }
 }
