@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use bevy::{prelude::*, render::render_resource::{TextureDimension, Extent3d, TextureFormat}, window::PresentMode};
+use bevy::{prelude::*, render::render_resource::{TextureDimension, Extent3d, TextureFormat}};
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
 use nebulousengine_components::MainCamera;
@@ -95,7 +95,7 @@ fn setup(
         ..default()
     }, MainCamera));
 
-    commands.spawn(convert_uifile_to_uibundle("./test_assets/test.ui").unwrap());
+    // commands.spawn(convert_uifile_to_uibundle("./test_assets/test.ui").unwrap());
 }
 
 fn rotate(mut query: Query<&mut Transform, With<Shape>>, time: Res<Time>) {

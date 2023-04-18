@@ -1,4 +1,4 @@
-[project]
+[package]
 name = "nebulousengine_ui"
 version = "0.0.1"
 edition = "2021"

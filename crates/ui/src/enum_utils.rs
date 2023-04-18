@@ -1,4 +1,4 @@
-use bevy::ui::{JustifyContent, Display, Direction, FlexDirection, PositionType, FlexWrap, AlignItems, AlignSelf, AlignContent, Overflow};
+use bevy::{prelude::*, ui::FocusPolicy};
 
 pub fn display(target: &str) -> Display {
     return match target {
@@ -100,10 +100,64 @@ pub fn justify_content(target: &str) -> JustifyContent {
     }
 }
 
+pub fn focus_policy(target: &str) -> FocusPolicy {
+    return match target {
+        "block" => FocusPolicy::Block,
+        "pass" => FocusPolicy::Pass,
+        _ => FocusPolicy::default()
+    }
+}
+
+pub fn visibility(target: &str) -> Visibility {
+    return match target {
+        "inherited" => Visibility::Inherited,
+        "hidden" => Visibility::Hidden,
+        "visible" => Visibility::Visible,
+        _ => Visibility::default()
+    }
+}
+
 pub fn overflow(target: &str) -> Overflow {
     return match target {
         "visible" => Overflow::Visible,
         "hidden" => Overflow::Hidden,
         _ => Overflow::DEFAULT
     }
+}
+
+pub fn val(value: &str) -> Val {
+    // if passed value is auto or undefined, return corresponding enum value
+    if value == "undefined" || value == "" { return Val::Undefined }
+    else if value == "auto" { return Val::Auto }
+    // if the passed value is a percent, attempt to convert it to a float and default to 0 if attempt fails
+    else if value.ends_with('%') {
+        return Val::Percent(convert_string_to_f32_with_default(&value[0..(value.len() - 1)], 0.0))
+    }
+    // otherwise, attempt to convert value to float and default to 0 if necessary
+    else { return Val::Px(convert_string_to_f32_with_default(value, 0.0)) }
+}
+
+pub fn zindex(input: &str) -> ZIndex {
+    // split input value into components, if not two, return default
+    let value: Vec<&str> = input.split(".", ).collect();
+    if value.len() != 2 { return ZIndex::default() }
+
+    // attempt to convert number (value 1), if fails, return default
+    let num_result = value[0].parse::<i32>();
+    if num_result.is_err() { return ZIndex::default() }
+    let num = num_result.unwrap();
+
+    // match type (value 2) and return value
+    let type_str = value[1].to_lowercase();
+    return match type_str.as_str() {
+        "local" => ZIndex::Local(num),
+        "l" => ZIndex::Local(num),
+        "global" => ZIndex::Global(num),
+        "g" => ZIndex::Global(num),
+        _ => ZIndex::default()
+    }
+}
+
+fn convert_string_to_f32_with_default(value: &str, default: f32) -> f32 {
+    return value.parse::<f32>().unwrap_or(default);
 }

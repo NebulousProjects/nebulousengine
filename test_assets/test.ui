@@ -5,7 +5,10 @@
         "justify_content": "center",
         "display:": "flex",
         "flex_direction": "row",
-        "border": 25
+        "border": 2,
+        "size": {
+            "width": 200
+        }
     },
     "children": [
         {
