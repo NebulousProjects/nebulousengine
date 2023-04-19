@@ -1,13 +1,11 @@
 {
-    "type": "node",
-    "background_color": "#EE5500",
+    "type": "button",
+    "background_color": "#22EE99",
     "style": {
-        "justify_content": "center",
-        "display:": "flex",
-        "flex_direction": "row",
         "border": 2,
         "size": {
-            "width": 200
+            "width": 200,
+            "height": 200
         }
     },
     "children": [
@@ -16,6 +14,12 @@
             "background_color": "#FFFFFF",
             "image": {
                 "path": "./apple.png"
+            },
+            "style": {
+                "size": {
+                    "width": 200,
+                    "height": 200
+                }
             }
         }
     ]
