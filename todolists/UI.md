@@ -6,5 +6,5 @@
 - [ ] Setup builder
 
 === Buttons ==
-- [ ] Setup builder
-- [ ] Click tag
+- [x] Setup builder
+- [x] Click tag

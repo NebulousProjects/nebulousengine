@@ -23,6 +23,7 @@ fn main() {
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // .add_plugin(EditorPlugin)
+        .add_plugin(UIPlugin)
         .add_startup_system(setup)
         .add_system(rotate)
         .run();
@@ -92,44 +93,15 @@ fn setup(
         ..default()
     });
 
-    // commands.spawn((Camera3dBundle {
-    //     transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
-    //     ..default()
-    // }, UiCameraConfig {
-    //     show_ui: true,
-    // }, MainCamera));
-    commands.spawn(Camera3dBundle {
-            transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
-            ..default()
-        }).insert(UiCameraConfig { show_ui: true })
-        .insert(MainCamera);
+    // camera
+    commands.spawn((Camera3dBundle {
+        transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
+        ..default()
+    }, UiCameraConfig {
+        show_ui: true,
+    }, MainCamera));
 
-    // commands.spawn(CameraUiBundle::default());
-    // commands.spawn((
-    //     // Create a TextBundle that has a Text with a single section.
-    //     TextBundle::from_section(
-    //         // Accepts a `String` or any type that converts into a `String`, such as `&str`
-    //         "hello\nbevy!",
-    //         TextStyle {
-    //             font: asset_server.load("./fonts/FiraSans-Bold.ttf"),
-    //             font_size: 100.0,
-    //             color: Color::WHITE,
-    //         },
-    //     ) // Set the alignment of the Text
-    //     .with_text_alignment(TextAlignment::Center)
-    //     // Set the style of the TextBundle itself.
-    //     .with_style(Style {
-    //         position_type: PositionType::Absolute,
-    //         position: UiRect {
-    //             bottom: Val::Px(5.0),
-    //             right: Val::Px(15.0),
-    //             ..default()
-    //         },
-    //         ..default()
-    //     }),
-    //     // ColorText,
-    // ));
-
+    // ui
     add_ui_json_to_commands(&load_file_to_json("./assets/test.ui"), &mut commands, &asset_server)
 }
 

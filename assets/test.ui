@@ -8,6 +8,7 @@
             "height": 200
         }
     },
+    "button_id": "test_button",
     "children": [
         {
             "type": "image",

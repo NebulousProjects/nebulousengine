@@ -6,6 +6,35 @@ use ui_utils::*;
 pub mod ui_utils;
 pub mod enum_utils;
 
+pub struct UIPlugin;
+
+impl Plugin for UIPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system(button_listener);
+    }
+}
+
+fn button_listener(
+    mut button_query: Query<
+        (&Interaction, &ButtonID),
+        (Changed<Interaction>, With<Button>)
+    >
+) {
+    for (interaction, tag) in &mut button_query {
+        match *interaction {
+            Interaction::Clicked => {
+                println!("Clicked {}", tag.id)
+            }
+            Interaction::Hovered => {
+                println!("Hover {}", tag.id)
+            }
+            Interaction::None => {
+                println!("None {}", tag.id)
+            }
+        }
+    }
+}
+
 pub fn add_ui_json_to_commands(input_json: &JsonValue, commands: &mut Commands, asset_server: &Res<AssetServer>) {
     // create entity
     let mut entity = commands.spawn_empty();
@@ -40,11 +69,16 @@ fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityCommands, 
     }
 }
 
+#[derive(Component, Clone)]
+pub struct ButtonID {
+    id: String
+}
+
 pub enum UiBundle {
     Node(NodeBundle),
     Text(TextBundle),
     Image(ImageBundle),
-    Button(ButtonBundle)
+    Button((ButtonBundle, ButtonID))
 }
 
 impl UiBundle  {
@@ -106,16 +140,19 @@ fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Res
             }
         ),
         "button" => UiBundle::Button(
-            ButtonBundle {
-                image: optional_image(&input_json, asset_server, "image"),
-                style: optional_style(&input_json, "style"),
-                background_color: optional_color_default(&input_json, "background_color", Color::WHITE).into(),
-                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-                transform: optional_transform(&input_json, "transform"),
-                visibility: visibility(optional_string(&input_json, "visibility")),
-                z_index: zindex(optional_string(&input_json, "z_index")),
-                ..Default::default()
-            }
+            (
+                ButtonBundle {
+                    image: optional_image(&input_json, asset_server, "image"),
+                    style: optional_style(&input_json, "style"),
+                    background_color: optional_color_default(&input_json, "background_color", Color::WHITE).into(),
+                    focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
+                    transform: optional_transform(&input_json, "transform"),
+                    visibility: visibility(optional_string(&input_json, "visibility")),
+                    z_index: zindex(optional_string(&input_json, "z_index")),
+                    ..Default::default()
+                },
+                ButtonID { id: optional_string(&input_json, "button_id").to_string() }
+            )
         ),
         _ => return Err("Unknown type".to_string())
     })
