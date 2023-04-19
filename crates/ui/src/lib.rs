@@ -18,7 +18,7 @@ pub fn add_ui_json_to_commands(input_json: &JsonValue, commands: &mut Commands, 
     // return entity.id();
 }
 
-pub fn insert_children(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
+fn insert_children(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
     let children = &input_json["children"];
     commands.with_children(|builder| {
         for i in 0 .. children.len() {
@@ -30,7 +30,7 @@ pub fn insert_children(input_json: &JsonValue, commands: &mut EntityCommands, as
     });
 }
 
-pub fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
+fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
     println!("Drawing ui with type: {}", input_json["type"]);
     let bundle = gen_ui_bundle(input_json, asset_server);
     if bundle.is_ok() {
@@ -43,7 +43,8 @@ pub fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityComman
 pub enum UiBundle {
     Node(NodeBundle),
     Text(TextBundle),
-    Image(ImageBundle)
+    Image(ImageBundle),
+    Button(ButtonBundle)
 }
 
 impl UiBundle  {
@@ -51,16 +52,10 @@ impl UiBundle  {
         match self {
             Self::Node(bundle) => commands.insert(bundle.clone()),
             Self::Text(bundle) => commands.insert(bundle.clone()),
-            Self::Image(bundle) => commands.insert(bundle.clone())
+            Self::Image(bundle) => commands.insert(bundle.clone()),
+            Self::Button(bundle) => commands.insert(bundle.clone())
         };
     }
-}
-
-#[derive(Debug)]
-pub enum JsonToUiErr {
-    NoType,
-    CannotConvertToStr,
-    UnknownType,
 }
 
 fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Result<UiBundle, String> {
@@ -108,6 +103,18 @@ fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Res
                 visibility: visibility(optional_string(&input_json, "visibility")),
                 z_index: zindex(optional_string(&input_json, "z_index")),
                 ..Default::default() 
+            }
+        ),
+        "button" => UiBundle::Button(
+            ButtonBundle {
+                image: optional_image(&input_json, asset_server, "image"),
+                style: optional_style(&input_json, "style"),
+                background_color: optional_color_default(&input_json, "background_color", Color::WHITE).into(),
+                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
+                transform: optional_transform(&input_json, "transform"),
+                visibility: visibility(optional_string(&input_json, "visibility")),
+                z_index: zindex(optional_string(&input_json, "z_index")),
+                ..Default::default()
             }
         ),
         _ => return Err("Unknown type".to_string())
