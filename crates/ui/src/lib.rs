@@ -42,14 +42,16 @@ pub fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityComman
 
 pub enum UiBundle {
     Node(NodeBundle),
-    Text(TextBundle)
+    Text(TextBundle),
+    Image(ImageBundle)
 }
 
 impl UiBundle  {
     fn attach(self, commands: &mut EntityCommands) {
         match self {
             Self::Node(bundle) => commands.insert(bundle.clone()),
-            Self::Text(bundle) => commands.insert(bundle.clone())
+            Self::Text(bundle) => commands.insert(bundle.clone()),
+            Self::Image(bundle) => commands.insert(bundle.clone())
         };
     }
 }
@@ -78,26 +80,29 @@ fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Res
                 ..Default::default() 
             }
         ),
-        "text" => { 
-            println!("Text: {}", optional_string(&input_json, "text"));
-            UiBundle::Text(
-                TextBundle {
-                    text: Text::from_section(optional_string(&input_json, "text"), TextStyle {
-                        font: asset_server.load("./fonts/FiraSans-Bold.ttf"),
-                        font_size: 100.0,
-                        color: Color::WHITE,
-                    }),
-                    calculated_size: optional_calculated_size(&input_json, "calculated_size"),
-                    style: optional_style(&input_json, "style"),
-                    background_color: optional_color(&input_json, "background_color").into(),
-                    focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-                    transform: optional_transform(&input_json, "transform"),
-                    visibility: visibility(optional_string(&input_json, "visibility")),
-                    z_index: zindex(optional_string(&input_json, "z_index")),
-                    ..Default::default() 
-                }
-            )
-        },
+        "text" => UiBundle::Text(
+            TextBundle {
+                text: Text::from_section(optional_string(&input_json, "text"), TextStyle {
+                    font: asset_server.load("./fonts/FiraSans-Bold.ttf"),
+                    font_size: 100.0,
+                    color: Color::WHITE,
+                }),
+                calculated_size: optional_calculated_size(&input_json, "calculated_size"),
+                style: optional_style(&input_json, "style"),
+                background_color: optional_color(&input_json, "background_color").into(),
+                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
+                transform: optional_transform(&input_json, "transform"),
+                visibility: visibility(optional_string(&input_json, "visibility")),
+                z_index: zindex(optional_string(&input_json, "z_index")),
+                ..Default::default() 
+            }
+        ),
+        "image" => UiBundle::Image(
+            ImageBundle {
+
+                ..Default::default() 
+            }
+        ),
         _ => return Err("Unknown type".to_string())
     })
 }
