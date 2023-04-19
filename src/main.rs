@@ -3,7 +3,8 @@ use std::f32::consts::PI;
 use bevy::{prelude::*, render::render_resource::{TextureDimension, Extent3d, TextureFormat}};
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
-use nebulousengine_components::MainCamera;
+use nebulousengine_components::*;
+use nebulousengine_ui::*;
 // use nebulousengine_ui::convert_uifile_to_uibundle;
 // use nebulousengine_editor::EditorPlugin;
 
@@ -37,6 +38,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>
 ) {
     let debug_material = materials.add(StandardMaterial {
         base_color_texture: Some(images.add(uv_debug_texture())),
@@ -90,12 +92,45 @@ fn setup(
         ..default()
     });
 
-    commands.spawn((Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
-        ..default()
-    }, MainCamera));
+    // commands.spawn((Camera3dBundle {
+    //     transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
+    //     ..default()
+    // }, UiCameraConfig {
+    //     show_ui: true,
+    // }, MainCamera));
+    commands.spawn(Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
+            ..default()
+        }).insert(UiCameraConfig { show_ui: true })
+        .insert(MainCamera);
 
-    // commands.spawn(convert_uifile_to_uibundle("./test_assets/test.ui").unwrap());
+    // commands.spawn(CameraUiBundle::default());
+    // commands.spawn((
+    //     // Create a TextBundle that has a Text with a single section.
+    //     TextBundle::from_section(
+    //         // Accepts a `String` or any type that converts into a `String`, such as `&str`
+    //         "hello\nbevy!",
+    //         TextStyle {
+    //             font: asset_server.load("./fonts/FiraSans-Bold.ttf"),
+    //             font_size: 100.0,
+    //             color: Color::WHITE,
+    //         },
+    //     ) // Set the alignment of the Text
+    //     .with_text_alignment(TextAlignment::Center)
+    //     // Set the style of the TextBundle itself.
+    //     .with_style(Style {
+    //         position_type: PositionType::Absolute,
+    //         position: UiRect {
+    //             bottom: Val::Px(5.0),
+    //             right: Val::Px(15.0),
+    //             ..default()
+    //         },
+    //         ..default()
+    //     }),
+    //     // ColorText,
+    // ));
+
+    add_ui_json_to_commands(&load_file_to_json("./assets/test.ui"), &mut commands, &asset_server)
 }
 
 fn rotate(mut query: Query<&mut Transform, With<Shape>>, time: Res<Time>) {

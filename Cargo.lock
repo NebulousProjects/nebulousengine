@@ -2281,6 +2281,7 @@ dependencies = [
  "bevy",
  "bevy_egui",
  "egui",
+ "json",
  "nebulousengine_components",
  "nebulousengine_editor",
  "nebulousengine_ui",
@@ -2291,6 +2292,7 @@ name = "nebulousengine_components"
 version = "0.0.1"
 dependencies = [
  "bevy",
+ "json",
 ]
 
 [[package]]

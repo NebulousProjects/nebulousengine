@@ -16,6 +16,9 @@ bevy = "0.10.1"
 bevy_egui = "0.20"
 egui = "0.21"
 
+# json
+json = "0.12.4"
+
 # internal
 nebulousengine_components = { path = "./crates/components" }
 nebulousengine_editor = { path = "./crates/editor" }

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::Extent3d;
+use json::{ JsonValue };
 
 #[derive(Component)]
 pub struct MainCamera;
@@ -24,4 +25,9 @@ impl Default for ViewportContainer {
             setup: false
         }
     }
+}
+
+pub fn load_file_to_json(path: &str) -> JsonValue {
+    let file_contents = std::fs::read_to_string(path).unwrap();
+    return json::parse(file_contents.as_str()).unwrap();
 }

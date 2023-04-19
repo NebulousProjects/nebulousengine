@@ -12,7 +12,7 @@
     },
     "children": [
         {
-            "type": "text_hello",
+            "type": "text",
             "text": "hello",
             "background_color": "#00BB77",
             "color": "#FFFFFF"
