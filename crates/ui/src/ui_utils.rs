@@ -46,6 +46,20 @@ pub fn optional_color(json_container: &JsonValue, target: &str) -> Color {
     }
 }
 
+pub fn optional_color_default(json_container: &JsonValue, target: &str, default: Color) -> Color {
+    if json_container.has_key(target) { 
+        let value = json_container[target].as_str().unwrap();
+        return Color::rgb(
+            u32::from_str_radix(&value[1..3], 16).unwrap() as f32 / 255.0, 
+            u32::from_str_radix(&value[3..5], 16).unwrap() as f32 / 255.0, 
+            u32::from_str_radix(&value[5..7], 16).unwrap() as f32 / 255.0
+        ).into();
+    } else {
+        return default
+    }
+}
+
+
 // todo if just number, use ui rect all
 pub fn optional_uirect(json_container: &JsonValue, target: &str) -> UiRect {
     return if json_container.has_key(target) {
@@ -179,4 +193,15 @@ pub fn optional_bool(json_container: &JsonValue, target: &str, default: bool) ->
             value.as_str().unwrap() == "true"
         } else { default }
     } else { default }
+}
+
+pub fn optional_image(json_container: &JsonValue, asset_server: &Res<AssetServer>, target: &str) -> UiImage {
+    return if json_container.has_key(target) {
+        let image_json = &json_container[target];
+        UiImage {
+            texture: asset_server.load(optional_string(image_json, "path")),
+            flip_x: optional_bool(image_json, "flip_x", false),
+            flip_y: optional_bool(image_json, "flip_y", false),
+        }
+    } else { UiImage::default() }
 }

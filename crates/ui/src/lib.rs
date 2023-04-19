@@ -99,7 +99,14 @@ fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Res
         ),
         "image" => UiBundle::Image(
             ImageBundle {
-
+                image: optional_image(&input_json, asset_server, "image"),
+                calculated_size: optional_calculated_size(&input_json, "calculated_size"),
+                style: optional_style(&input_json, "style"),
+                background_color: optional_color_default(&input_json, "background_color", Color::WHITE).into(),
+                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
+                transform: optional_transform(&input_json, "transform"),
+                visibility: visibility(optional_string(&input_json, "visibility")),
+                z_index: zindex(optional_string(&input_json, "z_index")),
                 ..Default::default() 
             }
         ),

@@ -12,10 +12,11 @@
     },
     "children": [
         {
-            "type": "text",
-            "text": "hello",
-            "background_color": "#00BB77",
-            "color": "#FFFFFF"
+            "type": "image",
+            "background_color": "#FFFFFF",
+            "image": {
+                "path": "./apple.png"
+            }
         }
     ]
 }
