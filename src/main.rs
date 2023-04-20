@@ -1,8 +1,8 @@
 use std::f32::consts::PI;
 
-use bevy::{prelude::*, render::render_resource::{TextureDimension, Extent3d, TextureFormat}};
-// use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::{prelude::*, render::render_resource::*};
 
+use nebulousengine_scripting::*;
 use nebulousengine_utils::*;
 use nebulousengine_ui::*;
 // use nebulousengine_ui::convert_uifile_to_uibundle;
@@ -24,6 +24,7 @@ fn main() {
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // .add_plugin(EditorPlugin)
         .add_plugin(UIPlugin)
+        .add_plugin(ScriptingPlugin)
         .add_startup_system(setup)
         .add_system(rotate)
         .run();

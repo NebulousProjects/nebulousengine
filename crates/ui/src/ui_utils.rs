@@ -237,7 +237,6 @@ pub fn optional_text_sections(json_container: &JsonValue, asset_server: &Res<Ass
             for i in 0 .. array.len() {
                 let element = &array[i];
                 vec.push(text_section(element, asset_server));
-                println!("Build text with element: {}", element["text"]);
             }
 
             return vec;
