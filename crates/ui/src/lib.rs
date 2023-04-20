@@ -60,7 +60,6 @@ fn insert_children(input_json: &JsonValue, commands: &mut EntityCommands, asset_
 }
 
 fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
-    println!("Drawing ui with type: {}", input_json["type"]);
     let bundle = gen_ui_bundle(input_json, asset_server);
     if bundle.is_ok() {
         bundle.unwrap().attach(commands);
@@ -111,11 +110,7 @@ fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Res
         ),
         "text" => UiBundle::Text(
             TextBundle {
-                text: Text::from_section(optional_string(&input_json, "text"), TextStyle {
-                    font: asset_server.load("./fonts/FiraSans-Bold.ttf"),
-                    font_size: 100.0,
-                    color: Color::WHITE,
-                }),
+                text: optional_text(&input_json, asset_server, "text"),
                 calculated_size: optional_calculated_size(&input_json, "calculated_size"),
                 style: optional_style(&input_json, "style"),
                 background_color: optional_color(&input_json, "background_color").into(),

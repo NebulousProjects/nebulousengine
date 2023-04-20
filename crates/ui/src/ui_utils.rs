@@ -1,7 +1,7 @@
 use crate::enum_utils::*;
 
 use bevy::prelude::*;
-use json::{ JsonValue };
+use json::JsonValue::{self};
 use std::u32;
 
 pub fn optional_style(json_container: &JsonValue, target: &str) -> Style {
@@ -204,4 +204,54 @@ pub fn optional_image(json_container: &JsonValue, asset_server: &Res<AssetServer
             flip_y: optional_bool(image_json, "flip_y", false),
         }
     } else { UiImage::default() }
+}
+
+pub fn optional_font(json_container: &JsonValue, asset_server: &Res<AssetServer>, target: &str) -> Handle<Font> {
+    return asset_server.load(optional_string(json_container, target));
+}
+
+pub fn optional_text_style(json_container: &JsonValue, asset_server: &Res<AssetServer>, target: &str) -> TextStyle {
+    return if json_container.has_key(target) {
+        let root = &json_container[target];
+        TextStyle {
+            font: optional_font(root, asset_server, "font"),
+            font_size: optional_f32(root, "font_size", 20.0),
+            color: optional_color_default(root, "color", Color::WHITE)
+        }
+    } else { TextStyle::default() }
+}
+
+pub fn text_section(root: &JsonValue, asset_server: &Res<AssetServer>) -> TextSection {
+    TextSection { 
+        value: optional_string(root, "text").to_string(), 
+        style: optional_text_style(root, asset_server, "style") 
+    }
+}
+
+pub fn optional_text_sections(json_container: &JsonValue, asset_server: &Res<AssetServer>, target: &str) -> Vec<TextSection> {
+    return if json_container.has_key(target) {
+        let array = &json_container[target];
+        if array.is_array() {
+            let mut vec = Vec::new();
+
+            for i in 0 .. array.len() {
+                let element = &array[i];
+                vec.push(text_section(element, asset_server));
+                println!("Build text with element: {}", element["text"]);
+            }
+
+            return vec;
+        } else { Vec::new() }
+    } else { Vec::new() }
+}
+
+pub fn optional_text(json_container: &JsonValue, asset_server: &Res<AssetServer>, target: &str) -> Text {
+    return if json_container.has_key(target) {
+        let value = &json_container[target];
+        Text {
+            sections: optional_text_sections(value, asset_server, "sections"),
+            alignment: text_alignment(optional_string(value, "alignment")),
+            linebreak_behaviour: break_line_on(optional_string(value, "linebreak_behaviour"))
+        }
+    } else { Text::default() }
 }

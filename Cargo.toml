@@ -3,11 +3,6 @@ name = "nebulousengine"
 version = "0.0.1"
 edition = "2021"
 
-# [workspace]
-# members = [
-#     "crates/*"
-# ]
-
 [dependencies]
 # bevy
 bevy = "0.10.1"

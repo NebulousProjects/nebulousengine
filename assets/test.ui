@@ -11,16 +11,17 @@
     "button_id": "test_button",
     "children": [
         {
-            "type": "image",
-            "background_color": "#FFFFFF",
-            "image": {
-                "path": "./apple.png"
-            },
-            "style": {
-                "size": {
-                    "width": 200,
-                    "height": 200
-                }
+            "type": "text",
+            "text": {
+                "sections": [
+                    {
+                        "text": "hello",
+                        "style": {
+                            "font": "fonts/FiraSans-Bold.ttf"
+                        }
+                    }
+                ],
+                "alignment": "center"
             }
         }
     ]

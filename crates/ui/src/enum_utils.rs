@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ui::FocusPolicy};
+use bevy::{prelude::*, ui::FocusPolicy, text::BreakLineOn};
 
 pub fn display(target: &str) -> Display {
     return match target {
@@ -122,6 +122,23 @@ pub fn overflow(target: &str) -> Overflow {
         "visible" => Overflow::Visible,
         "hidden" => Overflow::Hidden,
         _ => Overflow::DEFAULT
+    }
+}
+
+pub fn break_line_on(target: &str) -> BreakLineOn {
+    return match target {
+        "word_boundary" => BreakLineOn::WordBoundary,
+        "any_character" => BreakLineOn::AnyCharacter,
+        _ => BreakLineOn::WordBoundary
+    }
+}
+
+pub fn text_alignment(target: &str) -> TextAlignment {
+    return match target {
+        "left" => TextAlignment::Left,
+        "center" => TextAlignment::Center,
+        "right" => TextAlignment::Right,
+        _ => TextAlignment::Center
     }
 }
 

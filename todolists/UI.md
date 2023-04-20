@@ -1,9 +1,9 @@
 ==== Text ====
-- [ ] Define text section in json
-- [ ] Define font locations in json
+- [x] Define text section in json
+- [x] Define font locations in json
 
 === Images ===
-- [ ] Setup builder
+- [x] Setup builder
 
 === Buttons ==
 - [x] Setup builder
