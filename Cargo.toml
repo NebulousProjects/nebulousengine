@@ -15,6 +15,6 @@ egui = "0.21"
 json = "0.12.4"
 
 # internal
-nebulousengine_components = { path = "./crates/components" }
 nebulousengine_editor = { path = "./crates/editor" }
 nebulousengine_ui = { path = "./crates/ui" }
+nebulousengine_utils = { path = "./crates/utils" }

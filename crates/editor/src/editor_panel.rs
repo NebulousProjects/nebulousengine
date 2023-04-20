@@ -1,7 +1,7 @@
 use bevy::{prelude::*, render::render_resource::Extent3d};
 use bevy_egui::EguiContexts;
 use egui::*;
-use nebulousengine_components::ViewportContainer;
+use nebulousengine_utils::ViewportContainer;
 
 #[derive(Resource)]
 pub struct EditorTabs {

@@ -5,5 +5,5 @@
 
 /target/
 /crates/editor/target/
-/crates/components/target/
 /crates/ui/target/
+/crates/utils/target/

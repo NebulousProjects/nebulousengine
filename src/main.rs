@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use bevy::{prelude::*, render::render_resource::{TextureDimension, Extent3d, TextureFormat}};
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
-use nebulousengine_components::*;
+use nebulousengine_utils::*;
 use nebulousengine_ui::*;
 // use nebulousengine_ui::convert_uifile_to_uibundle;
 // use nebulousengine_editor::EditorPlugin;

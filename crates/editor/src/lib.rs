@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::render::camera::{RenderTarget, Viewport};
 use bevy::render::render_resource::*;
 use bevy_egui::*;
-use nebulousengine_components::{ViewportContainer, MainCamera};
+use nebulousengine_utils::{ViewportContainer, MainCamera};
 use self::files_editor_panel::render_files;
 use self::editor_panel::*;
 

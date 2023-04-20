@@ -2088,7 +2088,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "nebulousengine_components"
+name = "nebulousengine_utils"
 version = "0.0.1"
 dependencies = [
  "bevy",

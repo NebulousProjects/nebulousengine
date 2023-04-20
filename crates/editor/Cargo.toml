@@ -8,4 +8,4 @@ bevy = "0.10"
 bevy_egui = "0.20.2"
 egui = "0.21.0"
 egui_dock = "0.4"
-nebulousengine_components = { path = "../components/" }
+nebulousengine_utils = { path = "../utils/" }
