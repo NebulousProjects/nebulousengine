@@ -8,5 +8,4 @@ bevy = "0.10.1"
 json = "0.12.4"
 
 # deno
-deno_core = "0.181.0"
-tokio = { version = "1.19.2", features = ["full"] }
+js-sandbox = "0.1.6"
