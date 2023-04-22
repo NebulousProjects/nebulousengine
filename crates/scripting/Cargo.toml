@@ -6,6 +6,3 @@ edition = "2021"
 [dependencies]
 bevy = "0.10.1"
 json = "0.12.4"
-
-# deno
-js-sandbox = "0.1.6"

@@ -8,3 +8,8 @@
 /crates/scripting/target/
 /crates/ui/target/
 /crates/utils/target/
+
+/kotlin/.gradle/
+/kotlin-test/.gradle/
+/kotlin/build/
+/kotlin-test/build/
