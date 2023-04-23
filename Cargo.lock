@@ -2343,6 +2343,7 @@ version = "0.0.1"
 dependencies = [
  "bevy",
  "json",
+ "nebulousengine_utils",
 ]
 
 [[package]]

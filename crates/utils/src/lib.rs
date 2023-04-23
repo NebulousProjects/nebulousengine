@@ -2,6 +2,9 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Extent3d;
 use json::{ JsonValue };
 
+pub mod optionals;
+pub mod enums;
+
 #[derive(Component)]
 pub struct MainCamera;
 

@@ -1,4 +1,4 @@
-use crate::enum_utils::*;
+use crate::enums::*;
 
 use bevy::prelude::*;
 use json::JsonValue::{self};

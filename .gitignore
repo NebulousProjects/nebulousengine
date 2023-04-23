@@ -3,11 +3,7 @@
 /kotlin/.gradle
 /kotlin/build
 
-/target/
-/crates/editor/target/
-/crates/scripting/target/
-/crates/ui/target/
-/crates/utils/target/
+target/
 
 /kotlin/.gradle/
 /kotlin-test/.gradle/

@@ -1,10 +1,7 @@
 use bevy::{prelude::*, ecs::system::EntityCommands};
-use enum_utils::{focus_policy, visibility, zindex};
 use json::{ JsonValue };
-use ui_utils::*;
-
-pub mod ui_utils;
-pub mod enum_utils;
+use nebulousengine_utils::optionals::*;
+use nebulousengine_utils::enums::*;
 
 pub struct UIPlugin;
 
