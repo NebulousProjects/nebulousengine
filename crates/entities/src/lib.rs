@@ -13,11 +13,15 @@ pub fn spawn_entity_from_json(commands: &mut Commands, input_json: &JsonValue, a
     // unpack json
     let components = &input_json["components"];
 
+    // add transform
+    let transform = optional_transform(input_json, "transform");
+    entity.insert(transform);
+
     // if components is an array, loop through each component
     if components.is_array() {
         for i in 0 .. components.len() {
             // add each component to the entity
-            let bundle = convert_component_to_bundle(&components[i], asset_server);
+            let bundle = unpack_component(&components[i], asset_server);
             if bundle.is_ok() {
                 bundle.unwrap().attach(&mut entity);
             } else {
@@ -50,7 +54,7 @@ impl EntityBundle {
     }
 }
 
-fn convert_component_to_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Result<EntityBundle, String> {
+fn unpack_component(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Result<EntityBundle, String> {
     // unpack json
     let type_str = input_json["type"].as_str();
 
@@ -76,9 +80,17 @@ fn convert_component_to_bundle(input_json: &JsonValue, asset_server: &Res<AssetS
                 Camera3dBundle {
                     camera: Camera {
                         viewport: optional_viewport(input_json, "viewport"),
-                        ..Default::default() // TODO finish
+                        order: optional_isize(input_json, "order", 0),
+                        is_active: optional_bool(input_json, "active", true),
+                        hdr: optional_bool(input_json, "hdr", false), // WARN EXPERIMENTAL
+                        msaa_writeback: optional_bool(input_json, "msaa_writeback", true), // WARN EXPERIMENTAL
+                        ..Default::default()
                     },
-                    ..Default::default() // TODO finish
+                    projection: projection(optional_string(input_json, "projection")),
+                    tonemapping: tonemapping(optional_string(input_json, "tonemapping")),
+                    dither: optional_deband_dither(input_json, "dither"),
+                    color_grading: optional_color_grading(input_json, "color_grading"),
+                    ..Default::default()
                 },
                 UiCameraConfig {
                     show_ui: optional_bool(input_json, "show_ui", true)

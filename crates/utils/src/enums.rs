@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ui::FocusPolicy, text::BreakLineOn};
+use bevy::{prelude::*, ui::FocusPolicy, text::BreakLineOn, core_pipeline::tonemapping::Tonemapping};
 
 pub fn display(target: &str) -> Display {
     return match target {
@@ -139,6 +139,28 @@ pub fn text_alignment(target: &str) -> TextAlignment {
         "center" => TextAlignment::Center,
         "right" => TextAlignment::Right,
         _ => TextAlignment::Center
+    }
+}
+
+pub fn projection(target: &str) -> Projection {
+    return match target {
+        "perspective" => Projection::Perspective(PerspectiveProjection::default()),
+        "orthographic" => Projection::Orthographic(OrthographicProjection::default()),
+        _ => Projection::default()
+    }
+}
+
+pub fn tonemapping(target: &str) -> Tonemapping {
+    return match target {
+        "none" => Tonemapping::None,
+        "reinhard" => Tonemapping::Reinhard,
+        "reinhard_luminance" => Tonemapping::ReinhardLuminance,
+        "aces_fitted" => Tonemapping::AcesFitted,
+        "agx" => Tonemapping::AgX,
+        "somewhat_boring_display_transform" => Tonemapping::SomewhatBoringDisplayTransform,
+        "tony_mc_mapface" => Tonemapping::TonyMcMapface,
+        "blender_filmic" => Tonemapping::BlenderFilmic,
+        _ => Tonemapping::default()
     }
 }
 

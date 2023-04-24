@@ -1,6 +1,6 @@
 use crate::enums::*;
 
-use bevy::{prelude::*, render::camera::Viewport};
+use bevy::{prelude::*, render::{camera::Viewport, view::ColorGrading}, core_pipeline::tonemapping::DebandDither};
 use json::JsonValue::{self};
 use std::{u32, ops::Range};
 
@@ -111,13 +111,32 @@ pub fn optional_val(json_container: &JsonValue, target: &str) -> Val {
     }
 }
 
+pub fn optional_deband_dither(json: &JsonValue, target: &str) -> DebandDither {
+    return if json.has_key(target) {
+        if json[target].as_bool().unwrap_or(true) { DebandDither::Enabled } 
+        else { DebandDither::Disabled }
+    } else { DebandDither::default() }
+}
+
+pub fn optional_color_grading(json: &JsonValue, target: &str) -> ColorGrading {
+    return if json.has_key(target) {
+        let value = &json[target];
+        ColorGrading {
+            exposure: optional_f32(value, "exposure", 0.0),
+            gamma: optional_f32(value, "gamma", 1.0),
+            pre_saturation: optional_f32(value, "pre_saturation", 1.0),
+            post_saturation: optional_f32(value, "post_saturation", 1.0)
+        }
+    } else { ColorGrading::default() }
+}
+
 pub fn optional_transform(json_container: &JsonValue, target: &str) -> Transform {
     return if json_container.has_key(target) {
         let value = &json_container[target];
         Transform {
             translation: optional_vec3(value, "position", Vec3::ZERO),
             rotation: optional_quat(value, "rotation", Quat::default()),
-            scale: optional_vec3(value, target, Vec3::ONE)
+            scale: optional_vec3(value, "scale", Vec3::ONE)
         }
     } else { Transform::default() }
 }
@@ -201,6 +220,12 @@ pub fn optional_range_f32(json: &JsonValue, target: &str, default: Range<f32>) -
         let start = optional_f32(value, "start", default.start);
         let end = optional_f32(value, "end", default.end);
         start .. end
+    } else { default }
+}
+
+pub fn optional_isize(json: &JsonValue, target: &str, default: isize) -> isize {
+    return if json.has_key(target) {
+        json[target].as_isize().unwrap_or(default)
     } else { default }
 }
 
