@@ -76,7 +76,7 @@ fn convert_component_to_bundle(input_json: &JsonValue, asset_server: &Res<AssetS
                 Camera3dBundle {
                     camera: Camera {
                         viewport: optional_viewport(input_json, "viewport"),
-                        ..Default::default() // TODO finsih
+                        ..Default::default() // TODO finish
                     },
                     ..Default::default() // TODO finish
                 },
