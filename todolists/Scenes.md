@@ -1,0 +1,4 @@
+- [ ] Load UIs, Systems, and Entities from a single JSON file
+- [ ] If an entry is already JSON, load that JSON
+- [ ] If an entity is a valid path to a file, load that file
+- [ ] If any problems, error but do not crash

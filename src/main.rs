@@ -2,6 +2,7 @@ use std::f32::consts::PI;
 
 use bevy::{prelude::*, render::render_resource::*};
 
+use nebulousengine_entities::spawn_entity_from_path;
 use nebulousengine_scripting::*;
 use nebulousengine_utils::*;
 use nebulousengine_ui::*;
@@ -42,39 +43,39 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>
 ) {
-    let debug_material = materials.add(StandardMaterial {
-        base_color_texture: Some(images.add(uv_debug_texture())),
-        ..default()
-    });
+    // let debug_material = materials.add(StandardMaterial {
+    //     base_color_texture: Some(images.add(uv_debug_texture())),
+    //     ..default()
+    // });
 
-    let shapes = [
-        meshes.add(shape::Cube::default().into()),
-        meshes.add(shape::Box::default().into()),
-        meshes.add(shape::Capsule::default().into()),
-        meshes.add(shape::Torus::default().into()),
-        meshes.add(shape::Cylinder::default().into()),
-        meshes.add(shape::Icosphere::default().try_into().unwrap()),
-        meshes.add(shape::UVSphere::default().into()),
-    ];
+    // let shapes = [
+    //     meshes.add(shape::Cube::default().into()),
+    //     meshes.add(shape::Box::default().into()),
+    //     meshes.add(shape::Capsule::default().into()),
+    //     meshes.add(shape::Torus::default().into()),
+    //     meshes.add(shape::Cylinder::default().into()),
+    //     meshes.add(shape::Icosphere::default().try_into().unwrap()),
+    //     meshes.add(shape::UVSphere::default().into()),
+    // ];
 
-    let num_shapes = shapes.len();
+    // let num_shapes = shapes.len();
 
-    for (i, shape) in shapes.into_iter().enumerate() {
-        commands.spawn((
-            PbrBundle {
-                mesh: shape,
-                material: debug_material.clone(),
-                transform: Transform::from_xyz(
-                    -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
-                    2.0,
-                    0.0,
-                )
-                .with_rotation(Quat::from_rotation_x(-PI / 4.)),
-                ..default()
-            },
-            Shape,
-        ));
-    }
+    // for (i, shape) in shapes.into_iter().enumerate() {
+    //     commands.spawn((
+    //         PbrBundle {
+    //             mesh: shape,
+    //             material: debug_material.clone(),
+    //             transform: Transform::from_xyz(
+    //                 -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
+    //                 2.0,
+    //                 0.0,
+    //             )
+    //             .with_rotation(Quat::from_rotation_x(-PI / 4.)),
+    //             ..default()
+    //         },
+    //         Shape,
+    //     ));
+    // }
 
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -103,7 +104,10 @@ fn setup(
     }, MainCamera));
 
     // ui
-    add_ui_json_to_commands(&load_file_to_json("./assets/test.ui"), &mut commands, &asset_server)
+    add_ui_json_to_commands(&load_file_to_json("./assets/test.ui"), &mut commands, &asset_server);
+
+    // entities
+    spawn_entity_from_path(&mut commands, "./assets/test.entity", &asset_server);
 }
 
 fn rotate(mut query: Query<&mut Transform, With<Shape>>, time: Res<Time>) {

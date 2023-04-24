@@ -5,3 +5,8 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.10.1"
+
+# json
+json = "0.12.4"
+
+nebulousengine_utils = { path = "../utils" }

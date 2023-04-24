@@ -1,0 +1,8 @@
+{
+    "components": [
+        {
+            "type": "model",
+            "model": "./barracks.gltf.glb"
+        }
+    ]
+}

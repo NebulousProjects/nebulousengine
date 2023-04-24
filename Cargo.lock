@@ -2313,6 +2313,7 @@ dependencies = [
  "egui",
  "json",
  "nebulousengine_editor",
+ "nebulousengine_entities",
  "nebulousengine_scripting",
  "nebulousengine_ui",
  "nebulousengine_utils",
@@ -2326,6 +2327,15 @@ dependencies = [
  "bevy_egui",
  "egui",
  "egui_dock",
+ "nebulousengine_utils",
+]
+
+[[package]]
+name = "nebulousengine_entities"
+version = "0.0.1"
+dependencies = [
+ "bevy",
+ "json",
  "nebulousengine_utils",
 ]
 
