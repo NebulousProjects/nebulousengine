@@ -1,0 +1,13 @@
+{
+    "components": [
+        {
+            "type": "camera",
+            "main": true,
+            "show_ui": true
+        }
+    ],
+    "transform": {
+        "position": [0.0, 6.0, 12.0],
+        "rotation": [0.0, -22.5, 0.0]
+    }
+}

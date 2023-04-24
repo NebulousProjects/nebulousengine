@@ -1,6 +1,6 @@
-use bevy::{prelude::*, ecs::system::EntityCommands, gltf::Gltf};
+use bevy::{prelude::*, ecs::system::EntityCommands};
 use json::JsonValue;
-use nebulousengine_utils::*;
+use nebulousengine_utils::{*, optionals::*, enums::*};
 
 pub fn spawn_entity_from_path(commands: &mut Commands, path: &str, asset_server: &Res<AssetServer>) {
     spawn_entity_from_json(commands, &load_file_to_json(path), asset_server);
@@ -28,13 +28,24 @@ pub fn spawn_entity_from_json(commands: &mut Commands, input_json: &JsonValue, a
 }
 
 pub enum EntityBundle {
-    Model(PbrBundle)
+    Model(SceneBundle),
+    Camera((Camera3dBundle, UiCameraConfig, Option<MainCamera>))
 }
 
 impl EntityBundle {
     fn attach(self, commands: &mut EntityCommands) {
         match self {
-            Self::Model(bundle) => commands.insert(bundle)
+            Self::Model(bundle) => commands.insert(bundle),
+            Self::Camera((camera, ui_config, main_camera)) => {
+                // insert not optional camera components
+                commands.insert(camera).insert(ui_config);
+
+                // add main camera if able
+                if main_camera.is_some() { commands.insert(main_camera.unwrap()); }
+
+                // return the commands to match others
+                commands
+            } 
         };
     }
 }
@@ -49,21 +60,32 @@ fn convert_component_to_bundle(input_json: &JsonValue, asset_server: &Res<AssetS
     }
     let type_str = type_str.unwrap();
 
-    //mesh: asset_server.load("models/FlightHelmet/FlightHelmet.gltf#Mesh0/Primitive0"),
-    //material: asset_server.load("models/FlightHelmet/FlightHelmet.gltf#Material0"),
-
     // match the component and add it to the entity
     Ok(match type_str {
         "model" => {
-            let target = input_json["model"].as_str().unwrap();
             EntityBundle::Model(
-                PbrBundle {
-                    mesh: asset_server.load(format!("{}#Mesh0/Primitive0", target).as_str()),
-                    material: asset_server.load(format!("{}#Material0", target).as_str()),
+                SceneBundle {
+                    scene: asset_server.load(format!("{}#Scene0", optional_string(input_json, "model")).as_str()),
+                    visibility: visibility(optional_string(input_json, "visibility")),
                     ..Default::default()
                 }
             )
         },
+        "camera" => {
+            EntityBundle::Camera((
+                Camera3dBundle {
+                    camera: Camera {
+                        viewport: optional_viewport(input_json, "viewport"),
+                        ..Default::default() // TODO finsih
+                    },
+                    ..Default::default() // TODO finish
+                },
+                UiCameraConfig {
+                    show_ui: optional_bool(input_json, "show_ui", true)
+                },
+                if optional_bool(input_json, "main", false) { Some(MainCamera) } else { None }
+            ))
+        }
         _ => return Err(format!("Could not add type {}", type_str))
     })
 }

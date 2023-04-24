@@ -1,8 +1,8 @@
 use crate::enums::*;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, render::camera::Viewport};
 use json::JsonValue::{self};
-use std::u32;
+use std::{u32, ops::Range};
 
 pub fn optional_style(json_container: &JsonValue, target: &str) -> Style {
     return if json_container.has_key(target) {
@@ -59,8 +59,19 @@ pub fn optional_color_default(json_container: &JsonValue, target: &str, default:
     }
 }
 
+pub fn optional_viewport(json: &JsonValue, target: &str) -> Option<Viewport> {
+    if json.has_key(target) {
+        let value = &json[target];
+        Some(
+            Viewport {
+                physical_position: optional_uvec2(value, "position"),
+                physical_size: optional_uvec2(value, "size"),
+                depth: optional_range_f32(value, "depth", 0.0 .. 1.0)
+            }
+        )
+    } else { None }
+}
 
-// todo if just number, use ui rect all
 pub fn optional_uirect(json_container: &JsonValue, target: &str) -> UiRect {
     return if json_container.has_key(target) {
         let value = &json_container[target];
@@ -155,6 +166,23 @@ pub fn optional_vec3(json_container: &JsonValue, target: &str, default: Vec3) ->
     }
 }
 
+pub fn optional_uvec2(json: &JsonValue, target: &str) -> UVec2 {
+    return if json.has_key(target) {
+        let value = json[target].clone();
+        if value.is_array() && value.len() == 2 {
+            UVec2 {
+                x: value[0].as_u32().unwrap_or(0),
+                y: value[1].as_u32().unwrap_or(0)
+            }
+        } else if value.is_object() {
+            UVec2 {
+                x: optional_u32(json, "x", 0),
+                y: optional_u32(json, "y", 0)
+            }
+        } else { UVec2 { x: 0, y: 0 } }
+    } else { UVec2 { x: 0, y: 0 } }
+}
+
 pub fn optional_calculated_size(json_container: &JsonValue, target: &str) -> CalculatedSize {
     return if json_container.has_key(target) {
         let value = &json_container[target];
@@ -165,6 +193,15 @@ pub fn optional_calculated_size(json_container: &JsonValue, target: &str) -> Cal
             }, preserve_aspect_ratio: optional_bool(value, "preserve_aspect_ratio", false)
         }
     } else { CalculatedSize::default() }
+}
+
+pub fn optional_range_f32(json: &JsonValue, target: &str, default: Range<f32>) -> Range<f32> {
+    return if json.has_key(target) {
+        let value = &json[target];
+        let start = optional_f32(value, "start", default.start);
+        let end = optional_f32(value, "end", default.end);
+        start .. end
+    } else { default }
 }
 
 pub fn optional_string<'a>(json_container: &'a JsonValue, target: &'a str) -> &'a str {
@@ -180,7 +217,12 @@ pub fn f32_default(value: &JsonValue, default: f32) -> f32 {
 pub fn optional_f32(json_container: &JsonValue, target: &str, default: f32) -> f32 {
     return if json_container.has_key(target) {
         f32_default(&json_container[target], default)
-        // json_container[target].clone().as_f32().unwrap_or(default) // rust bullshit
+    } else { default }
+}
+
+pub fn optional_u32(json: &JsonValue, target: &str, default: u32) -> u32 {
+    return if json.has_key(target) {
+        json[target].as_u32().unwrap_or(default)
     } else { default }
 }
 

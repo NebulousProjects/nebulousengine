@@ -110,7 +110,7 @@ fn setup(
     spawn_entity_from_path(&mut commands, "./assets/test.entity", &asset_server);
 }
 
-fn rotate(mut query: Query<&mut Transform, With<Shape>>, time: Res<Time>) {
+fn rotate(mut query: Query<&mut Transform, With<Handle<Scene>>>, time: Res<Time>) {
     for mut transform in &mut query {
         transform.rotate_y(time.delta_seconds() / 2.);
     }

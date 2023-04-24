@@ -1,5 +1,5 @@
 1. [x] Basic load
-2. [ ] Convert to components
+2. [ ] Transform offsets optional
 3. [ ] Convert JSON to bundles for all Bevy Bundles
 4. [ ] Load complete entity from JSON with optional transform
 5. [ ] Integrate with asset server (if possible)
