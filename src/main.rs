@@ -95,20 +95,12 @@ fn setup(
         ..default()
     });
 
-    // camera
-    // commands.spawn((Camera3dBundle {
-    //     transform: Transform::from_xyz(0.0, 6., 12.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
-    //     ..default()
-    // }, UiCameraConfig {
-    //     show_ui: true,
-    // }, MainCamera));
-
     // ui
     add_ui_json_to_commands(&load_file_to_json("./assets/test.ui"), &mut commands, &asset_server);
 
     // entities
-    spawn_entity_from_path(&mut commands, "./assets/test.entity", &asset_server);
-    spawn_entity_from_path(&mut commands, "./assets/camera.entity", &asset_server);
+    spawn_entity_from_path(&mut commands, "./assets/test.entity", &asset_server, None, None, None);
+    spawn_entity_from_path(&mut commands, "./assets/camera.entity", &asset_server, None, None, None);
 }
 
 fn rotate(mut query: Query<&mut Transform, With<Handle<Scene>>>, time: Res<Time>) {

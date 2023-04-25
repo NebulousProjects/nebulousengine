@@ -7,5 +7,5 @@
 6. [ ] Caching or pre-parsing if possible
 
 === Other Stuff ===
-[ ] Look at for transforms
-[ ] Vec3 to quat in optionals
+[x] Look at for transforms
+[x] Vec3 to quat in optionals

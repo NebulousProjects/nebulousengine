@@ -1,21 +1,33 @@
+use std::ops::Add;
+
 use bevy::{prelude::*, ecs::system::EntityCommands};
 use json::JsonValue;
 use nebulousengine_utils::{*, optionals::*, enums::*};
 
-pub fn spawn_entity_from_path(commands: &mut Commands, path: &str, asset_server: &Res<AssetServer>) {
-    spawn_entity_from_json(commands, &load_file_to_json(path), asset_server);
+pub fn spawn_entity_from_path(
+    commands: &mut Commands, 
+    path: &str, 
+    asset_server: &Res<AssetServer>,
+    position_offset: Option<Vec3>,
+    rotation_offset: Option<Quat>,
+    scale_mult: Option<Vec3>
+) {
+    spawn_entity_from_json(commands, &load_file_to_json(path), asset_server, position_offset, rotation_offset, scale_mult);
 }
 
-pub fn spawn_entity_from_json(commands: &mut Commands, input_json: &JsonValue, asset_server: &Res<AssetServer>) {
+pub fn spawn_entity_from_json(
+    commands: &mut Commands, 
+    input_json: &JsonValue, 
+    asset_server: &Res<AssetServer>,
+    position_offset: Option<Vec3>,
+    rotation_offset: Option<Quat>,
+    scale_mult: Option<Vec3>
+) {
     // create entity
     let mut entity = commands.spawn_empty();
 
     // unpack json
     let components = &input_json["components"];
-
-    // add transform
-    let transform = optional_transform(input_json, "transform");
-    entity.insert(transform);
 
     // if components is an array, loop through each component
     if components.is_array() {
@@ -29,6 +41,13 @@ pub fn spawn_entity_from_json(commands: &mut Commands, input_json: &JsonValue, a
             }
         }
     }
+    
+    // add transform after components to override any transforms created
+    let mut transform = optional_transform(input_json, "transform");
+    if position_offset.is_some() { transform.translation += position_offset.unwrap() }
+    if rotation_offset.is_some() { transform.rotate(rotation_offset.unwrap()) }
+    if scale_mult.is_some() { transform.scale *= scale_mult.unwrap() }
+    entity.insert(transform);
 }
 
 pub enum EntityBundle {

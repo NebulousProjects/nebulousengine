@@ -133,31 +133,61 @@ pub fn optional_color_grading(json: &JsonValue, target: &str) -> ColorGrading {
 pub fn optional_transform(json_container: &JsonValue, target: &str) -> Transform {
     return if json_container.has_key(target) {
         let value = &json_container[target];
-        Transform {
+        let mut transform = Transform {
             translation: optional_vec3(value, "position", Vec3::ZERO),
             rotation: optional_quat(value, "rotation", Quat::default()),
             scale: optional_vec3(value, "scale", Vec3::ONE)
+        };
+
+        if value.has_key("look_at") {
+            let look_at = &value["look_at"];
+            transform.look_at(
+                optional_vec3(look_at, "at", Vec3::ZERO), 
+                optional_vec3(look_at, "axis", Vec3::ZERO)
+            )
         }
+
+        transform
     } else { Transform::default() }
 }
 
 pub fn optional_quat(json_container: &JsonValue, target: &str, default: Quat) -> Quat {
     return if json_container.has_key(target) {
         let value = json_container[target].clone();
-        if value.is_array() && value.len() == 4 {
-            Quat::from_xyzw(
-                f32_default(&value[0], default.x),
-                f32_default(&value[1], default.y),
-                f32_default(&value[2], default.z),
-                f32_default(&value[3], default.w)
-            )
+        if value.is_array() {
+            if value.len() == 4 {
+                Quat::from_xyzw(
+                    f32_default(&value[0], default.x),
+                    f32_default(&value[1], default.y),
+                    f32_default(&value[2], default.z),
+                    f32_default(&value[3], default.w)
+                )
+            } else if value.len() == 3 {
+                Quat::from_scaled_axis(
+                    Vec3 { 
+                        x: f32_default(&value[0], 0.0) * 0.0174532925199, 
+                        y: f32_default(&value[1], 0.0) * 0.0174532925199, 
+                        z: f32_default(&value[2], 0.0) * 0.0174532925199 
+                    }
+                )
+            } else { default }
         } else if value.is_object() {
-            Quat::from_xyzw(
-                optional_f32(&value, "x", default.x),
-                optional_f32(&value, "y", default.y),
-                optional_f32(&value, "z", default.z),
-                optional_f32(&value, "w", default.w),
-            )
+            if value.has_key("w") {
+                Quat::from_xyzw(
+                    optional_f32(&value, "x", default.x),
+                    optional_f32(&value, "y", default.y),
+                    optional_f32(&value, "z", default.z),
+                    optional_f32(&value, "w", default.w),
+                )
+            } else {
+                Quat::from_scaled_axis(
+                    Vec3 { 
+                        x: optional_f32(&value, "x", 0.0) * 0.0174532925199, 
+                        y: optional_f32(&value, "y", 0.0) * 0.0174532925199, 
+                        z: optional_f32(&value, "z", 0.0) * 0.0174532925199 
+                    }
+                )
+            }
         } else { default }
     } else {
         default
@@ -168,18 +198,18 @@ pub fn optional_vec3(json_container: &JsonValue, target: &str, default: Vec3) ->
     return if json_container.has_key(target) {
         let value = json_container[target].clone();
         if value.is_array() && value.len() == 3 {
-            Vec3 {
+            return Vec3 {
                 x: f32_default(&value[0], default.x),
                 y: f32_default(&value[1], default.y),
                 z: f32_default(&value[2], default.z)
             }
         } else if value.is_object() {
-            Vec3 {
+            return Vec3 {
                 x: optional_f32(&value, "x", default.x),
                 y: optional_f32(&value, "y", default.y),
                 z: optional_f32(&value, "z", default.z),
             }
-        } else { default }
+        } else { return default }
     } else {
         default
     }
