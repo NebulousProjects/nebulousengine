@@ -42,7 +42,7 @@ fn setup(
     // entities
     spawn_entity_from_path(&mut commands, "./assets/test.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
     spawn_entity_from_path(&mut commands, "./assets/camera.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
-    spawn_entity_from_path(&mut commands, "./assets/light.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
+    // spawn_entity_from_path(&mut commands, "./assets/light.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
     spawn_entity_from_path(&mut commands, "./assets/ground.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
 }
 

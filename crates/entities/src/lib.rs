@@ -30,21 +30,70 @@ pub fn spawn_entity_from_json(
     // create entity
     let mut entity = commands.spawn_empty();
 
-    // unpack json
-    let components = &input_json["components"];
+    // call build functions
+    build_entity_from_json(
+        &mut entity, input_json, asset_server, 
+        meshes, materials, position_offset, 
+        rotation_offset, scale_mult, visible
+    );
+    add_children(
+        &mut entity, input_json, asset_server, 
+        meshes, materials, position_offset, 
+        rotation_offset, scale_mult, visible
+    );
+}
 
-    // if components is an array, loop through each component
-    if components.is_array() {
-        for i in 0 .. components.len() {
-            // add each component to the entity
-            let bundle = unpack_component(&components[i], asset_server, meshes, materials);
-            if bundle.is_ok() {
-                bundle.unwrap().attach(&mut entity);
-            } else {
-                warn!("Failed to convert json to component with input {}", input_json)
-            }
+fn add_children(
+    commands: &mut EntityCommands, 
+    input_json: &JsonValue, 
+    asset_server: &Res<AssetServer>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    position_offset: Option<Vec3>,
+    rotation_offset: Option<Quat>,
+    scale_mult: Option<Vec3>,
+    visible: bool
+) {
+    // check if we have a children json object and grab it
+    if input_json.has_key("children") {
+        let children = &input_json["children"];
+
+        // make sure object is array
+        if children.is_array() {
+            // create a new child for each element in children array
+            commands.with_children(|builder| {
+                for i in 0 .. children.len() {
+                    let json = &children[i];
+                    let mut entity = builder.spawn_empty();
+                    build_entity_from_json(
+                        &mut entity, json, asset_server, 
+                        meshes, materials, position_offset, 
+                        rotation_offset, scale_mult, visible
+                    );
+                    add_children(
+                        &mut entity, json, asset_server, 
+                        meshes, materials, position_offset, 
+                        rotation_offset, scale_mult, visible
+                    );
+                }
+            });
         }
     }
+}
+
+fn build_entity_from_json(
+    entity: &mut EntityCommands, 
+    input_json: &JsonValue, 
+    asset_server: &Res<AssetServer>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    position_offset: Option<Vec3>,
+    rotation_offset: Option<Quat>,
+    scale_mult: Option<Vec3>,
+    visible: bool
+) {
+    // unpack json
+    let components = &input_json["components"];
 
     // add visibility
     entity.insert(
@@ -58,8 +107,22 @@ pub fn spawn_entity_from_json(
     if rotation_offset.is_some() { transform.rotate(rotation_offset.unwrap()) }
     if scale_mult.is_some() { transform.scale *= scale_mult.unwrap() }
     entity.insert(transform).insert(GlobalTransform::default());
+
+    // if components is an array, loop through each component
+    if components.is_array() {
+        for i in 0 .. components.len() {
+            // add each component to the entity
+            let bundle = unpack_component(&components[i], asset_server, meshes, materials);
+            if bundle.is_ok() {
+                bundle.unwrap().attach(entity);
+            } else {
+                warn!("Failed to convert json to component with input {}", input_json)
+            }
+        }
+    }
 }
 
+// enum wrapper for components
 pub enum EntityBundle {
     Model(Handle<Scene>),
     Camera(((Camera, Projection, Tonemapping, DebandDither, ColorGrading), UiCameraConfig, Option<MainCamera>)),
@@ -71,6 +134,7 @@ pub enum EntityBundle {
 
 impl EntityBundle {
     fn attach(self, commands: &mut EntityCommands) {
+        // attach each component and its corresponding defaults to the given entity
         match self {
             Self::Model(bundle) => commands.insert(bundle),
             Self::Camera((camera, ui_config, main_camera)) => {
@@ -168,6 +232,7 @@ fn unpack_component(
 }
 
 fn unpack_shape(json: &JsonValue) -> Mesh {
+    // match the shape string to a shape and create it accordingly
     return match optional_string(json, "shape") {
         "box" => {
             if json.has_key("from") && json.has_key("to") {
