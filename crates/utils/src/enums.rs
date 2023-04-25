@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ui::FocusPolicy, text::BreakLineOn, core_pipeline::tonemapping::Tonemapping};
+use bevy::{prelude::{*, shape::CapsuleUvProfile}, ui::FocusPolicy, text::BreakLineOn, core_pipeline::tonemapping::Tonemapping};
 
 pub fn display(target: &str) -> Display {
     return match target {
@@ -161,6 +161,15 @@ pub fn tonemapping(target: &str) -> Tonemapping {
         "tony_mc_mapface" => Tonemapping::TonyMcMapface,
         "blender_filmic" => Tonemapping::BlenderFilmic,
         _ => Tonemapping::default()
+    }
+}
+
+pub fn capsule_uv_mapping(target: &str) -> CapsuleUvProfile {
+    return match target {
+        "aspect" => CapsuleUvProfile::Aspect,
+        "uniform" => CapsuleUvProfile::Uniform,
+        "fixed" => CapsuleUvProfile::Fixed,
+        _ => CapsuleUvProfile::default()
     }
 }
 

@@ -1,0 +1,13 @@
+{
+    "components": [
+        {
+            "type": "point_light",
+            "intensity": 9000.0,
+            "range": 100.0,
+            "shadows_enabled": true
+        }
+    ],
+    "transform": {
+        "position": [ 8.0, 16.0, 8.0 ]
+    }
+}

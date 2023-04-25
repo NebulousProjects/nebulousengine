@@ -215,6 +215,23 @@ pub fn optional_vec3(json_container: &JsonValue, target: &str, default: Vec3) ->
     }
 }
 
+pub fn optional_vec2(json: &JsonValue, target: &str) -> Vec2 {
+    return if json.has_key(target) {
+        let value = json[target].clone();
+        if value.is_array() && value.len() == 2 {
+            Vec2 {
+                x: value[0].as_f32().unwrap_or(0.0),
+                y: value[1].as_f32().unwrap_or(0.0)
+            }
+        } else if value.is_object() {
+            Vec2 {
+                x: optional_f32(json, "x", 0.0),
+                y: optional_f32(json, "y", 0.0)
+            }
+        } else { Vec2 { x: 0.0, y: 0.0 } }
+    } else { Vec2 { x: 0.0, y: 0.0 } }
+}
+
 pub fn optional_uvec2(json: &JsonValue, target: &str) -> UVec2 {
     return if json.has_key(target) {
         let value = json[target].clone();
@@ -256,6 +273,12 @@ pub fn optional_range_f32(json: &JsonValue, target: &str, default: Range<f32>) -
 pub fn optional_isize(json: &JsonValue, target: &str, default: isize) -> isize {
     return if json.has_key(target) {
         json[target].as_isize().unwrap_or(default)
+    } else { default }
+}
+
+pub fn optional_usize(json: &JsonValue, target: &str, default: usize) -> usize {
+    return if json.has_key(target) {
+        json[target].as_usize().unwrap_or(default)
     } else { default }
 }
 
