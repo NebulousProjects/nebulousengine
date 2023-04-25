@@ -17,6 +17,7 @@ json = "0.12.4"
 # internal
 nebulousengine_editor = { path = "./crates/editor" }
 nebulousengine_entities = { path = "./crates/entities" }
+nebulousengine_scenes = { path = "./crates/scenes" }
 nebulousengine_scripting = { path = "./crates/scripting" }
 nebulousengine_ui = { path = "./crates/ui" }
 nebulousengine_utils = { path = "./crates/utils" }

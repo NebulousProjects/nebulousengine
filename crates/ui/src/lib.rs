@@ -39,9 +39,6 @@ pub fn add_ui_json_to_commands(input_json: &JsonValue, commands: &mut Commands, 
     // add ui and children
     insert_json_ui_bundle(input_json, &mut entity, asset_server);
     insert_children(input_json, &mut entity, asset_server);
-
-    // return final entity
-    // return entity.id();
 }
 
 fn insert_children(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {

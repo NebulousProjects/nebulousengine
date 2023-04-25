@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
-use nebulousengine_entities::spawn_entity_from_path;
+use nebulousengine_scenes::load_scene_from_path;
 use nebulousengine_scripting::*;
-use nebulousengine_utils::*;
 use nebulousengine_ui::*;
 // use nebulousengine_ui::convert_uifile_to_uibundle;
 // use nebulousengine_editor::EditorPlugin;
@@ -34,16 +33,10 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
+    mut wrapper: NonSendMut<ScriptEngineWrapper>
 ) {
-    // ui
-    add_ui_json_to_commands(&load_file_to_json("./assets/test.ui"), &mut commands, &asset_server);
-
-    // entities
-    spawn_entity_from_path(&mut commands, "./assets/test.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
-    spawn_entity_from_path(&mut commands, "./assets/camera.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
-    // spawn_entity_from_path(&mut commands, "./assets/light.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
-    spawn_entity_from_path(&mut commands, "./assets/ground.entity", &asset_server, &mut meshes, &mut materials, None, None, None, true);
+    load_scene_from_path(&mut commands, "./assets/test.scene", &asset_server, &mut meshes, &mut materials, &mut wrapper);
 }
 
 fn rotate(mut query: Query<&mut Transform, With<Handle<Scene>>>, time: Res<Time>) {
