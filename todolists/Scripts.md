@@ -1,2 +1,3 @@
-- [ ] Script "components"
-- [ ] Integrate with asset servers
+[ ] Script "components"
+[ ] Integrate with asset servers
+[ ] Add world to scope

@@ -8,14 +8,6 @@
         },
         { 
             "path": "./assets/ground.entity"
-        },
-        {
-            "components": [
-                {
-                    "type": "model",
-                    "model": "./barracks.gltf.glb"
-                }
-            ]
         }
     ],
     "uis": [

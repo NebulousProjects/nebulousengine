@@ -6,6 +6,8 @@
 
 === Swapping Scenes ===
 [ ] Clear all old entities
+[ ] Clear all old ui
+[ ] Clear all old scripts
 [ ] Add new scene
 
 === "Clutch" ===

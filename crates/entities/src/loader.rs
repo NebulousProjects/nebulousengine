@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ecs::system::EntityCommands};
 use json::JsonValue;
-use nebulousengine_utils::optionals::*;
+use nebulousengine_utils::{optionals::*, Despawnable};
 
 use crate::components::unpack_component;
 
@@ -61,13 +61,6 @@ pub fn build_entity_from_json(
         if visible { Visibility::Inherited }
         else { Visibility::Hidden }
     ).insert(ComputedVisibility::default());
-    
-    // add transform
-    let mut transform = optional_transform(input_json, "transform");
-    if position_offset.is_some() { transform.translation += position_offset.unwrap() }
-    if rotation_offset.is_some() { transform.rotate(rotation_offset.unwrap()) }
-    if scale_mult.is_some() { transform.scale *= scale_mult.unwrap() }
-    entity.insert(transform).insert(GlobalTransform::default());
 
     // if components is an array, loop through each component
     if components.is_array() {
@@ -80,5 +73,17 @@ pub fn build_entity_from_json(
                 warn!("Failed to convert json to component with input {}", input_json)
             }
         }
+    }
+    
+    // add transform
+    let mut transform = optional_transform(input_json, "transform");
+    if position_offset.is_some() { transform.translation += position_offset.unwrap() }
+    if rotation_offset.is_some() { transform.rotate(rotation_offset.unwrap()) }
+    if scale_mult.is_some() { transform.scale *= scale_mult.unwrap() }
+    entity.insert(transform).insert(GlobalTransform::default());
+
+    // add despawnable unless marked persistent
+    if !optional_bool(input_json, "persistent", false) {
+        entity.insert(Despawnable);
     }
 }

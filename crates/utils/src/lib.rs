@@ -8,6 +8,9 @@ pub mod enums;
 #[derive(Component)]
 pub struct MainCamera;
 
+#[derive(Component)]
+pub struct Despawnable;
+
 #[derive(Resource)]
 pub struct ViewportContainer {
     pub image_handle: Option<Handle<Image>>,
