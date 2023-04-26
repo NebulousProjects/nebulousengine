@@ -3,12 +3,15 @@
 [x] If an entry is already JSON, load that JSON
 [x] If an entity is a valid path to a file, load that file
 [x] If any problems, error but do not crash
+[x] Trigger via event
 
 === Swapping Scenes ===
-[ ] Clear all old entities
-[ ] Clear all old ui
-[ ] Clear all old scripts
-[ ] Add new scene
+[x] Clear all old entities
+[x] Clear all old ui
+[x] Clear all old scripts
+[x] Add new scene
 
 === "Clutch" ===
-[ ] Broadcast pause and play events
+[x] Running State
+[ ] Scripts stop
+[ ] UI stop broadcasting events

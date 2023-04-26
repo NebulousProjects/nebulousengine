@@ -1,5 +1,6 @@
 use bevy::{prelude::*, ecs::system::EntityCommands};
 use json::{ JsonValue };
+use nebulousengine_utils::Despawnable;
 use nebulousengine_utils::optionals::*;
 use nebulousengine_utils::enums::*;
 
@@ -35,6 +36,7 @@ fn button_listener(
 pub fn add_ui_json_to_commands(input_json: &JsonValue, commands: &mut Commands, asset_server: &Res<AssetServer>) {
     // create entity
     let mut entity = commands.spawn_empty();
+    entity.insert(Despawnable);
 
     // add ui and children
     insert_json_ui_bundle(input_json, &mut entity, asset_server);

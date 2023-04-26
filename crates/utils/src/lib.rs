@@ -37,3 +37,14 @@ pub fn load_file_to_json(path: &str) -> JsonValue {
     let file_contents = std::fs::read_to_string(path).unwrap();
     return json::parse(file_contents.as_str()).unwrap();
 }
+
+#[derive(Resource)]
+pub struct RunningState {
+    pub running: bool
+}
+
+impl Default for RunningState {
+    fn default() -> Self {
+        Self { running: true }
+    }
+}

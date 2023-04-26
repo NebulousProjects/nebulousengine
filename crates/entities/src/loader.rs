@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ecs::system::EntityCommands};
 use json::JsonValue;
-use nebulousengine_utils::{optionals::*, Despawnable};
+use nebulousengine_utils::optionals::*;
 
 use crate::components::unpack_component;
 
@@ -81,9 +81,4 @@ pub fn build_entity_from_json(
     if rotation_offset.is_some() { transform.rotate(rotation_offset.unwrap()) }
     if scale_mult.is_some() { transform.scale *= scale_mult.unwrap() }
     entity.insert(transform).insert(GlobalTransform::default());
-
-    // add despawnable unless marked persistent
-    if !optional_bool(input_json, "persistent", false) {
-        entity.insert(Despawnable);
-    }
 }

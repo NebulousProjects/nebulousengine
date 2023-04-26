@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use json::JsonValue;
-use nebulousengine_utils::*;
+use nebulousengine_utils::{*, optionals::*};
 
 use self::loader::*;
 
@@ -34,6 +34,11 @@ pub fn spawn_entity_from_json(
 ) {
     // create entity
     let mut entity = commands.spawn_empty();
+    
+    // add despawnable unless marked persistent
+    if !optional_bool(input_json, "persistent", false) {
+        entity.insert(Despawnable);
+    }
 
     // call build functions
     build_entity_from_json(

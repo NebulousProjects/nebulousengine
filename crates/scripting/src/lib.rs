@@ -13,17 +13,17 @@ impl Plugin for ScriptingPlugin {
 
 #[derive(Deref, DerefMut)]
 pub struct ScriptEngineWrapper<'a> {
-    engine: ScriptEngine<'a>
+    pub engine: ScriptEngine<'a>
 }
 
 pub struct ScriptEngine<'a> {
-    engine: Engine,
-    scripts: Vec<ScriptInstance<'a>>
+    pub engine: Engine,
+    pub scripts: Vec<ScriptInstance<'a>>
 }
 
 pub struct ScriptInstance<'a> {
-    ast: AST,
-    scope: Scope<'a>
+    pub ast: AST,
+    pub scope: Scope<'a>
 }
 
 impl Default for ScriptEngineWrapper<'_> {
@@ -71,7 +71,7 @@ pub fn load_script_raw(
     )
 }
 
-fn execute_functions(
+pub fn execute_functions(
     wrapper: &mut NonSendMut<ScriptEngineWrapper>,
     route: String
 ) {

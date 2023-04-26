@@ -6,12 +6,14 @@ use nebulousengine_utils::*;
 mod loader;
 
 pub struct ScenePlugin;
+pub struct LoadSceneEvent { pub path: String }
 
 impl Plugin for ScenePlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(SceneInfo::default())
-            .add_startup_system(start);
+            .add_event::<LoadSceneEvent>()
+            .add_startup_system(start)
+            .add_system(load_scene_loop);
     }
 }
 
@@ -25,43 +27,45 @@ fn start(
     load_scene_from_path(&mut commands, "./assets/test.scene", &asset_server, &mut meshes, &mut materials, &mut wrapper)
 }
 
-
-#[derive(Resource)]
-pub struct SceneInfo {
-    next_scene: String
-}
-
-impl Default for SceneInfo {
-    fn default() -> Self {
-        Self { next_scene: Default::default() }
-    }
-}
-
-pub fn load_scene(
-    commands: &mut Commands,
-    next_scene: String,
-    scene_info: &ResMut<SceneInfo>,
-    entities: &Query<Entity, With<Despawnable>>, // theres gotta be a better way to do this
-    asset_server: &Res<AssetServer>,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    wrapper: &mut NonSendMut<ScriptEngineWrapper>
+fn load_scene_loop(
+    mut commands: Commands,
+    mut events: EventReader<LoadSceneEvent>,
+    entities: Query<Entity, With<Despawnable>>, // theres gotta be a better way to do this
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut wrapper: NonSendMut<ScriptEngineWrapper>,
+    mut running_state: ResMut<RunningState>
 ) {
-    // TODO add pause here
+    // run for each event
+    for event in events.iter() {
+        let running_state = running_state.as_mut();
+        
+        // pause
+        running_state.running = false;
 
-    // call stop on all scripts not marked persistent
+        // call stop on all scripts
+        execute_functions(&mut wrapper, "stop".to_string());
 
-    // remove scripts all scripts not marked persistent
+        // remove scripts all scripts
+        wrapper.engine.scripts.clear();
 
-    // clear old entities and UIs
-    for entity in entities.iter() {
-        commands.entity(entity).despawn();
+        // clear old entities and UIs
+        for entity in entities.iter() {
+            commands.entity(entity).despawn_recursive();
+        }
+
+        // load new scene
+        load_scene_from_path(
+            &mut commands, event.path.as_str(), 
+            &asset_server, &mut meshes, 
+            &mut materials, &mut wrapper
+        );
+
+        // call start on all scripts
+        execute_functions(&mut wrapper, "start".to_string());
+
+        // resume
+        running_state.running = true;
     }
-
-    // load new scene
-    load_scene_from_path(commands, next_scene.as_str(), asset_server, meshes, materials, wrapper)
-
-    // call start on all scripts
-
-    // TODO add resume here
 }

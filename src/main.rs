@@ -3,9 +3,7 @@ use bevy::prelude::*;
 use nebulousengine_scenes::*;
 use nebulousengine_scripting::*;
 use nebulousengine_ui::*;
-use nebulousengine_utils::*;
-// use nebulousengine_ui::convert_uifile_to_uibundle;
-// use nebulousengine_editor::EditorPlugin;
+use nebulousengine_utils::RunningState;
 
 fn main() {
     App::new()
@@ -25,6 +23,7 @@ fn main() {
         .add_plugin(UIPlugin)
         .add_plugin(ScriptingPlugin)
         .add_plugin(ScenePlugin)
+        .insert_resource(RunningState::default())
         // .add_startup_system(setup)
         .add_system(update)
         .run();
@@ -42,20 +41,12 @@ fn main() {
 // }
 
 fn update(
-    mut commands: Commands,
     mut query: Query<&mut Transform, With<Handle<Scene>>>, 
     time: Res<Time>, 
     keys: Res<Input<KeyCode>>,
 
-    scene_info: ResMut<SceneInfo>,
-    entities: Query<Entity, With<Despawnable>>,
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut wrapper: NonSendMut<ScriptEngineWrapper>
+    mut load_scene_events: EventWriter<LoadSceneEvent>
 ) {
-    if query.is_empty() { warn!("Transform query is empty!") }
-
     // rotate queried entities for testing
     for mut transform in &mut query {
         transform.rotate_y(time.delta_seconds() / 2.);
@@ -63,6 +54,8 @@ fn update(
 
     // if keys pressed, trigger scene swap
     if keys.just_released(KeyCode::A) {
-        load_scene(&mut commands, "./assets/test2.scene".to_string(), &scene_info, &entities, &asset_server, &mut meshes, &mut materials, &mut wrapper);
+        load_scene_events.send(LoadSceneEvent { path: "./assets/test2.scene".to_string() });
+    } else if keys.just_released(KeyCode::D) {
+        load_scene_events.send(LoadSceneEvent { path: "./assets/test.scene".to_string() });
     }
 }
