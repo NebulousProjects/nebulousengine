@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use nebulousengine_utils::RunningState;
 use rhai::*;
 
 pub struct ScriptingPlugin;
@@ -92,8 +93,11 @@ pub fn execute_functions(
 }
 
 fn update(
-    mut wrapper: NonSendMut<ScriptEngineWrapper>
+    mut wrapper: NonSendMut<ScriptEngineWrapper>,
+    running_state: ResMut<RunningState>
 ) {
     // update active script "systems"
-    execute_functions(&mut wrapper, "update".to_string());
+    if running_state.running {
+        execute_functions(&mut wrapper, "update".to_string());
+    }
 }

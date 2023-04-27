@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ecs::system::EntityCommands};
 use json::{ JsonValue };
-use nebulousengine_utils::Despawnable;
+use nebulousengine_utils::*;
 use nebulousengine_utils::optionals::*;
 use nebulousengine_utils::enums::*;
 
@@ -16,18 +16,21 @@ fn button_listener(
     mut button_query: Query<
         (&Interaction, &ButtonID),
         (Changed<Interaction>, With<Button>)
-    >
+    >,
+    running_state: ResMut<RunningState>
 ) {
-    for (interaction, tag) in &mut button_query {
-        match *interaction {
-            Interaction::Clicked => {
-                println!("Clicked {}", tag.id)
-            }
-            Interaction::Hovered => {
-                println!("Hover {}", tag.id)
-            }
-            Interaction::None => {
-                println!("None {}", tag.id)
+    if running_state.running {
+        for (interaction, tag) in &mut button_query {
+            match *interaction {
+                Interaction::Clicked => {
+                    println!("Clicked {}", tag.id)
+                }
+                Interaction::Hovered => {
+                    println!("Hover {}", tag.id)
+                }
+                Interaction::None => {
+                    println!("None {}", tag.id)
+                }
             }
         }
     }

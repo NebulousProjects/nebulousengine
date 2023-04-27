@@ -45,11 +45,14 @@ fn update(
     time: Res<Time>, 
     keys: Res<Input<KeyCode>>,
 
-    mut load_scene_events: EventWriter<LoadSceneEvent>
+    mut load_scene_events: EventWriter<LoadSceneEvent>,
+    mut running_state: ResMut<RunningState>
 ) {
     // rotate queried entities for testing
-    for mut transform in &mut query {
-        transform.rotate_y(time.delta_seconds() / 2.);
+    if running_state.running {
+        for mut transform in &mut query {
+            transform.rotate_y(time.delta_seconds() / 2.);
+        }
     }
 
     // if keys pressed, trigger scene swap
@@ -57,5 +60,10 @@ fn update(
         load_scene_events.send(LoadSceneEvent { path: "./assets/test2.scene".to_string() });
     } else if keys.just_released(KeyCode::D) {
         load_scene_events.send(LoadSceneEvent { path: "./assets/test.scene".to_string() });
+    }
+
+    // if space pressed, toggle pause
+    if keys.just_released(KeyCode::Space) {
+        running_state.running = !running_state.running
     }
 }

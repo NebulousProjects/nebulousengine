@@ -2357,6 +2357,7 @@ name = "nebulousengine_scripting"
 version = "0.0.1"
 dependencies = [
  "bevy",
+ "nebulousengine_utils",
  "rhai",
 ]
 
