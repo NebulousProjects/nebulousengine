@@ -1,0 +1,9 @@
+[package]
+name = "nebulousengine_input"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+bevy = "0.10.1"
+json = "0.12.4"
+nebulousengine_utils = { path = "../utils/" }

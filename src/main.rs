@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use nebulousengine_input::{*, types::{InputValue, InputRule, InputType, InputPressedEvent, InputReleasedEvent, InputDescription}};
 use nebulousengine_scenes::*;
 use nebulousengine_scripting::*;
 use nebulousengine_ui::*;
@@ -20,34 +21,43 @@ fn main() {
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // .add_plugin(EditorPlugin)
+        .add_plugin(InputPlugin)
         .add_plugin(UIPlugin)
         .add_plugin(ScriptingPlugin)
         .add_plugin(ScenePlugin)
         .insert_resource(RunningState::default())
-        // .add_startup_system(setup)
+        .add_startup_system(start)
         .add_system(update)
         .run();
 }
 
-
-// fn setup(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-//     asset_server: Res<AssetServer>,
-//     mut wrapper: NonSendMut<ScriptEngineWrapper>
-// ) {
-//     // load_scene_from_path(&mut commands, "./assets/test.scene", &asset_server, &mut meshes, &mut materials, &mut wrapper);
-// }
+fn start(
+    mut inputs: ResMut<Inputs>
+) {
+    inputs.insert_or_update_input(
+        "test".to_string(),
+        InputValue {
+            rule: InputRule {
+                press_threshold: 1.0,
+                descriptions: vec![
+                    InputDescription::Scalar { input_type: InputType::Keyboard(KeyCode::W) }
+                ]
+            },
+            value: 0.0
+        }
+    );
+}
 
 fn update(
     mut query: Query<&mut Transform, With<Handle<Scene>>>, 
     time: Res<Time>, 
     keys: Res<Input<KeyCode>>,
 
-    mut load_scene_events: EventWriter<LoadSceneEvent>,
+    // mut load_scene_events: EventWriter<LoadSceneEvent>,
     mut running_state: ResMut<RunningState>,
-    mut ui_events: EventReader<UIInteractEvent>
+    mut pressed_events: EventReader<InputPressedEvent>,
+    mut released_events: EventReader<InputReleasedEvent>,
+    mut inputs: ResMut<Inputs>
 ) {
     // rotate queried entities for testing
     if running_state.running {
@@ -57,11 +67,19 @@ fn update(
     }
 
     // if keys pressed, trigger scene swap
-    if keys.just_released(KeyCode::A) {
-        load_scene_events.send(LoadSceneEvent { path: "./assets/test2.scene".to_string() });
-    } else if keys.just_released(KeyCode::D) {
-        load_scene_events.send(LoadSceneEvent { path: "./assets/test.scene".to_string() });
+    // if keys.just_released(KeyCode::A) {
+    //     load_scene_events.send(LoadSceneEvent { path: "./assets/test2.scene".to_string() });
+    // } else if keys.just_released(KeyCode::D) {
+    //     load_scene_events.send(LoadSceneEvent { path: "./assets/test.scene".to_string() });
+    // }
+
+    for event in pressed_events.iter() {
+        info!("Pressed event: {}", event.name);
     }
+    for event in released_events.iter() {
+        info!("Released event: {}", event.name);
+    }
+    // info!("Test current value: {}", inputs.get_value_or_default(&"test".to_string(), -1000000.0));
 
     // if space pressed, toggle pause
     if keys.just_released(KeyCode::Space) {
