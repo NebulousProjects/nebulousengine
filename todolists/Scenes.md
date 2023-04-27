@@ -13,5 +13,5 @@
 
 === "Clutch" ===
 [x] Running State
-[ ] Scripts stop
-[ ] UI stop broadcasting events
+[x] Scripts stop
+[x] UI stop broadcasting events

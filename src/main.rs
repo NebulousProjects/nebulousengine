@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use nebulousengine_scenes::*;
 use nebulousengine_scripting::*;
 use nebulousengine_ui::*;
-use nebulousengine_utils::RunningState;
+use nebulousengine_utils::*;
 
 fn main() {
     App::new()
@@ -46,7 +46,8 @@ fn update(
     keys: Res<Input<KeyCode>>,
 
     mut load_scene_events: EventWriter<LoadSceneEvent>,
-    mut running_state: ResMut<RunningState>
+    mut running_state: ResMut<RunningState>,
+    mut ui_events: EventReader<UIInteractEvent>
 ) {
     // rotate queried entities for testing
     if running_state.running {

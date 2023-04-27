@@ -8,8 +8,15 @@ pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(button_listener);
+        app
+            .add_event::<UIInteractEvent>()
+            .add_system(button_listener);
     }
+}
+
+pub struct UIInteractEvent {
+    pub id: String,
+    pub interaction: Interaction
 }
 
 fn button_listener(
@@ -17,21 +24,15 @@ fn button_listener(
         (&Interaction, &ButtonID),
         (Changed<Interaction>, With<Button>)
     >,
-    running_state: ResMut<RunningState>
+    running_state: ResMut<RunningState>,
+    mut events: EventWriter<UIInteractEvent>
 ) {
     if running_state.running {
         for (interaction, tag) in &mut button_query {
-            match *interaction {
-                Interaction::Clicked => {
-                    println!("Clicked {}", tag.id)
-                }
-                Interaction::Hovered => {
-                    println!("Hover {}", tag.id)
-                }
-                Interaction::None => {
-                    println!("None {}", tag.id)
-                }
-            }
+            events.send(UIInteractEvent {
+                id: tag.id.clone(),
+                interaction: interaction.clone()
+            })
         }
     }
 }
