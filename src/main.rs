@@ -40,7 +40,7 @@ fn start(
             rule: InputRule {
                 press_threshold: 1.0,
                 descriptions: vec![
-                    InputDescription::Scalar { input_type: InputType::Keyboard(KeyCode::W) }
+                    InputDescription::Scalar { input_type: InputType::GamepadAxis(GamepadAxisType::LeftZ) }
                 ]
             },
             value: 0.0
@@ -73,13 +73,13 @@ fn update(
     //     load_scene_events.send(LoadSceneEvent { path: "./assets/test.scene".to_string() });
     // }
 
-    for event in pressed_events.iter() {
-        info!("Pressed event: {}", event.name);
-    }
-    for event in released_events.iter() {
-        info!("Released event: {}", event.name);
-    }
-    // info!("Test current value: {}", inputs.get_value_or_default(&"test".to_string(), -1000000.0));
+    // for event in pressed_events.iter() {
+    //     info!("Pressed event: {}", event.name);
+    // }
+    // for event in released_events.iter() {
+    //     info!("Released event: {}", event.name);
+    // }
+    info!("Test current value: {}", inputs.get_value_or_default(&"test".to_string(), -1000000.0));
 
     // if space pressed, toggle pause
     if keys.just_released(KeyCode::Space) {

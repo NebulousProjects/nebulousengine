@@ -1,10 +1,16 @@
-use bevy::{prelude::*, input::mouse::MouseMotion};
+use bevy::{prelude::*, input::mouse::{MouseMotion}};
+
+use crate::GamepadContainer;
 
 pub struct InputPressedEvent {
     pub name: String,
     pub value: f32
 }
 pub struct InputReleasedEvent {
+    pub name: String,
+    pub value: f32
+}
+pub struct InputChangedEvent {
     pub name: String,
     pub value: f32
 }
@@ -28,13 +34,18 @@ pub enum InputType {
     Keyboard(KeyCode),
     MouseMotionX(),
     MouseMotionY(),
+    GamepadButton(GamepadButtonType),
+    GamepadAxis(GamepadAxisType)
 }
 
 fn eval_input_type(
     input_type: &InputType,
+    primary_window: &Window,
     keys: &Res<Input<KeyCode>>,
+    pad_buttons: &Res<Input<GamepadButton>>,
+    pad_axes: &Res<Axis<GamepadAxis>>,
     mouse_motion: &mut EventReader<MouseMotion>,
-    primary_window: &Window
+    gamepad_container: &Option<Res<GamepadContainer>>
 ) -> f32 {
     return match input_type {
         InputType::Keyboard(keycode) => {
@@ -61,42 +72,62 @@ fn eval_input_type(
 
                 output / primary_window.height()
             }
+        },
+        InputType::GamepadButton(button) => {
+            if gamepad_container.is_some() {
+                let container = gamepad_container.as_deref().unwrap();
+                if pad_buttons.pressed(GamepadButton { gamepad: container.0, button_type: *button }) { 1.0 } else { 0.0 }
+            } else { 0.0 }
+        },
+        InputType::GamepadAxis(axis) => {
+            if gamepad_container.is_some() {
+                let container = gamepad_container.as_deref().unwrap();
+                let option = pad_axes.get(GamepadAxis { gamepad: container.0, axis_type: *axis });
+                if option.is_some() { option.unwrap() } else { 0.0 }
+            } else { 0.0 }
         }
     }
 }
 
 pub fn eval_description(
     description: &InputDescription,
+    primary_window: &Window,
     keys: &Res<Input<KeyCode>>,
+    pad_buttons: &Res<Input<GamepadButton>>,
+    pad_axes: &Res<Axis<GamepadAxis>>,
     mouse_motion: &mut EventReader<MouseMotion>,
-    primary_window: &Window
+    gamepad_container: &Option<Res<GamepadContainer>>,
 ) -> f32 {
     match description {
         InputDescription::Scalar { input_type } => {
-            eval_input_type(input_type, keys, mouse_motion, primary_window)
+            eval_input_type(input_type, primary_window, keys, pad_buttons, pad_axes, mouse_motion, gamepad_container)
         },
         InputDescription::Axis { positive_type, negative_type } => {
-            eval_input_type(positive_type, keys, mouse_motion, primary_window) - eval_input_type(negative_type, keys, mouse_motion, primary_window)
+            eval_input_type(positive_type, primary_window, keys, pad_buttons, pad_axes, mouse_motion, gamepad_container) 
+            - eval_input_type(negative_type, primary_window, keys, pad_buttons, pad_axes, mouse_motion, gamepad_container)
         }
     }
 }
 
 pub fn eval_rule(
     rule: &InputRule,
+    primary_window: &Window,
     keys: &Res<Input<KeyCode>>,
+    pad_buttons: &Res<Input<GamepadButton>>,
+    pad_axes: &Res<Axis<GamepadAxis>>,
     mouse_motion: &mut EventReader<MouseMotion>,
-    primary_window: &Window
+    gamepad_container: &Option<Res<GamepadContainer>>,
 ) -> f32 {
     let mut output = 0.0;
     let mut count = 0.0;
 
     for description in rule.descriptions.iter() {
-        let eval = eval_description(description, keys, mouse_motion, primary_window);
+        let eval = eval_description(description, primary_window, keys, pad_buttons, pad_axes, mouse_motion, gamepad_container);
         if eval != 0.0 {
             output += eval;
             count += 1.0;
         }
     }
 
-    output / count
+    if count == 0.0 { 0.0 } else { output / count }
 }
