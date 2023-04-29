@@ -1,25 +1,25 @@
 {
     "entities": [
         { 
-            "path": "./assets/camera.entity",
+            "path": "camera.entity",
             "transform": {
                 "position": [0.0, 0.0, 0.0]
             }
         },
         { 
-            "path": "./assets/ground.entity"
+            "path": "ground.entity"
         },
         {
             "components": [
                 {
                     "type": "model",
-                    "model": "./barracks.gltf.glb"
+                    "model": "barracks.gltf.glb"
                 }
             ]
         }
     ],
     "uis": [
-        "./assets/test.ui"
+        "test.ui"
     ],
     "scripts": []
 }

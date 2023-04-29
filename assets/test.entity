@@ -2,7 +2,7 @@
     "components": [
         {
             "type": "model",
-            "model": "./barracks.gltf.glb"
+            "model": "barracks.gltf.glb"
         }
     ]
 }

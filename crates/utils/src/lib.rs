@@ -34,7 +34,7 @@ impl Default for ViewportContainer {
 }
 
 pub fn load_file_to_json(path: &str) -> Result<JsonValue, String> {
-    let file_contents = std::fs::read_to_string(path);
+    let file_contents = std::fs::read_to_string(format!("./assets/{}", path));
 
     if file_contents.is_ok() {
         let json = json::parse(file_contents.unwrap().as_str());

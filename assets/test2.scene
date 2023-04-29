@@ -1,17 +1,17 @@
 {
     "entities": [
         { 
-            "path": "./assets/camera.entity",
+            "path": "camera.entity",
             "transform": {
                 "position": [0.0, 0.0, 0.0]
             }
         },
         { 
-            "path": "./assets/ground.entity"
+            "path": "ground.entity"
         }
     ],
     "uis": [
-        "./assets/test.ui"
+        "test.ui"
     ],
     "scripts": []
 }

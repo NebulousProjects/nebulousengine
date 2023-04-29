@@ -15,6 +15,7 @@ pub fn load_scene_from_path(
     let json = load_file_to_json(path);
 
     if json.is_ok() {
+        println!("Loading scene!");
         load_scene_from_json(
             commands, &json.unwrap(), 
             asset_server, meshes, materials

@@ -1,46 +1,28 @@
 use bevy::prelude::*;
 
+use nebulousengine_editor::EditorPlugin;
 use nebulousengine_input::{*, types::{InputPressedEvent, InputReleasedEvent}};
+use nebulousengine_noneditor::*;
 use nebulousengine_scenes::*;
 use nebulousengine_ui::*;
 use nebulousengine_utils::*;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        // .add_plugins(DefaultPlugins.set(WindowPlugin {
-        //     primary_window: Some(Window {
-        //         title: "Nebulous Engine Game".into(), // todo make this dynamic
-        //         present_mode: PresentMode::AutoNoVsync,
-                
-        //         ..default()
-        //     }),
-        //     ..default()
-        // }))
-        // .add_plugin(LogDiagnosticsPlugin::default())
-        // .add_plugin(FrameTimeDiagnosticsPlugin::default())
-        // .add_plugin(EditorPlugin)
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins)
         .add_plugin(InputPlugin)
         .add_plugin(UIPlugin)
-        // .add_plugin(ScriptingPlugin)
         .add_plugin(ScenePlugin)
-        .insert_resource(RunningState::default())
-        .add_startup_system(start)
         .add_system(update)
-        .run();
-}
+        .insert_resource(RunningState::default());
 
-fn start(
-    // mut inputs: ResMut<Inputs>
-) {
-    // inputs.insert_or_update_input("test2".to_string(), InputValue { 
-    //     press_threshold: 1.0, 
-    //     descriptions: vec![
-    //         InputDescription::Scalar { input_type: InputType::Keyboard(ScanCode(30)) }
-    //     ],
-    //     value: 0.0
-    // });
-    // inputs.insert_from_path("./assets/test.input");
+    if cfg!(feature = "editor") {
+        app.add_plugin(EditorPlugin);
+    } else {
+        app.add_plugin(NonEditorPlugin);
+    }
+
+    app.run();
 }
 
 fn update(

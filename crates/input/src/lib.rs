@@ -9,8 +9,6 @@ use types::*;
 pub mod types;
 pub mod enums;
 
-static DEFAULT_INPUT_PATH: &str = "./assets/default.input";
-
 #[derive(Resource)]
 pub struct GamepadContainer(Gamepad);
 
@@ -20,21 +18,10 @@ impl Plugin for InputPlugin {
         app
             .add_system(gamepad_update)
             .add_system(update)
-            .add_startup_system(setup)
             .insert_resource(Inputs { values: HashMap::new() })
             .add_event::<InputPressedEvent>()
             .add_event::<InputReleasedEvent>()
             .add_event::<InputChangedEvent>();
-    }
-}
-
-fn setup(
-    
-    mut inputs: ResMut<Inputs>
-) {
-    // on start, load default.input if it exists
-    if std::fs::metadata(DEFAULT_INPUT_PATH).is_ok() {
-        inputs.insert_from_path(DEFAULT_INPUT_PATH)
     }
 }
 

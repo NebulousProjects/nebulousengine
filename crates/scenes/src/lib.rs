@@ -11,19 +11,8 @@ impl Plugin for ScenePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<LoadSceneEvent>()
-            .add_startup_system(start)
             .add_system(load_scene_loop);
     }
-}
-
-fn start(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    asset_server: Res<AssetServer>,
-    // mut wrapper: NonSendMut<ScriptEngineWrapper>
-) {
-    load_scene_from_path(&mut commands, "./assets/test.scene", &asset_server, &mut meshes, &mut materials)
 }
 
 fn load_scene_loop(
