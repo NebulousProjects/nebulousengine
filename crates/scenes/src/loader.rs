@@ -13,10 +13,16 @@ pub fn load_scene_from_path(
     materials: &mut ResMut<Assets<StandardMaterial>>,
     wrapper: &mut NonSendMut<ScriptEngineWrapper>
 ) {
-    load_scene_from_json(
-        commands, &load_file_to_json(path), 
-        asset_server, meshes, materials, wrapper
-    );
+    let json = load_file_to_json(path);
+
+    if json.is_ok() {
+        load_scene_from_json(
+            commands, &json.unwrap(), 
+            asset_server, meshes, materials, wrapper
+        );
+    } else {
+        error!("{}", json.err().unwrap());
+    }
 }
 
 pub fn load_scene_from_json(
@@ -111,7 +117,12 @@ pub fn load_ui(
     asset_server: &Res<AssetServer>,
 ) {
     if json.is_string() {
-        add_ui_json_to_commands(&load_file_to_json(json.as_str().unwrap()), commands, asset_server)
+        let json = load_file_to_json(json.as_str().unwrap());
+        if json.is_ok() {
+            add_ui_json_to_commands(&json.unwrap(), commands, asset_server);
+        } else {
+            error!("{}", json.err().unwrap())
+        }
     } else if json.is_object() {
         add_ui_json_to_commands(json, commands, asset_server);
     } else {

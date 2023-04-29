@@ -18,7 +18,12 @@ pub fn spawn_entity_from_path(
     scale_mult: Option<Vec3>,
     visible: bool
 ) {
-    spawn_entity_from_json(commands, &load_file_to_json(path), asset_server, meshes, materials, position_offset, rotation_offset, scale_mult, visible);
+    let json = load_file_to_json(path);
+    if json.is_ok() {
+        spawn_entity_from_json(commands, &json.unwrap(), asset_server, meshes, materials, position_offset, rotation_offset, scale_mult, visible);
+    } else {
+        error!("{}", json.err().unwrap())
+    }
 }
 
 pub fn spawn_entity_from_json(

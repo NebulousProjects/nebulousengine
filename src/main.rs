@@ -32,7 +32,7 @@ fn main() {
 }
 
 fn start(
-    mut inputs: ResMut<Inputs>
+    // mut inputs: ResMut<Inputs>
 ) {
     // inputs.insert_or_update_input("test2".to_string(), InputValue { 
     //     press_threshold: 1.0, 
@@ -41,7 +41,7 @@ fn start(
     //     ],
     //     value: 0.0
     // });
-    inputs.insert_from_path("./assets/test.input");
+    // inputs.insert_from_path("./assets/test.input");
 }
 
 fn update(

@@ -33,9 +33,20 @@ impl Default for ViewportContainer {
     }
 }
 
-pub fn load_file_to_json(path: &str) -> JsonValue {
-    let file_contents = std::fs::read_to_string(path).unwrap();
-    return json::parse(file_contents.as_str()).unwrap();
+pub fn load_file_to_json(path: &str) -> Result<JsonValue, String> {
+    let file_contents = std::fs::read_to_string(path);
+
+    if file_contents.is_ok() {
+        let json = json::parse(file_contents.unwrap().as_str());
+        if json.is_ok() {
+            Ok(json.unwrap())
+        } else {
+            Err(format!("Json parse failed with error: {}", json.err().unwrap()))
+        }
+        // json::parse(file_contents.as_str()).unwrap()
+    } else {
+        Err(format!("Get file contents failed with error: {}", file_contents.err().unwrap()))
+    }
 }
 
 #[derive(Resource)]
