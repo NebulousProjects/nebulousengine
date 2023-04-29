@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use loader::load_scene_from_path;
-use nebulousengine_scripting::*;
 use nebulousengine_utils::*;
 
 mod loader;
@@ -22,9 +21,9 @@ fn start(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
-    mut wrapper: NonSendMut<ScriptEngineWrapper>
+    // mut wrapper: NonSendMut<ScriptEngineWrapper>
 ) {
-    load_scene_from_path(&mut commands, "./assets/test.scene", &asset_server, &mut meshes, &mut materials, &mut wrapper)
+    load_scene_from_path(&mut commands, "./assets/test.scene", &asset_server, &mut meshes, &mut materials)
 }
 
 fn load_scene_loop(
@@ -34,7 +33,7 @@ fn load_scene_loop(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut wrapper: NonSendMut<ScriptEngineWrapper>,
+    // mut wrapper: NonSendMut<ScriptEngineWrapper>,
     mut running_state: ResMut<RunningState>
 ) {
     // run for each event
@@ -45,10 +44,10 @@ fn load_scene_loop(
         running_state.running = false;
 
         // call stop on all scripts
-        execute_functions(&mut wrapper, "stop".to_string());
+        // execute_functions(&mut wrapper, "stop".to_string()); TODO
 
         // remove scripts all scripts
-        wrapper.engine.scripts.clear();
+        // wrapper.engine.scripts.clear();
 
         // clear old entities and UIs
         for entity in entities.iter() {
@@ -59,11 +58,11 @@ fn load_scene_loop(
         load_scene_from_path(
             &mut commands, event.path.as_str(), 
             &asset_server, &mut meshes, 
-            &mut materials, &mut wrapper
+            &mut materials
         );
 
         // call start on all scripts
-        execute_functions(&mut wrapper, "start".to_string());
+        // execute_functions(&mut wrapper, "start".to_string()); TODO
 
         // resume
         running_state.running = true;

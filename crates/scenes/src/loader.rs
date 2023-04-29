@@ -1,7 +1,6 @@
 use json::JsonValue;
 use bevy::prelude::*;
 use nebulousengine_entities::*;
-use nebulousengine_scripting::*;
 use nebulousengine_ui::*;
 use nebulousengine_utils::{*, optionals::*};
 
@@ -11,14 +10,14 @@ pub fn load_scene_from_path(
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    wrapper: &mut NonSendMut<ScriptEngineWrapper>
+    // wrapper: &mut NonSendMut<ScriptEngineWrapper>
 ) {
     let json = load_file_to_json(path);
 
     if json.is_ok() {
         load_scene_from_json(
             commands, &json.unwrap(), 
-            asset_server, meshes, materials, wrapper
+            asset_server, meshes, materials
         );
     } else {
         error!("{}", json.err().unwrap());
@@ -31,7 +30,7 @@ pub fn load_scene_from_json(
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    wrapper: &mut NonSendMut<ScriptEngineWrapper>
+    // wrapper: &mut NonSendMut<ScriptEngineWrapper>
 ) {
     // load entities
     if json.has_key("entities") {
@@ -60,9 +59,10 @@ pub fn load_scene_from_json(
     if json.has_key("scripts") {
         let scripts = &json["scripts"];
         if scripts.is_array() {
-            for i in 0 .. scripts.len() {
-                load_script(&scripts[i], wrapper);
-            }
+            // for i in 0 .. scripts.len() {
+                error!("TODO scripts");
+                // load_script(&scripts[i], wrapper);
+            // }
         }
     }
 }
@@ -130,13 +130,13 @@ pub fn load_ui(
     }
 }
 
-pub fn load_script(
-    json: &JsonValue, 
-    wrapper: &mut NonSendMut<ScriptEngineWrapper>,
-) {
-    if json.is_string() {
-        load_script_path(wrapper, json.as_str().unwrap().to_string())
-    } else {
-        error!("Could not load ui from json {}", json);
-    }
-}
+// pub fn load_script(
+//     json: &JsonValue, 
+//     wrapper: &mut NonSendMut<ScriptEngineWrapper>,
+// ) {
+//     if json.is_string() {
+//         load_script_path(wrapper, json.as_str().unwrap().to_string())
+//     } else {
+//         error!("Could not load ui from json {}", json);
+//     }
+// }

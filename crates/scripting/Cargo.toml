@@ -1,9 +1,0 @@
-[package]
-name = "nebulousengine_scripting"
-version = "0.0.1"
-edition = "2021"
-
-[dependencies]
-bevy = "0.10.1"
-rhai = "1.13.0"
-nebulousengine_utils = { path = "../utils/" }

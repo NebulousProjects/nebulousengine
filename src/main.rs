@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use nebulousengine_input::{*, types::{InputPressedEvent, InputReleasedEvent}};
 use nebulousengine_scenes::*;
-use nebulousengine_scripting::*;
 use nebulousengine_ui::*;
 use nebulousengine_utils::*;
 
@@ -23,7 +22,7 @@ fn main() {
         // .add_plugin(EditorPlugin)
         .add_plugin(InputPlugin)
         .add_plugin(UIPlugin)
-        .add_plugin(ScriptingPlugin)
+        // .add_plugin(ScriptingPlugin)
         .add_plugin(ScenePlugin)
         .insert_resource(RunningState::default())
         .add_startup_system(start)
