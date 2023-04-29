@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use nebulousengine_input::{*, types::{InputValue, InputRule, InputType, InputPressedEvent, InputReleasedEvent, InputDescription}};
+use nebulousengine_input::{*, types::{InputPressedEvent, InputReleasedEvent}};
 use nebulousengine_scenes::*;
 use nebulousengine_scripting::*;
 use nebulousengine_ui::*;
@@ -34,30 +34,26 @@ fn main() {
 fn start(
     mut inputs: ResMut<Inputs>
 ) {
-    inputs.insert_or_update_input(
-        "test".to_string(),
-        InputValue {
-            rule: InputRule {
-                press_threshold: 1.0,
-                descriptions: vec![
-                    InputDescription::Scalar { input_type: InputType::GamepadAxis(GamepadAxisType::LeftZ) }
-                ]
-            },
-            value: 0.0
-        }
-    );
+    // inputs.insert_or_update_input("test2".to_string(), InputValue { 
+    //     press_threshold: 1.0, 
+    //     descriptions: vec![
+    //         InputDescription::Scalar { input_type: InputType::Keyboard(ScanCode(30)) }
+    //     ],
+    //     value: 0.0
+    // });
+    inputs.insert_from_path("./assets/test.input");
 }
 
 fn update(
     mut query: Query<&mut Transform, With<Handle<Scene>>>, 
     time: Res<Time>, 
-    keys: Res<Input<KeyCode>>,
+    // keys: Res<Input<ScanCode>>,
 
     // mut load_scene_events: EventWriter<LoadSceneEvent>,
-    mut running_state: ResMut<RunningState>,
+    running_state: ResMut<RunningState>,
     mut pressed_events: EventReader<InputPressedEvent>,
     mut released_events: EventReader<InputReleasedEvent>,
-    mut inputs: ResMut<Inputs>
+    // mut inputs: ResMut<Inputs>
 ) {
     // rotate queried entities for testing
     if running_state.running {
@@ -66,23 +62,10 @@ fn update(
         }
     }
 
-    // if keys pressed, trigger scene swap
-    // if keys.just_released(KeyCode::A) {
-    //     load_scene_events.send(LoadSceneEvent { path: "./assets/test2.scene".to_string() });
-    // } else if keys.just_released(KeyCode::D) {
-    //     load_scene_events.send(LoadSceneEvent { path: "./assets/test.scene".to_string() });
-    // }
-
-    // for event in pressed_events.iter() {
-    //     info!("Pressed event: {}", event.name);
-    // }
-    // for event in released_events.iter() {
-    //     info!("Released event: {}", event.name);
-    // }
-    info!("Test current value: {}", inputs.get_value_or_default(&"test".to_string(), -1000000.0));
-
-    // if space pressed, toggle pause
-    if keys.just_released(KeyCode::Space) {
-        running_state.running = !running_state.running
+    for event in pressed_events.iter() {
+        info!("Pressed event: {}", event.name);
+    }
+    for event in released_events.iter() {
+        info!("Released event: {}", event.name);
     }
 }
