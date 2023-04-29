@@ -3,6 +3,7 @@ use bevy::render::camera::{RenderTarget, Viewport};
 use bevy::render::render_resource::*;
 use bevy_egui::*;
 use nebulousengine_utils::{ViewportContainer, MainCamera};
+use nebulousengine_noneditor::*;
 use self::files_editor_panel::render_files;
 use self::editor_panel::*;
 
@@ -17,6 +18,7 @@ impl Plugin for EditorPlugin {
             .init_resource::<ViewportContainer>()
             .insert_resource(EditorTabs::new())
             .add_plugin(EguiPlugin)
+            .add_plugin(NonEditorPlugin) // TODO: remove, this is just to load index.json
             .add_system(setup_viewport)
             .add_system(render_ui.after(setup_viewport));
     }
@@ -59,15 +61,19 @@ fn setup_viewport(
     viewport.image_handle = Some(image_handle.clone());
 
     // set render target
-    let mut cam = cameras.single_mut();
-    cam.target = RenderTarget::Image(viewport.image_handle.clone().expect("hi"));
-    cam.viewport = Some(
-        Viewport {
-            physical_size: UVec2 { x: size.width, y: size.height },
-            physical_position: UVec2 { x: 0, y: 0 },
-            depth: 0.0..1.0
-        }
-    )
+    if cameras.is_empty() {
+        warn!("No cameras marked main camera!");
+    } else {
+        let mut cam = cameras.single_mut();
+        cam.target = RenderTarget::Image(viewport.image_handle.clone().expect("hi"));
+        cam.viewport = Some(
+            Viewport {
+                physical_size: UVec2 { x: size.width, y: size.height },
+                physical_position: UVec2 { x: 0, y: 0 },
+                depth: 0.0..1.0
+            }
+        )
+    }
 }
 
 fn render_ui(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, mut rendered_texture_id: Local<egui::TextureId>, tabs: ResMut<EditorTabs>) {
