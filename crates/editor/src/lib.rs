@@ -78,7 +78,7 @@ fn setup_viewport(
 
 fn render_ui(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, mut rendered_texture_id: Local<egui::TextureId>, tabs: ResMut<EditorTabs>) {
     // make sure we have an image handle
-    if viewport.image_handle.is_none() { return }
+    // if viewport.image_handle.is_none() { return }
 
     *rendered_texture_id = contexts.add_image(viewport.image_handle.clone().expect("why"));
 
