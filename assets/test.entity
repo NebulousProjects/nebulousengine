@@ -3,6 +3,9 @@
         {
             "type": "model",
             "model": "barracks.gltf.glb"
+        },
+        {
+            "type": "rigidbody"
         }
     ]
 }

@@ -1,10 +1,20 @@
 {
+    "transform": {
+        "rotation": [ 0.0, 0.0, 0.0 ]
+    },
     "components": [
         {
             "type": "shape",
             "shape": "plane",
             "size": 50.0,
             "color": "#22AA22"
+        },
+        {
+            "type": "collider",
+            "shape": "cube",
+            "width": 25,
+            "height": 0.00001,
+            "depth": 25
         }
     ],
     "children": [

@@ -1,11 +1,20 @@
 use bevy::prelude::*;
 use json::JsonValue;
 use nebulousengine_utils::{*, optionals::*};
+use bevy_rapier3d::prelude::*;
 
 use self::loader::*;
 
 pub mod components;
 pub mod loader;
+
+pub struct EntityPlugin;
+
+impl Plugin for EntityPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
+    }
+}
 
 pub fn spawn_entity_from_path(
     commands: &mut Commands, 

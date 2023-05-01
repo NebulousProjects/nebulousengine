@@ -6,6 +6,7 @@ use nebulousengine_noneditor::*;
 use nebulousengine_scenes::*;
 use nebulousengine_ui::*;
 use nebulousengine_utils::*;
+use nebulousengine_entities::*;
 
 fn main() {
     let mut app = App::new();
@@ -13,6 +14,7 @@ fn main() {
         .add_plugin(InputPlugin)
         .add_plugin(UIPlugin)
         .add_plugin(ScenePlugin)
+        .add_plugin(EntityPlugin)
         .insert_resource(RunningState::default());
 
     if cfg!(feature = "editor") {
