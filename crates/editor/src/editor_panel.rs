@@ -29,6 +29,7 @@ pub enum EditorTabType {
     Unknown
 }
 
+// render editor in the center panel by a dock area
 pub fn render_editor(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, tabs: &mut EditorTabs) {
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         DockArea::new(&mut tabs.tree)
@@ -45,7 +46,7 @@ impl egui_dock::TabViewer for TabViewer {
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         let tab_type = &mut tab.tab_type;
         match tab_type {
-            EditorTabType::Text(text) => text.ui(ui),
+            EditorTabType::Text(text) => text.ui(ui, &tab.path),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
     }
