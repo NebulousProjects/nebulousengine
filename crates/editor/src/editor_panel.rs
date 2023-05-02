@@ -1,56 +1,61 @@
-use bevy::{prelude::*, render::render_resource::Extent3d};
+use std::{path::PathBuf};
+
+use bevy::prelude::{Resource, ResMut};
 use bevy_egui::EguiContexts;
-use egui::*;
+use egui_dock::{Tree, DockArea, Style};
 use nebulousengine_utils::ViewportContainer;
 
 #[derive(Resource)]
 pub struct EditorTabs {
-    tree: Vec<String>
+    pub tree: Tree<EditorTab>
 }
 
 impl EditorTabs {
     pub fn new() -> Self {
-        let mut tree = Vec::new();
-        tree.push("tab1".to_string());
-        tree.push("tab2".to_string());
-
-        Self { tree }
+        Self { tree: Tree::new(Vec::new()) }
     }
 }
 
-pub fn render_editor(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, rendered_texture_id: Local<egui::TextureId>, tabs: &mut EditorTabs) {
-    
-    egui::TopBottomPanel::top("tab_buttons_container").show(contexts.ctx_mut(), |ui| {
-        render_editor_tabs(ui, tabs);
-    });
-    
+pub struct EditorTab {
+    pub path: PathBuf,
+    pub name: String,
+    pub tab_type: EditorTabType
+}
+
+pub enum EditorTabType {
+    Text,
+    Unknown
+}
+
+pub fn render_editor(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, tabs: &mut EditorTabs) {
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
-        render_editor_main(ui, viewport, rendered_texture_id);
+        DockArea::new(&mut tabs.tree)
+            .style(Style::from_egui(ui.style().as_ref()))
+            .show_inside(ui, &mut TabViewer {});
     });
 }
 
-// function that renders tabs in top menu
-fn render_editor_tabs(ui: &mut Ui, tabs: &mut EditorTabs) {
-    // create a menu bar for the tabs
-    ui.horizontal(|ui| {
-        for element in tabs.tree.iter() {
-            if ui.button(element).clicked() {
-                println!("Element clicked {}", element);
-            }
-        }
-    });
+struct TabViewer;
+
+impl egui_dock::TabViewer for TabViewer {
+    type Tab = EditorTab;
+
+    fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
+        match tab.tab_type {
+            EditorTabType::Text => {
+                ui.label("TODO Text View");   
+            },
+            EditorTabType::Unknown => draw_unknown(ui, tab)
+        };
+    }
+
+    fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
+        (&*tab.name).into()
+    }
 }
 
-fn render_editor_main(ui: &mut Ui, mut viewport: ResMut<ViewportContainer>, rendered_texture_id: Local<egui::TextureId>/*, tabs: &mut EditorTabs */) {
-    let rect = ui.max_rect();
-    viewport.size = Extent3d { width: rect.width() as u32, height: rect.height() as u32, depth_or_array_layers: 1 };
-    ui.add(egui::widgets::Image::new(
-        *rendered_texture_id,
-        [ rect.width(), rect.height() ]
-    ));
+fn draw_unknown(ui: &mut egui::Ui, tab: &mut EditorTab) {
+    ui.vertical_centered(|ui| {
+        ui.label(format!("Unknown file type for file {}", tab.name));
+    });
 }
-// Example how to insert render image
-// ui.add(egui::widgets::Image::new(
-//     *rendered_texture_id,
-//     [512.0, 512.0]
-// ));

@@ -1,17 +1,19 @@
 use egui::Ui;
 use std::fs::{self, ReadDir, DirEntry};
 
-pub fn render_files(ui: &mut Ui) {
-    let master_path = fs::read_dir("./").unwrap(); // todo file watching and caching
+use crate::editor_panel::*;
+
+pub fn render_files(ui: &mut Ui, tabs: &mut EditorTabs) {
+    let master_path = fs::read_dir("./assets").unwrap(); // todo file watching and caching
 
     // create scroll area for the files
     egui::ScrollArea::both().show(ui, |ui| {
         // render the contents of the master path
-        render_directory_contents(ui, master_path);
+        render_directory_contents(ui, tabs, master_path);
     });
 }
 
-fn render_directory_contents(ui: &mut Ui, root: ReadDir) {
+fn render_directory_contents(ui: &mut Ui, tabs: &mut EditorTabs, root: ReadDir) {
     // loop through contents of the directory and divide it into directories and files
     let (dirs, files): (Vec<_>, Vec<_>) = root.into_iter()
         .map(|p| { p.unwrap() })
@@ -19,23 +21,42 @@ fn render_directory_contents(ui: &mut Ui, root: ReadDir) {
 
     // render all directories and then files
     for dir in dirs {
-        render_directory(ui, dir);
+        render_directory(ui, tabs, dir);
     }
     for file in files {
-        render_file(ui, file);
+        render_file(ui, tabs, file);
     }
 }
 
-fn render_file(ui: &mut Ui, path: DirEntry) {
-    //if ui.label(path.file_name().to_str().unwrap()).sense(Sense::click()).clicked() {
+fn render_file(ui: &mut Ui, tabs: &mut EditorTabs, path: DirEntry) {
+    // add a button to the file that when clicked, run code
     if ui.add(egui::widgets::Label::new(path.file_name().to_str().unwrap()).wrap(false).sense(egui::Sense::click())).clicked() {
-        println!("TODO open file");
+        tabs.tree.push_to_focused_leaf(EditorTab {
+            path: path.path(),
+            name: path.file_name().to_str().unwrap_or("").to_string(),
+            tab_type: EditorTabType::Unknown
+        });
+
+        // if tab already exists, focus
+        // if tabs.tree.iter().any(|tab| tab.path == path.path() ) {
+        //     tabs.focus_tab = Some(path.path());
+        // }
+        // // otherwise, open then focus
+        // else {
+        //     let tab = EditorTab {
+        //         path: path.path(),
+        //         name: path.file_name().to_str().unwrap_or("").to_string(),
+        //         tab_type: EditorTabType::Unknown
+        //     };
+        //     tabs.focus_tab = Some(path.path());
+        //     tabs.tree.push(tab);
+        // }
     }
 }
 
-fn render_directory(ui: &mut Ui, dir: DirEntry) {
+fn render_directory(ui: &mut Ui, tabs: &mut EditorTabs, dir: DirEntry) {
     // render collapsable containing directory contents
     ui.collapsing(dir.file_name().to_str().unwrap(), |ui| {
-        render_directory_contents(ui, fs::read_dir(dir.path()).unwrap());
+        render_directory_contents(ui, tabs, fs::read_dir(dir.path()).unwrap());
     });
 }
