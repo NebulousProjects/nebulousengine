@@ -5,6 +5,8 @@ use bevy_egui::EguiContexts;
 use egui_dock::{Tree, DockArea, Style};
 use nebulousengine_utils::ViewportContainer;
 
+use crate::text_editor::*;
+
 #[derive(Resource)]
 pub struct EditorTabs {
     pub tree: Tree<EditorTab>
@@ -23,7 +25,7 @@ pub struct EditorTab {
 }
 
 pub enum EditorTabType {
-    Text,
+    Text(TextContainer),
     Unknown
 }
 
@@ -41,10 +43,9 @@ impl egui_dock::TabViewer for TabViewer {
     type Tab = EditorTab;
 
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
-        match tab.tab_type {
-            EditorTabType::Text => {
-                ui.label("TODO Text View");   
-            },
+        let tab_type = &mut tab.tab_type;
+        match tab_type {
+            EditorTabType::Text(text) => text.ui(ui),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
     }

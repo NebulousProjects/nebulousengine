@@ -6,6 +6,7 @@ use self::editor_panel::*;
 
 pub mod files_editor_panel;
 pub mod editor_panel;
+mod text_editor;
 
 pub struct EditorPlugin;
 
@@ -43,6 +44,7 @@ fn render_ui(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, mu
         render_files(ui, &mut tabs)
     });
 
+    // render editor
     render_editor(contexts, viewport, /*rendered_texture_id,*/ tabs.into_inner());
 }
 
