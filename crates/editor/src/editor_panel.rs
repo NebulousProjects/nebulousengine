@@ -7,6 +7,8 @@ use nebulousengine_utils::ViewportContainer;
 
 use crate::text_editor::*;
 
+pub mod text_editor;
+
 #[derive(Resource)]
 pub struct EditorTabs {
     pub tree: Tree<EditorTab>

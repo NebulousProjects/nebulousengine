@@ -6,7 +6,6 @@ use self::editor_panel::*;
 
 pub mod files_editor_panel;
 pub mod editor_panel;
-mod text_editor;
 
 pub struct EditorPlugin;
 
