@@ -117,7 +117,11 @@ fn render_ui(
     });
 
     // render editor
-    render_editor(contexts, /*viewport, rendered_texture_id,*/ tabs.into_inner(), images);
+    render_editor(
+        contexts, /*viewport, rendered_texture_id,*/ 
+        tabs.into_inner(), 
+        images
+    );
 }
 
 /*

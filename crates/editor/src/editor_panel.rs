@@ -35,16 +35,26 @@ pub enum EditorTabType {
 }
 
 // render editor in the center panel by a dock area
-pub fn render_editor(mut contexts: EguiContexts, /*viewport: ResMut<ViewportContainer>,*/ tabs: &mut EditorTabs, images: Res<Assets<Image>>) {
+pub fn render_editor(
+    mut contexts: EguiContexts, 
+    tabs: &mut EditorTabs, 
+    images: Res<Assets<Image>>
+) {
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         DockArea::new(&mut tabs.tree)
             .style(Style::from_egui(ui.style().as_ref()))
-            .show_inside(ui, &mut TabViewer { images: &images });
+            .show_inside(ui, &mut TabViewer { 
+                info: TabInfo { images: &images }
+            });
     });
 }
 
+pub struct TabInfo<'a> {
+    images: &'a Res<'a, Assets<Image>>,
+}
+
 struct TabViewer<'a> {
-    images: &'a Res<'a, Assets<Image>>
+    info: TabInfo<'a>
 }
 
 impl egui_dock::TabViewer for TabViewer<'_> {
@@ -54,7 +64,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
         let tab_type = &mut tab.tab_type;
         match tab_type {
             EditorTabType::Text(text) => text.ui(ui, &tab.path),
-            EditorTabType::Image(image) => image.ui(ui, self.images),
+            EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &self.info),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
     }
