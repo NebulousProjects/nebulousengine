@@ -1,16 +1,23 @@
-use bevy::prelude::{Handle, Image};
+use bevy::prelude::{Handle, Image, Assets, Res};
 use egui::Vec2;
 
 pub struct ImageRenderer {
-    // pub handle: Handle<Image>,
+    pub handle: Handle<Image>,
     pub texture: egui::TextureId,
-    pub texture_size: Vec2,
+    pub texture_size: Option<Vec2>,
 }
 
 impl ImageRenderer {
-    pub fn ui(&mut self, ui: &mut egui::Ui) {
-        // println!("Rendering image");
-        ui.image(self.texture, self.texture_size);
+    pub fn ui(&mut self, ui: &mut egui::Ui, images: &Res<Assets<Image>>) {
+        if self.texture_size.is_some() {
+            ui.image(self.texture, self.texture_size.unwrap());
+        } else {
+            let image = images.get(&self.handle);
+            if image.is_some() {
+                let dimensions = image.unwrap().texture_descriptor.size;
+                self.texture_size = Some(Vec2 { x: dimensions.width as f32, y: dimensions.height as f32 });
+            }
+        }
     }
 }
 /*

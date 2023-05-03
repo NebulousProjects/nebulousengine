@@ -1,9 +1,8 @@
 use std::{path::PathBuf};
 
-use bevy::prelude::{Resource, ResMut};
+use bevy::prelude::{Resource, Image, Assets, Res};
 use bevy_egui::EguiContexts;
 use egui_dock::{Tree, DockArea, Style};
-use nebulousengine_utils::ViewportContainer;
 
 use crate::text_editor::*;
 
@@ -36,24 +35,26 @@ pub enum EditorTabType {
 }
 
 // render editor in the center panel by a dock area
-pub fn render_editor(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, tabs: &mut EditorTabs) {
+pub fn render_editor(mut contexts: EguiContexts, /*viewport: ResMut<ViewportContainer>,*/ tabs: &mut EditorTabs, images: Res<Assets<Image>>) {
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         DockArea::new(&mut tabs.tree)
             .style(Style::from_egui(ui.style().as_ref()))
-            .show_inside(ui, &mut TabViewer {});
+            .show_inside(ui, &mut TabViewer { images: &images });
     });
 }
 
-struct TabViewer;
+struct TabViewer<'a> {
+    images: &'a Res<'a, Assets<Image>>
+}
 
-impl egui_dock::TabViewer for TabViewer {
+impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = EditorTab;
 
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         let tab_type = &mut tab.tab_type;
         match tab_type {
             EditorTabType::Text(text) => text.ui(ui, &tab.path),
-            EditorTabType::Image(image) => image.ui(ui),
+            EditorTabType::Image(image) => image.ui(ui, self.images),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
     }
