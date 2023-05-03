@@ -7,7 +7,10 @@ use nebulousengine_utils::ViewportContainer;
 
 use crate::text_editor::*;
 
+use self::image_viewer::ImageRenderer;
+
 pub mod text_editor;
+pub mod image_viewer;
 
 #[derive(Resource)]
 pub struct EditorTabs {
@@ -28,6 +31,7 @@ pub struct EditorTab {
 
 pub enum EditorTabType {
     Text(TextContainer),
+    Image(ImageRenderer),
     Unknown
 }
 
@@ -49,6 +53,7 @@ impl egui_dock::TabViewer for TabViewer {
         let tab_type = &mut tab.tab_type;
         match tab_type {
             EditorTabType::Text(text) => text.ui(ui, &tab.path),
+            EditorTabType::Image(image) => image.ui(ui),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
     }

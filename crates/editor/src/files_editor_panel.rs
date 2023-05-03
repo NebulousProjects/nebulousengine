@@ -1,9 +1,10 @@
+use bevy::prelude::EventWriter;
 use egui::Ui;
 use std::fs::{self, ReadDir, DirEntry};
 
-use crate::{editor_panel::*, text_editor::TextContainer};
+use crate::EditorOpenFileEvent;
 
-pub fn render_files(ui: &mut Ui, tabs: &mut EditorTabs) {
+pub fn render_files(ui: &mut Ui, tabs: &mut EventWriter<EditorOpenFileEvent>) {
     let master_path = fs::read_dir("./assets").unwrap(); // todo file watching and caching
 
     // create scroll area for the files
@@ -13,7 +14,7 @@ pub fn render_files(ui: &mut Ui, tabs: &mut EditorTabs) {
     });
 }
 
-fn render_directory_contents(ui: &mut Ui, tabs: &mut EditorTabs, root: ReadDir) {
+fn render_directory_contents(ui: &mut Ui, tabs: &mut EventWriter<EditorOpenFileEvent>, root: ReadDir) {
     // loop through contents of the directory and divide it into directories and files
     let (dirs, files): (Vec<_>, Vec<_>) = root.into_iter()
         .map(|p| { p.unwrap() })
@@ -28,26 +29,15 @@ fn render_directory_contents(ui: &mut Ui, tabs: &mut EditorTabs, root: ReadDir) 
     }
 }
 
-fn render_file(ui: &mut Ui, tabs: &mut EditorTabs, path: DirEntry) {
+fn render_file(ui: &mut Ui, events: &mut EventWriter<EditorOpenFileEvent>, path: DirEntry) {
     // add a button to the file that when clicked, run code
     if ui.add(egui::widgets::Label::new(path.file_name().to_str().unwrap()).wrap(false).sense(egui::Sense::click())).clicked() {
-        // attempt to load the file as text, other, default ot unknown
-        let input_str = std::fs::read_to_string(path.path());
-        let editor_type = match input_str {
-            Ok(str) => EditorTabType::Text(TextContainer { text: str }),
-            Err(_) => EditorTabType::Unknown
-        };
-        
-        // add tab
-        tabs.tree.push_to_focused_leaf(EditorTab {
-            path: path.path(),
-            name: path.file_name().to_str().unwrap_or("").to_string(),
-            tab_type: editor_type
-        });
+        println!("Loading {}", path.path().to_str().unwrap());
+        events.send(EditorOpenFileEvent { path: path.path() })
     }
 }
 
-fn render_directory(ui: &mut Ui, tabs: &mut EditorTabs, dir: DirEntry) {
+fn render_directory(ui: &mut Ui, tabs: &mut EventWriter<EditorOpenFileEvent>, dir: DirEntry) {
     // render collapsable containing directory contents
     ui.collapsing(dir.file_name().to_str().unwrap(), |ui| {
         render_directory_contents(ui, tabs, fs::read_dir(dir.path()).unwrap());

@@ -1,5 +1,11 @@
+use std::path::PathBuf;
+
 use bevy::prelude::*;
+use bevy::reflect::GetPath;
 use bevy_egui::*;
+use editor_panel::image_viewer::ImageRenderer;
+use editor_panel::text_editor::TextContainer;
+use egui::vec2;
 use nebulousengine_utils::{ViewportContainer};
 use self::files_editor_panel::render_files;
 use self::editor_panel::*;
@@ -7,21 +13,119 @@ use self::editor_panel::*;
 pub mod files_editor_panel;
 pub mod editor_panel;
 
+pub struct EditorOpenFileEvent {
+    path: PathBuf
+}
 pub struct EditorPlugin;
 
 impl Plugin for EditorPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<ViewportContainer>()
+            .add_event::<EditorOpenFileEvent>()
             .insert_resource(EditorTabs::new())
             .add_plugin(EguiPlugin)
             // .add_plugin(NonEditorPlugin) // TODO: remove, this is just to load index.json
             // .add_system(setup_viewport)
-            .add_system(render_ui);
+            .add_system(load_images)
+            .add_system(render_ui)
+            .add_system(load_tab);
     }
 }
 
-fn render_ui(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, mut tabs: ResMut<EditorTabs>) {
+fn load_tab(
+    mut contexts: EguiContexts,
+    mut asset_server: Res<AssetServer>,
+    mut tabs: ResMut<EditorTabs>,
+    mut read_open_events: EventReader<EditorOpenFileEvent>
+) {
+    read_open_events.iter().for_each(|event| {
+        let path = &event.path;
+
+        let editor_type = get_tab_type(&mut contexts, &asset_server, path).unwrap_or_else(|| {
+            // attempt to load the file as text, other, default ot unknown
+            let input_str = std::fs::read_to_string(path.clone());
+            match input_str {
+                Ok(str) => EditorTabType::Text(TextContainer { text: str }),
+                Err(_) => EditorTabType::Unknown
+            }
+        });
+        
+        // add tab
+        tabs.tree.push_to_focused_leaf(EditorTab {
+            path: path.clone(),
+            name: path.file_name().unwrap().to_str().unwrap().to_string(),
+            tab_type: editor_type
+        });
+    });
+}
+
+fn load_images(
+    mut ev_asset: EventReader<AssetEvent<Image>>,
+    mut tabs: ResMut<EditorTabs>
+) {
+    // for ev in ev_asset.iter() {
+    //     match ev {
+    //         AssetEvent::Created { ev_handle } => {
+    //             for node in tabs.tree.iter_mut() {
+    //                 match node {
+    //                     egui_dock::Node::Leaf { rect, viewport, tabs, active, scroll } => {
+    //                         for tab in tabs.iter_mut() {
+    //                             match tab.tab_type {
+    //                                 EditorTabType::Image(image) => {
+    //                                     if image.handle == *ev_handle {
+                                            
+    //                                     }
+    //                                 }
+    //                                 _ => {}
+    //                             }
+    //                         }
+    //                     }
+    //                     _ => {}
+    //                 }
+    //             }
+    //         },
+    //         _ => {}
+    //     }
+    // }
+}
+
+fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &PathBuf) -> Option<EditorTabType> {
+    // get extension
+    let extension = path.extension();
+    if extension.is_none() { return None; }
+    let extension = extension.unwrap().to_str();
+    if extension.is_none() { return None; }
+    let extension = extension.unwrap();
+
+    // get bevy path
+    let mut bevy_path = path.to_str().expect("Could not convert path for image load");
+    if bevy_path.starts_with("./assets") {
+        bevy_path = &bevy_path[9 .. bevy_path.len()];
+    }
+
+    // match extension to load method
+    match extension {
+        "png" => {
+            let image: Handle<Image> = asset_server.load(bevy_path);
+            let image = contexts.add_image(image);
+            Some(EditorTabType::Image(
+                ImageRenderer {
+                    texture: image,
+                    texture_size: egui::vec2(512.0, 512.0)
+                }
+            ))
+        },
+        _ => None
+    }
+}
+
+fn render_ui(
+    mut contexts: EguiContexts, 
+    viewport: ResMut<ViewportContainer>, 
+    mut tabs: ResMut<EditorTabs>,
+    mut events: EventWriter<EditorOpenFileEvent>
+) {
     // make sure we have an image handle
     // if viewport.image_handle.is_none() { return }
 
@@ -40,7 +144,7 @@ fn render_ui(mut contexts: EguiContexts, viewport: ResMut<ViewportContainer>, mu
         });
 
         // render files
-        render_files(ui, &mut tabs)
+        render_files(ui, &mut events)
     });
 
     // render editor
