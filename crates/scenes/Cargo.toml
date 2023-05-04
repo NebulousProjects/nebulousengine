@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = "0.10.1"
 json = "0.12.4"
+nebulousengine_input = { path = "../input" }
 nebulousengine_entities = { path = "../entities" }
 nebulousengine_ui = { path = "../ui" }
 nebulousengine_utils = { path = "../utils/" }

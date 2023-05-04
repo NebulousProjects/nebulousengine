@@ -40,5 +40,8 @@
     "uis": [
         "test.ui"
     ],
-    "scripts": []
+    "scripts": [],
+    "inputs": [
+        "default.input"
+    ]
 }

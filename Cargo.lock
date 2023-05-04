@@ -2478,6 +2478,7 @@ dependencies = [
  "bevy",
  "json",
  "nebulousengine_entities",
+ "nebulousengine_input",
  "nebulousengine_ui",
  "nebulousengine_utils",
 ]

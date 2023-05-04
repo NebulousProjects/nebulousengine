@@ -1,6 +1,7 @@
 use json::JsonValue;
 use bevy::prelude::*;
 use nebulousengine_entities::*;
+use nebulousengine_input::InputContainer;
 use nebulousengine_ui::*;
 use nebulousengine_utils::{*, optionals::*};
 
@@ -64,6 +65,20 @@ pub fn load_scene_from_json(
                 error!("TODO scripts");
                 // load_script(&scripts[i], wrapper);
             // }
+        }
+    }
+
+    // load inputs
+    if json.has_key("inputs") {
+        let inputs = &json["inputs"];
+        if inputs.is_array() {
+            for i in 0 .. inputs.len() {
+                let input = inputs[i].as_str();
+                if input.is_some() {
+                    let input_container: Handle<InputContainer> = asset_server.load(input.unwrap());
+                    commands.spawn(input_container);
+                }
+            }
         }
     }
 }
