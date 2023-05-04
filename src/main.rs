@@ -10,7 +10,11 @@ use nebulousengine_entities::*;
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins)
+    app.add_plugins(DefaultPlugins.set(AssetPlugin {
+            watch_for_changes: true,
+            ..Default::default()
+        }))
+        // .add_plugins(DefaultPlugins)
         .add_plugin(InputPlugin)
         .add_plugin(UIPlugin)
         .add_plugin(ScenePlugin)

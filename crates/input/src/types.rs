@@ -3,14 +3,17 @@ use bevy::{prelude::*, input::mouse::{MouseMotion}};
 use crate::GamepadContainer;
 
 pub struct InputPressedEvent {
+    pub container: String,
     pub name: String,
     pub value: f32
 }
 pub struct InputReleasedEvent {
+    pub container: String,
     pub name: String,
     pub value: f32
 }
 pub struct InputChangedEvent {
+    pub container: String,
     pub name: String,
     pub value: f32
 }

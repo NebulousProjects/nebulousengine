@@ -32,7 +32,6 @@ fn render_directory_contents(ui: &mut Ui, tabs: &mut EventWriter<EditorOpenFileE
 fn render_file(ui: &mut Ui, events: &mut EventWriter<EditorOpenFileEvent>, path: DirEntry) {
     // add a button to the file that when clicked, run code
     if ui.add(egui::widgets::Label::new(path.file_name().to_str().unwrap()).wrap(false).sense(egui::Sense::click())).clicked() {
-        println!("Loading {}", path.path().to_str().unwrap());
         events.send(EditorOpenFileEvent { path: path.path() })
     }
 }

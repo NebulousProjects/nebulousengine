@@ -1,7 +1,7 @@
 use bevy::{prelude::*, input::{mouse::MouseMotion, gamepad::{GamepadEvent, GamepadConnection}}, asset::{AssetLoader, LoadedAsset}, reflect::TypeUuid};
 use enums::{mouse_button, gamepad_button_type, gamepad_axis_type};
 use json::JsonValue;
-use nebulousengine_utils::{load_file_to_json, optionals::{optional_string, optional_u32, optional_f32}};
+use nebulousengine_utils::{optionals::{optional_string, optional_u32, optional_f32}};
 use std::{collections::*};
 
 use types::*;
@@ -99,7 +99,6 @@ fn update(
     for (_, input) in inputs.iter_mut() {
         // loop through all active input rules
         for (name, value) in input.inputs.iter_mut() {
-            // println!("Input name: {}", name);
             // get new and old values
             let old_value = value.value;
             let new_value = eval_value(&value, primary_window, &keys, &mouse_buttons, &pad_buttons, &pad_axes, &mut mouse_motion, &gamepad_container);
@@ -107,6 +106,7 @@ fn update(
             // if the value has been pressed, broadcast event
             if old_value.abs() < value.press_threshold && new_value.abs() >= value.press_threshold {
                 pressed_events.send(InputPressedEvent {
+                    container: input.name.clone(),
                     name: name.clone(),
                     value: new_value
                 });
@@ -115,18 +115,45 @@ fn update(
             // if the value has been released, broadcast event
             if old_value.abs() >= value.press_threshold && new_value.abs() < value.press_threshold {
                 released_events.send(InputReleasedEvent {
+                    container: input.name.clone(),
                     name: name.clone(),
                     value: new_value
                 });
             }
 
             if new_value != old_value {
-                changed_events.send(InputChangedEvent { name: name.clone(), value: new_value });
+                changed_events.send(InputChangedEvent {
+                    container: input.name.clone(),
+                    name: name.clone(), 
+                    value: new_value
+                });
             }
 
             // update the saved values
             value.value = new_value;
         }
+    }
+}
+
+pub fn get_input_value(
+    input_containers: &Res<Assets<InputContainer>>,
+    container: String,
+    input: String
+) -> Result<f32, String> {
+    // attempt to get input container, return error if fail
+    let container_opt = input_containers.iter().find(|(_, c)| c.name == container);
+    if container_opt.is_some() {
+        // attempt to get input result from the container
+        let result = container_opt.unwrap().1.get_input(&input);
+
+        // return the result if ok, otherwise, return the error
+        if result.is_ok() {
+            Ok(result.unwrap())
+        } else {
+            Err(format!("Could not get input from container {} because get input returned error: {}", container, &input))
+        }
+    } else {
+        Err(format!("No active input container with name: {}", container))
     }
 }
 
@@ -136,6 +163,16 @@ pub struct InputContainer {
     inputs: HashMap<String, InputValue>,
     name: String,
     serverPath: String
+}
+impl InputContainer {
+    pub fn get_input(&self, name: &String) -> Result<f32, String> {
+        let value = self.inputs.get(name);
+        if value.is_some() {
+            Ok(value.unwrap().value)
+        } else {
+            Err(format!("Could not find error with name: {}", name))
+        }
+    }
 }
 
 #[derive(Default)]
@@ -158,7 +195,6 @@ impl AssetLoader for InputContainerLoader {
             if root_json.is_array() {
                 // create map and then assemble it by looping through all inputs in root json
                 let mut map: HashMap<String, InputValue> = HashMap::new();
-                println!("Length of root json is {}", root_json.len());
                 for json_idx in 0 .. root_json.len() {
                     let json = &root_json[json_idx];
                     let (name, value) = get_from_json_object(json);
@@ -167,7 +203,7 @@ impl AssetLoader for InputContainerLoader {
                 }
 
                 // unpack context
-                let name = load_context.path().file_name().unwrap().to_str().unwrap().to_string();
+                let name = load_context.path().file_stem().unwrap().to_str().unwrap().to_string();
                 let path = load_context.path().to_str().unwrap().to_string();
 
                 // assemble final object
