@@ -162,7 +162,7 @@ pub fn get_input_value(
 pub struct InputContainer {
     inputs: HashMap<String, InputValue>,
     name: String,
-    serverPath: String
+    // serverPath: String
 }
 impl InputContainer {
     pub fn get_input(&self, name: &String) -> Result<f32, String> {
@@ -210,7 +210,7 @@ impl AssetLoader for InputContainerLoader {
                 let container = InputContainer {
                     inputs: map,
                     name: name.clone(),
-                    serverPath: path.clone()
+                    // serverPath: path.clone()
                 };
 
                 // set default to final object
