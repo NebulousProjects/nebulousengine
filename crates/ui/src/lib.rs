@@ -1,16 +1,104 @@
-use bevy::{prelude::*, ecs::system::EntityCommands};
-use json::{ JsonValue };
+use bevy::{prelude::*, asset::{AssetLoader, HandleId, LoadedAsset}, reflect::TypeUuid, ecs::system::EntityCommands};
+use json::JsonValue;
+use loader::*;
 use nebulousengine_utils::*;
-use nebulousengine_utils::optionals::*;
-use nebulousengine_utils::enums::*;
+
+mod loader;
 
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_asset::<UIContainer>()
+            .init_asset_loader::<UILoader>()
             .add_event::<UIInteractEvent>()
-            .add_system(button_listener);
+            .add_system(button_listener)
+            .add_system(load_ui)
+            .add_system(reload);
+    }
+}
+
+#[derive(Default)]
+pub struct UILoader;
+impl AssetLoader for UILoader {
+    fn load<'a>(
+        &'a self,
+        bytes: &'a [u8],
+        load_context: &'a mut bevy::asset::LoadContext,
+    ) -> bevy::utils::BoxedFuture<'a, Result<(), bevy::asset::Error>> {
+        Box::pin(async move {
+            // get json from bytes
+            let str = std::str::from_utf8(bytes);
+            if str.is_err() { return Err(bevy::asset::Error::msg("Could not convert bytes to json in input asset loader")) }
+            let root_json = json::parse(str.unwrap());
+            if root_json.is_err() { return Err(bevy::asset::Error::msg("Could not parse json in input asset loader")) }
+            let root_json = root_json.unwrap();
+
+            // save container
+            load_context.set_default_asset(LoadedAsset::new(UIContainer { json: root_json }));
+
+            Ok(())
+        })
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["ui"]
+    }
+}
+
+#[derive(Component, TypeUuid)]
+#[uuid = "8510c296-d2ca-4353-8710-ce996aee18cb"]
+pub struct UIContainer {
+    json: JsonValue
+}
+
+#[derive(Component)]
+pub struct UIContainerLoaded {
+    path: HandleId
+}
+
+fn load_ui(
+    mut commands: Commands,
+    query: Query<(Entity, &Handle<UIContainer>), Without<UIContainerLoaded>>,
+    assets: Res<Assets<UIContainer>>,
+    asset_server: Res<AssetServer>
+) {
+    // loop through query and load each handle
+    for (entity, handle) in query.iter() {
+        let container = assets.get(handle);
+        if container.is_some() {
+            // get id
+            let id = handle.id();
+            let mut entity = commands.entity(entity);
+            let json = &container.unwrap().json;
+
+            // assemble ui
+            add_ui_json_to_commands(json, &mut entity, &asset_server);
+            entity.insert(UIContainerLoaded { path: id });
+        }
+    }
+}
+
+fn reload(
+    mut commands: Commands,
+    mut ev_assets: EventReader<AssetEvent<UIContainer>>,
+    query: Query<(Entity, &UIContainerLoaded), With<UIContainerLoaded>>,
+) {
+    for event in &mut ev_assets {
+        match event {
+            AssetEvent::Modified { handle } => {
+                let id = handle.id();
+                query.iter().filter(|(_, loaded)| {
+                    id == loaded.path
+                }).for_each(|(entity, _)| {
+                    let mut entity_cmds = commands.entity(entity);
+                    entity_cmds.remove::<UIContainerLoaded>();
+                    entity_cmds.despawn_descendants();
+                });
+            }
+            _ => {}
+        }
     }
 }
 
@@ -18,7 +106,6 @@ pub struct UIInteractEvent {
     pub id: String,
     pub interaction: Interaction
 }
-
 fn button_listener(
     mut button_query: Query<
         (&Interaction, &ButtonID),
@@ -37,118 +124,8 @@ fn button_listener(
     }
 }
 
-pub fn add_ui_json_to_commands(input_json: &JsonValue, commands: &mut Commands, asset_server: &Res<AssetServer>) {
-    // create entity
-    let mut entity = commands.spawn_empty();
-    entity.insert(Despawnable);
-
+pub fn add_ui_json_to_commands(input_json: &JsonValue, entity: &mut EntityCommands, asset_server: &Res<AssetServer>) {
     // add ui and children
-    insert_json_ui_bundle(input_json, &mut entity, asset_server);
-    insert_children(input_json, &mut entity, asset_server);
-}
-
-fn insert_children(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
-    let children = &input_json["children"];
-    commands.with_children(|builder| {
-        for i in 0 .. children.len() {
-            let json = &children[i];
-            let mut entity = builder.spawn_empty();
-            insert_json_ui_bundle(json, &mut entity, asset_server);
-            insert_children(json, &mut entity, asset_server);
-        }
-    });
-}
-
-fn insert_json_ui_bundle(input_json: &JsonValue, commands: &mut EntityCommands, asset_server: &Res<AssetServer>) {
-    let bundle = gen_ui_bundle(input_json, asset_server);
-    if bundle.is_ok() {
-        bundle.unwrap().attach(commands);
-    } else {
-        println!("Drawing ui caused error: {}", bundle.err().unwrap());
-    }
-}
-
-#[derive(Component, Clone)]
-pub struct ButtonID {
-    id: String
-}
-
-pub enum UiBundle {
-    Node(NodeBundle),
-    Text(TextBundle),
-    Image(ImageBundle),
-    Button((ButtonBundle, ButtonID))
-}
-
-impl UiBundle  {
-    fn attach(self, commands: &mut EntityCommands) {
-        match self {
-            Self::Node(bundle) => commands.insert(bundle.clone()),
-            Self::Text(bundle) => commands.insert(bundle.clone()),
-            Self::Image(bundle) => commands.insert(bundle.clone()),
-            Self::Button(bundle) => commands.insert(bundle.clone())
-        };
-    }
-}
-
-fn gen_ui_bundle(input_json: &JsonValue, asset_server: &Res<AssetServer>) -> Result<UiBundle, String> {
-    // if !value.has_key("type") { JsonToUiErr::NoType }
-
-    let type_str = input_json["type"].as_str().unwrap();
-
-    Ok(match type_str {
-        "node" => UiBundle::Node(
-            NodeBundle {
-                style: optional_style(&input_json, "style"),
-                background_color: optional_color(&input_json, "background_color").into(),
-                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-                transform: optional_transform(&input_json, "transform"),
-                visibility: visibility(optional_string(&input_json, "visibility")),
-                z_index: zindex(optional_string(&input_json, "z_index")),
-                ..Default::default() 
-            }
-        ),
-        "text" => UiBundle::Text(
-            TextBundle {
-                text: optional_text(&input_json, asset_server, "text"),
-                calculated_size: optional_calculated_size(&input_json, "calculated_size"),
-                style: optional_style(&input_json, "style"),
-                background_color: optional_color(&input_json, "background_color").into(),
-                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-                transform: optional_transform(&input_json, "transform"),
-                visibility: visibility(optional_string(&input_json, "visibility")),
-                z_index: zindex(optional_string(&input_json, "z_index")),
-                ..Default::default() 
-            }
-        ),
-        "image" => UiBundle::Image(
-            ImageBundle {
-                image: optional_image(&input_json, asset_server, "image"),
-                calculated_size: optional_calculated_size(&input_json, "calculated_size"),
-                style: optional_style(&input_json, "style"),
-                background_color: optional_color_default(&input_json, "background_color", Color::WHITE).into(),
-                focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-                transform: optional_transform(&input_json, "transform"),
-                visibility: visibility(optional_string(&input_json, "visibility")),
-                z_index: zindex(optional_string(&input_json, "z_index")),
-                ..Default::default() 
-            }
-        ),
-        "button" => UiBundle::Button(
-            (
-                ButtonBundle {
-                    image: optional_image(&input_json, asset_server, "image"),
-                    style: optional_style(&input_json, "style"),
-                    background_color: optional_color_default(&input_json, "background_color", Color::WHITE).into(),
-                    focus_policy: focus_policy(optional_string(&input_json, "focus_policy")),
-                    transform: optional_transform(&input_json, "transform"),
-                    visibility: visibility(optional_string(&input_json, "visibility")),
-                    z_index: zindex(optional_string(&input_json, "z_index")),
-                    ..Default::default()
-                },
-                ButtonID { id: optional_string(&input_json, "button_id").to_string() }
-            )
-        ),
-        _ => return Err("Unknown type".to_string())
-    })
+    insert_json_ui_bundle(input_json, entity, asset_server);
+    insert_children(input_json, entity, asset_server);
 }

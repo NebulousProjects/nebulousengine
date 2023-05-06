@@ -118,14 +118,12 @@ pub fn load_ui(
     asset_server: &Res<AssetServer>,
 ) {
     if json.is_string() {
-        let json = load_file_to_json(json.as_str().unwrap());
-        if json.is_ok() {
-            add_ui_json_to_commands(&json.unwrap(), commands, asset_server);
-        } else {
-            error!("{}", json.err().unwrap())
-        }
+        let handle: Handle<UIContainer> = asset_server.load(json.as_str().unwrap());
+        commands.spawn_empty().insert(handle).insert(Despawnable);
     } else if json.is_object() {
-        add_ui_json_to_commands(json, commands, asset_server);
+        let mut entity = commands.spawn_empty();
+        entity.insert(Despawnable);
+        add_ui_json_to_commands(json, &mut entity, asset_server);
     } else {
         error!("Could not load ui from json {}", json);
     }
