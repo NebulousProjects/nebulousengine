@@ -68,7 +68,6 @@ fn reload(
     for event in &mut ev_asset {
         match event {
             AssetEvent::Modified { handle } => {
-                warn!("Reloading entity containers");
                 let id = handle.id();
                 query.iter().filter(|(_, loaded)| {
                     id == loaded.path
@@ -78,7 +77,7 @@ fn reload(
                     entity_cmds.despawn_descendants();
                 });
             }
-            _ => { warn!("Unhandled") }
+            _ => {}
         }
     }
 }

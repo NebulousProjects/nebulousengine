@@ -3,28 +3,8 @@ use bevy::prelude::*;
 use nebulousengine_entities::*;
 use nebulousengine_input::InputContainer;
 use nebulousengine_ui::*;
-use nebulousengine_utils::{*, optionals::*};
+use nebulousengine_utils::*;
 
-pub fn load_scene_from_path(
-    commands: &mut Commands, 
-    path: &str, 
-    asset_server: &Res<AssetServer>,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    // wrapper: &mut NonSendMut<ScriptEngineWrapper>
-) {
-    let json = load_file_to_json(path);
-
-    if json.is_ok() {
-        println!("Loading scene!");
-        load_scene_from_json(
-            commands, &json.unwrap(), 
-            asset_server, meshes, materials
-        );
-    } else {
-        error!("{}", json.err().unwrap());
-    }
-}
 
 pub fn load_scene_from_json(
     commands: &mut Commands, 
@@ -161,3 +141,26 @@ pub fn load_ui(
 //         error!("Could not load ui from json {}", json);
 //     }
 // }
+
+/*
+pub fn load_scene_from_path(
+    commands: &mut Commands, 
+    path: &str, 
+    asset_server: &Res<AssetServer>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    // wrapper: &mut NonSendMut<ScriptEngineWrapper>
+) {
+    let json = load_file_to_json(path);
+
+    if json.is_ok() {
+        println!("Loading scene!");
+        load_scene_from_json(
+            commands, &json.unwrap(), 
+            asset_server, meshes, materials
+        );
+    } else {
+        error!("{}", json.err().unwrap());
+    }
+}
+*/
