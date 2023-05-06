@@ -34,29 +34,35 @@ pub fn optional_style(json_container: &JsonValue, target: &str) -> Style {
 }
 
 pub fn optional_color(json_container: &JsonValue, target: &str) -> Color {
-    if json_container.has_key(target) { 
-        let value = json_container[target].as_str().unwrap();
-        return Color::rgb(
-            u32::from_str_radix(&value[1..3], 16).unwrap() as f32 / 255.0, 
-            u32::from_str_radix(&value[3..5], 16).unwrap() as f32 / 255.0, 
-            u32::from_str_radix(&value[5..7], 16).unwrap() as f32 / 255.0
-        ).into();
-    } else {
-        return Color::NONE.into();
-    }
+    return optional_color_default(json_container, target, Color::NONE.into());
 }
 
 pub fn optional_color_default(json_container: &JsonValue, target: &str, default: Color) -> Color {
     if json_container.has_key(target) { 
         let value = json_container[target].as_str().unwrap();
-        return Color::rgb(
-            u32::from_str_radix(&value[1..3], 16).unwrap() as f32 / 255.0, 
-            u32::from_str_radix(&value[3..5], 16).unwrap() as f32 / 255.0, 
-            u32::from_str_radix(&value[5..7], 16).unwrap() as f32 / 255.0
-        ).into();
+        if value.len() == 7 {
+            return Color::rgb(
+                optional_f32_radix(&value[1..3], 16, 0.0) / 255.0, 
+                optional_f32_radix(&value[3..5], 16, 0.0) / 255.0, 
+                optional_f32_radix(&value[5..7], 16, 0.0) / 255.0
+            ).into();
+        } else if value.len() == 4 {
+            return Color::rgb(
+                optional_f32_radix(&value[1..2], 16, 0.0) / 16.0, 
+                optional_f32_radix(&value[2..3], 16, 0.0) / 16.0, 
+                optional_f32_radix(&value[3..4], 16, 0.0) / 16.0
+            ).into();
+        } else { default }
     } else {
         return default
     }
+}
+
+pub fn optional_f32_radix(str: &str, radix: u32, default: f32) -> f32 {
+    let value = u32::from_str_radix(str, radix);
+    return if value.is_ok() {
+        value.unwrap() as f32
+    } else { default }
 }
 
 pub fn optional_viewport(json: &JsonValue, target: &str) -> Option<Viewport> {

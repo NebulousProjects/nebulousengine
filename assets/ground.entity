@@ -7,7 +7,7 @@
             "type": "shape",
             "shape": "plane",
             "size": 50.0,
-            "color": "#22AA22"
+            "color": "#2A2"
         },
         {
             "type": "collider",

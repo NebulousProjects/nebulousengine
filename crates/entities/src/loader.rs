@@ -9,11 +9,7 @@ pub fn add_children(
     input_json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    position_offset: Option<Vec3>,
-    rotation_offset: Option<Quat>,
-    scale_mult: Option<Vec3>,
-    visible: bool
+    materials: &mut ResMut<Assets<StandardMaterial>>
 ) {
     // check if we have a children json object and grab it
     if input_json.has_key("children") {
@@ -28,13 +24,11 @@ pub fn add_children(
                     let mut entity = builder.spawn_empty();
                     build_entity_from_json(
                         &mut entity, json, asset_server, 
-                        meshes, materials, position_offset, 
-                        rotation_offset, scale_mult, visible
+                        meshes, materials
                     );
                     add_children(
                         &mut entity, json, asset_server, 
-                        meshes, materials, position_offset, 
-                        rotation_offset, scale_mult, visible
+                        meshes, materials
                     );
                 }
             });
@@ -47,20 +41,13 @@ pub fn build_entity_from_json(
     input_json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    position_offset: Option<Vec3>,
-    rotation_offset: Option<Quat>,
-    scale_mult: Option<Vec3>,
-    visible: bool
+    materials: &mut ResMut<Assets<StandardMaterial>>
 ) {
     // unpack json
     let components = &input_json["components"];
 
     // add visibility
-    entity.insert(
-        if visible { Visibility::Inherited }
-        else { Visibility::Hidden }
-    ).insert(ComputedVisibility::default());
+    entity.insert(Visibility::Inherited).insert(ComputedVisibility::default());
 
     // if components is an array, loop through each component
     if components.is_array() {
@@ -76,9 +63,6 @@ pub fn build_entity_from_json(
     }
     
     // add transform
-    let mut transform = optional_transform(input_json, "transform");
-    if position_offset.is_some() { transform.translation += position_offset.unwrap() }
-    if rotation_offset.is_some() { transform.rotate(rotation_offset.unwrap()) }
-    if scale_mult.is_some() { transform.scale *= scale_mult.unwrap() }
+    let transform = optional_transform(input_json, "transform");
     entity.insert(transform).insert(GlobalTransform::default());
 }

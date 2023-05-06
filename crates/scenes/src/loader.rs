@@ -91,36 +91,41 @@ pub fn load_entity(
     materials: &mut ResMut<Assets<StandardMaterial>>
 ) {
     if json.is_object() {
+        let mut entity = commands.spawn_empty();
+
         if json.has_key("path") {
             // get optional transform
-            let transform = optional_transform(json, "transform");
+            // let transform = optional_transform(json, "transform");
 
-            // get position option
-            let position = if transform.translation.length() != 0.0 {
-                Some(transform.translation)
-            } else { None };
+            // // get position option
+            // let position = if transform.translation.length() != 0.0 {
+            //     Some(transform.translation)
+            // } else { None };
 
-            // get rotation option
-            let rotation = if transform.rotation.length() != 0.0 {
-                Some(transform.rotation)
-            } else { None };
+            // // get rotation option
+            // let rotation = if transform.rotation.length() != 0.0 {
+            //     Some(transform.rotation)
+            // } else { None };
 
-            // get scale option
-            let scale = if transform.scale.length() != 1.0 {
-                Some(transform.scale)
-            } else { None };
+            // // get scale option
+            // let scale = if transform.scale.length() != 1.0 {
+            //     Some(transform.scale)
+            // } else { None };
 
-            // get visible option
-            let visible = optional_bool(json, "visible", true);
+            // // get visible option
+            // let visible = optional_bool(json, "visible", true);
 
             // load entity
-            spawn_entity_from_path(commands, json["path"].as_str().unwrap(), asset_server, meshes, materials, position, rotation, scale, visible)
+            // spawn_entity_from_path(commands, json["path"].as_str().unwrap(), asset_server, meshes, materials, position)
+
+            let handle: Handle<EntityContainer> = asset_server.load(json["path"].as_str().unwrap());
+            entity.insert(handle);
         } else if json.has_key("components") {
             // get visible option
-            let visible = optional_bool(json, "visible", true);
+            // let visible = optional_bool(json, "visible", true);
 
             // spawn entity from json
-            spawn_entity_from_json(commands, json, asset_server, meshes, materials, None, None, None, visible);
+            spawn_entity_from_json(&mut entity, json, asset_server, meshes, materials);
         } else {
             error!("Could not load entity from json {}", json);
         }
