@@ -269,22 +269,22 @@ fn decode_description(input: &JsonValue) -> Result<InputDescription, String> {
 
 
     return match type_str {
-        "scalar" => {
+        "single" => {
             let input_object = &input["input"];
             let input_enum = decode_input(input_object);
             if input_enum.is_ok() {
-                Ok(InputDescription::Scalar { input_type: input_enum.unwrap() })
+                Ok(InputDescription::Single { input_type: input_enum.unwrap() })
             } else {
                 Err("Could not decode input".to_string())
             }
         },
-        "axis" => {
+        "double" => {
             let positive_object = &input["positive_input"];
             let negative_object = &input["negative_input"];
             let positive_enum = decode_input(positive_object);
             let negative_enum = decode_input(negative_object);
             if positive_enum.is_ok() && negative_enum.is_ok() {
-                Ok(InputDescription::Axis { positive_type: positive_enum.unwrap(), negative_type: negative_enum.unwrap() })
+                Ok(InputDescription::Double { positive_type: positive_enum.unwrap(), negative_type: negative_enum.unwrap() })
             } else {
                 Err("Could not decode axis input".to_string())
             }

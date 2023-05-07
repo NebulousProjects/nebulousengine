@@ -3,28 +3,28 @@
         "name": "test",
         "descriptions": [
             {
-                "type": "scalar",
+                "type": "single",
                 "input": {
                     "type": "keyboard",
                     "keycode": 30
                 }
             },
             {
-                "type": "scalar",
+                "type": "single",
                 "input": {
                     "type": "gamepad_button",
                     "button": "dpad_up"
                 }
             },
             {
-                "type": "scalar",
+                "type": "single",
                 "input": {
                     "type": "mouse_button",
                     "button": "left"
                 }
             },
             {
-                "type": "scalar",
+                "type": "single",
                 "input": {
                     "type": "gamepad_axis",
                     "axis": "left_stick_x"

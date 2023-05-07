@@ -25,8 +25,8 @@ pub struct InputValue {
 }
 
 pub enum InputDescription {
-    Scalar { input_type: InputType },
-    Axis { positive_type: InputType, negative_type: InputType }
+    Single { input_type: InputType },
+    Double { positive_type: InputType, negative_type: InputType }
 }
 
 pub enum InputType {
@@ -104,10 +104,10 @@ pub fn eval_description(
     gamepad_container: &Option<Res<GamepadContainer>>,
 ) -> f32 {
     match description {
-        InputDescription::Scalar { input_type } => {
+        InputDescription::Single { input_type } => {
             eval_input_type(input_type, primary_window, keys, mouse_buttons, pad_buttons, pad_axes, mouse_motion, gamepad_container)
         },
-        InputDescription::Axis { positive_type, negative_type } => {
+        InputDescription::Double { positive_type, negative_type } => {
             eval_input_type(positive_type, primary_window, keys, mouse_buttons, pad_buttons, pad_axes, mouse_motion, gamepad_container) 
             - eval_input_type(negative_type, primary_window, keys, mouse_buttons, pad_buttons, pad_axes, mouse_motion, gamepad_container)
         }
