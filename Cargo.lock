@@ -2437,6 +2437,7 @@ dependencies = [
  "bevy_egui",
  "egui",
  "egui_dock",
+ "json",
  "nebulousengine_noneditor",
  "nebulousengine_utils",
 ]

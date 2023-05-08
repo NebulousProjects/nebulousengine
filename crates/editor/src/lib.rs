@@ -3,8 +3,9 @@ use std::path::PathBuf;
 use bevy::prelude::*;
 use bevy_egui::*;
 use editor_panel::image_viewer::ImageRenderer;
+use editor_panel::input_editor::InputEditor;
 use editor_panel::text_editor::TextContainer;
-use nebulousengine_utils::{ViewportContainer};
+use nebulousengine_utils::{ViewportContainer, load_file_to_json};
 use self::files_editor_panel::render_files;
 use self::editor_panel::*;
 
@@ -71,6 +72,8 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
         bevy_path = &bevy_path[9 .. bevy_path.len()];
     }
 
+    warn!("Loading path {}", path.clone().as_os_str().to_str().unwrap());
+
     // match extension to load method
     match extension {
         "png" => {
@@ -83,6 +86,19 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
                     texture_size: None
                 }
             ))
+        },
+        "input" => {
+            let json = load_file_to_json(bevy_path);
+            if json.is_ok() {
+                Some(EditorTabType::Input(
+                    InputEditor {
+                        json: json.unwrap()
+                    }
+                ))
+            } else {
+                warn!("Could not load input file json with error: {}", json.err().unwrap());
+                None
+            }
         },
         _ => None
     }

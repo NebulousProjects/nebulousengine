@@ -40,12 +40,6 @@ impl TextContainer {
                         error!("File save failed from file create with error {}", error);
                     }
                 }
-                // if file.is_ok() {
-                //     let write = self.text.as_str().as_bytes();
-                //     file.unwrap().write_all(write);
-                // } else {
-                //     println!("Save failed from file create with error {}", file.err().unwrap());
-                // }
             }
         });
     }

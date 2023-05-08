@@ -8,5 +8,6 @@ bevy = "0.10"
 bevy_egui = "0.20.2"
 egui = "0.21.0"
 egui_dock = "0.5.0"
+json = "0.12.4"
 nebulousengine_utils = { path = "../utils/" }
 nebulousengine_noneditor = { path = "../noneditor/" }

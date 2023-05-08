@@ -6,10 +6,11 @@ use egui_dock::{Tree, DockArea, Style};
 
 use crate::text_editor::*;
 
-use self::image_viewer::ImageRenderer;
+use self::{image_viewer::ImageRenderer, input_editor::InputEditor};
 
 pub mod text_editor;
 pub mod image_viewer;
+pub mod input_editor;
 
 #[derive(Resource)]
 pub struct EditorTabs {
@@ -31,6 +32,7 @@ pub struct EditorTab {
 pub enum EditorTabType {
     Text(TextContainer),
     Image(ImageRenderer),
+    Input(InputEditor),
     Unknown
 }
 
@@ -65,6 +67,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
         match tab_type {
             EditorTabType::Text(text) => text.ui(ui, &tab.path),
             EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &self.info),
+            EditorTabType::Input(input) => input.ui(ui, &tab.path),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
     }
