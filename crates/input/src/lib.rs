@@ -160,8 +160,8 @@ pub fn get_input_value(
 #[derive(Component, TypeUuid)]
 #[uuid = "fa70fb4f-ea35-4186-8971-3191e888b7cc"]
 pub struct InputContainer {
-    inputs: HashMap<String, InputValue>,
-    name: String,
+    pub inputs: HashMap<String, InputValue>,
+    pub name: String,
     // serverPath: String
 }
 impl InputContainer {

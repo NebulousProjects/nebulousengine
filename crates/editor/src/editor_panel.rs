@@ -3,6 +3,7 @@ use std::{path::PathBuf};
 use bevy::prelude::*;
 use bevy_egui::EguiContexts;
 use egui::{ScrollArea, Color32};
+use nebulousengine_input::InputContainer;
 
 use crate::text_editor::*;
 
@@ -42,7 +43,8 @@ pub fn render_editor(
     mut contexts: EguiContexts, 
     tabs: &mut EditorTabs,
 
-    images: Res<Assets<Image>>
+    images: Res<Assets<Image>>,
+    inputs: Res<Assets<InputContainer>>
 ) {
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         egui::TopBottomPanel::top("top_tab_bar").show_inside(ui, |ui| {
@@ -84,7 +86,7 @@ pub fn render_editor(
             match tab_type {
                 EditorTabType::Text(text) => text.ui(ui, &tab.path),
                 EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &images),
-                EditorTabType::Input(input) => input.ui(ui, &tab.path),
+                EditorTabType::Input(input) => input.ui(ui, &inputs),
                 EditorTabType::Unknown => draw_unknown(ui, tab)
             };
         })

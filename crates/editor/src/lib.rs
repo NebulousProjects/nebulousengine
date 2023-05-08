@@ -5,7 +5,8 @@ use bevy_egui::*;
 use editor_panel::image_viewer::ImageRenderer;
 use editor_panel::input_editor::InputEditor;
 use editor_panel::text_editor::TextContainer;
-use nebulousengine_utils::{ViewportContainer, load_file_to_json};
+use nebulousengine_input::InputContainer;
+use nebulousengine_utils::{ViewportContainer};
 use self::files_editor_panel::render_files;
 use self::editor_panel::*;
 
@@ -91,17 +92,12 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
             ))
         },
         "input" => {
-            let json = load_file_to_json(bevy_path);
-            if json.is_ok() {
-                Some(EditorTabType::Input(
-                    InputEditor {
-                        json: json.unwrap()
-                    }
-                ))
-            } else {
-                warn!("Could not load input file json with error: {}", json.err().unwrap());
-                None
-            }
+            let handle: Handle<InputContainer> = asset_server.load(bevy_path);
+            Some(EditorTabType::Input(
+                InputEditor {
+                    handle: handle
+                }
+            ))
         },
         _ => None
     }
@@ -112,7 +108,9 @@ fn render_ui(
     // viewport: ResMut<ViewportContainer>, 
     tabs: ResMut<EditorTabs>,
     mut events: EventWriter<EditorOpenFileEvent>,
-    images: Res<Assets<Image>>
+
+    images: Res<Assets<Image>>,
+    inputs: Res<Assets<InputContainer>>
 ) {
     // make sure we have an image handle
     // if viewport.image_handle.is_none() { return }
@@ -138,7 +136,7 @@ fn render_ui(
     // render editor
     render_editor(
         contexts, /*viewport, rendered_texture_id,*/ 
-        tabs.into_inner(), images
+        tabs.into_inner(), images, inputs
     );
 }
 // Example how to insert render image
