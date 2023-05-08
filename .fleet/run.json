@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "cargo",
+            "name": "Run Dev",
+            "cargoArgs": [ "run" ],
+        },
+        {
+            "type": "cargo",
+            "name": "Run Dev Editor",
+            "cargoArgs": [ "run", "--features", "editor" ],
+        },
+    ]
+}

@@ -1,9 +1,8 @@
 use std::{path::PathBuf};
 
-use bevy::prelude::{Resource, Image, Assets, Res};
+use bevy::prelude::*;
 use bevy_egui::EguiContexts;
-use egui::ScrollArea;
-use egui_dock::{Tree, DockArea, Style};
+use egui::{ScrollArea, Color32};
 
 use crate::text_editor::*;
 
@@ -14,14 +13,14 @@ pub mod image_viewer;
 pub mod input_editor;
 
 #[derive(Resource)]
-pub struct EditorTabs<'a> {
+pub struct EditorTabs {
     pub tree: Vec<EditorTab>,
-    pub selected: Option<&'a mut EditorTab>
+    pub selected: usize
 }
 
-impl EditorTabs<'_> {
+impl EditorTabs {
     pub fn new() -> Self {
-        Self { tree: Vec::new(), selected: None }
+        Self { tree: Vec::new(), selected: 0 }
     }
 }
 
@@ -41,8 +40,7 @@ pub enum EditorTabType {
 // render editor in the center panel by a dock area
 pub fn render_editor(
     mut contexts: EguiContexts, 
-    tabs: &mut EditorTabs, 
-    images: Res<Assets<Image>>
+    tabs: &mut EditorTabs,
 ) {
     egui::TopBottomPanel::top("0").show(contexts.ctx_mut(), |ui| {
         ui.horizontal(|ui| {
@@ -55,9 +53,12 @@ pub fn render_editor(
                     // horizontally stack the tabs button and its remove button
                     ui.horizontal(|ui| {
                         let tab = &tabs.tree[i];
-                        if ui.button(&tab.name).clicked() {
-                            println!("TODO change tab");
-                        }
+
+                        // add open button with custom fill
+                        let color = if tabs.selected == i { Color32::DARK_GREEN } else { Color32::BLACK };
+                        let open_button = egui::Button::new(&tab.name).fill(color);
+                        if ui.add(open_button).clicked() { tabs.selected = i.clone(); }
+
                         if ui.button("x").clicked() {
                             tabs.tree.remove(i);
                         }
@@ -69,9 +70,13 @@ pub fn render_editor(
 
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         // let tab = tabs.selected;
-        if tabs.selected.is_none() { return; }
-        let tab = tabs.selected.as_mut().unwrap();
+        if tabs.selected >= tabs.tree.len() {
+            if tabs.tree.len() == 0 { return; }
+            else { tabs.selected = 0; }
+        }
+        let tab = &mut tabs.tree[tabs.selected];
 
+        // match to ui render function
         let tab_type = &mut tab.tab_type;
         match tab_type {
             EditorTabType::Text(text) => text.ui(ui, &tab.path),
@@ -79,11 +84,6 @@ pub fn render_editor(
             EditorTabType::Input(input) => input.ui(ui, &tab.path),
             EditorTabType::Unknown => draw_unknown(ui, tab)
         };
-        // DockArea::new(&mut tabs.tree)
-        //     .style(Style::from_egui(ui.style().as_ref()))
-        //     .show_inside(ui, &mut TabViewer { 
-        //         info: TabInfo { images: &images }
-        //     });
     });
 }
 
@@ -92,29 +92,3 @@ fn draw_unknown(ui: &mut egui::Ui, tab: &EditorTab) {
         ui.label(format!("Unknown file type for file {}", tab.name));
     });
 }
-
-// pub struct TabInfo<'a> {
-//     images: &'a Res<'a, Assets<Image>>,
-// }
-
-// struct TabViewer<'a> {
-//     info: TabInfo<'a>
-// }
-
-// impl egui_dock::TabViewer for TabViewer<'_> {
-//     type Tab = EditorTab;
-
-//     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
-//         let tab_type = &mut tab.tab_type;
-//         match tab_type {
-//             EditorTabType::Text(text) => text.ui(ui, &tab.path),
-//             EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &self.info),
-//             EditorTabType::Input(input) => input.ui(ui, &tab.path),
-//             EditorTabType::Unknown => draw_unknown(ui, tab)
-//         };
-//     }
-
-//     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
-//         (&*tab.name).into()
-//     }
-// }
