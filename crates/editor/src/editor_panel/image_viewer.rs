@@ -1,4 +1,4 @@
-use bevy::prelude::{Handle, Image};
+use bevy::prelude::*;
 use egui::{Vec2, Rect};
 
 pub struct ImageRenderer {
@@ -8,27 +8,26 @@ pub struct ImageRenderer {
 }
 
 impl ImageRenderer {
-    pub fn ui(&mut self, ui: &mut egui::Ui, rect: &Rect) {
-        ui.label("TODO");
-        // if self.texture_size.is_some() {
-        //     ui.image(self.texture, self.texture_size.unwrap());
-        // } else {
-        //     // attempt to get image, skip if not loaded yet
-        //     let image = info.images.get(&self.handle);
-        //     if image.is_some() {
-        //         // get and unpack width and height
-        //         let dimensions = image.unwrap().texture_descriptor.size;
-        //         let width = dimensions.width as f32;
-        //         let height = dimensions.height as f32;
+    pub fn ui(&mut self, ui: &mut egui::Ui, rect: &Rect, images: &Res<Assets<Image>>) {
+        if self.texture_size.is_some() {
+            ui.image(self.texture, self.texture_size.unwrap());
+        } else {
+            // attempt to get image, skip if not loaded yet
+            let image = images.get(&self.handle);
+            if image.is_some() {
+                // get and unpack width and height
+                let dimensions = image.unwrap().texture_descriptor.size;
+                let width = dimensions.width as f32;
+                let height = dimensions.height as f32;
 
-        //         // get scale
-        //         let scale = rect.width() / width;
-        //         let scale = scale.min(rect.height() / height).min(1.0);
+                // get scale
+                let scale = rect.width() / width;
+                let scale = scale.min(rect.height() / height).min(1.0);
 
-        //         // save texture size with scale
-        //         self.texture_size = Some(Vec2 { x: width * scale, y: height * scale });
-        //     }
-        // }
+                // save texture size with scale
+                self.texture_size = Some(Vec2 { x: width * scale, y: height * scale });
+            }
+        }
     }
 }
 /*

@@ -41,49 +41,53 @@ pub enum EditorTabType {
 pub fn render_editor(
     mut contexts: EguiContexts, 
     tabs: &mut EditorTabs,
+
+    images: Res<Assets<Image>>
 ) {
-    egui::TopBottomPanel::top("0").show(contexts.ctx_mut(), |ui| {
-        ui.horizontal(|ui| {
-            // create a horizontal scroll area for all of the buttons
-            ScrollArea::horizontal().show(ui, |ui| {
-                for i in 0 .. tabs.tree.len() {
-                    // if i exceedes the trees limit, break
-                    if i >= tabs.tree.len() { break; }
+    egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
+        egui::TopBottomPanel::top("top_tab_bar").show_inside(ui, |ui| {
+            ui.horizontal(|ui| {
+                // create a horizontal scroll area for all of the buttons
+                ScrollArea::horizontal().show(ui, |ui| {
+                    for i in 0 .. tabs.tree.len() {
+                        // if i exceedes the trees limit, break
+                        if i >= tabs.tree.len() { break; }
 
-                    // horizontally stack the tabs button and its remove button
-                    ui.horizontal(|ui| {
-                        let tab = &tabs.tree[i];
+                        // horizontally stack the tabs button and its remove button
+                        ui.horizontal(|ui| {
+                            let tab = &tabs.tree[i];
 
-                        // add open button with custom fill
-                        let color = if tabs.selected == i { Color32::DARK_GREEN } else { Color32::BLACK };
-                        let open_button = egui::Button::new(&tab.name).fill(color);
-                        if ui.add(open_button).clicked() { tabs.selected = i.clone(); }
+                            // add open button with custom fill
+                            let color = if tabs.selected == i { Color32::DARK_GREEN } else { Color32::BLACK };
+                            let open_button = egui::Button::new(&tab.name).fill(color);
+                            if ui.add(open_button).clicked() { tabs.selected = i.clone(); }
 
-                        if ui.button("x").clicked() {
-                            tabs.tree.remove(i);
-                        }
-                    });
-                }
+                            if ui.button("x").clicked() {
+                                tabs.tree.remove(i);
+                            }
+                        });
+                    }
+                });
             });
         });
-    });
 
-    egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
-        // let tab = tabs.selected;
-        if tabs.selected >= tabs.tree.len() {
-            if tabs.tree.len() == 0 { return; }
-            else { tabs.selected = 0; }
-        }
-        let tab = &mut tabs.tree[tabs.selected];
+        egui::CentralPanel::default().show_inside(ui, |ui| {
+            // let tab = tabs.selected;
+            if tabs.selected >= tabs.tree.len() {
+                if tabs.tree.len() == 0 { return; }
+                else { tabs.selected = 0; }
+            }
+            let tab = &mut tabs.tree[tabs.selected];
 
-        // match to ui render function
-        let tab_type = &mut tab.tab_type;
-        match tab_type {
-            EditorTabType::Text(text) => text.ui(ui, &tab.path),
-            EditorTabType::Image(image) => image.ui(ui, &ui.max_rect()),
-            EditorTabType::Input(input) => input.ui(ui, &tab.path),
-            EditorTabType::Unknown => draw_unknown(ui, tab)
-        };
+            // match to ui render function
+            let tab_type = &mut tab.tab_type;
+            match tab_type {
+                EditorTabType::Text(text) => text.ui(ui, &tab.path),
+                EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &images),
+                EditorTabType::Input(input) => input.ui(ui, &tab.path),
+                EditorTabType::Unknown => draw_unknown(ui, tab)
+            };
+        })
     });
 }
 

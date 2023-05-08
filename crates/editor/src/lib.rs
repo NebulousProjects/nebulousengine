@@ -111,7 +111,8 @@ fn render_ui(
     mut contexts: EguiContexts, 
     // viewport: ResMut<ViewportContainer>, 
     tabs: ResMut<EditorTabs>,
-    mut events: EventWriter<EditorOpenFileEvent>
+    mut events: EventWriter<EditorOpenFileEvent>,
+    images: Res<Assets<Image>>
 ) {
     // make sure we have an image handle
     // if viewport.image_handle.is_none() { return }
@@ -137,7 +138,7 @@ fn render_ui(
     // render editor
     render_editor(
         contexts, /*viewport, rendered_texture_id,*/ 
-        tabs.into_inner(),
+        tabs.into_inner(), images
     );
 }
 // Example how to insert render image
