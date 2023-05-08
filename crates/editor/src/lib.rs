@@ -34,7 +34,7 @@ impl Plugin for EditorPlugin {
 fn load_tab(
     mut contexts: EguiContexts,
     asset_server: Res<AssetServer>,
-    mut tabs: ResMut<EditorTabs>,
+    mut tabs: ResMut<EditorTabs<'static>>,
     mut read_open_events: EventReader<EditorOpenFileEvent>
 ) {
     read_open_events.iter().for_each(|event| {
@@ -50,7 +50,7 @@ fn load_tab(
         });
         
         // add tab
-        tabs.tree.push_to_focused_leaf(EditorTab {
+        tabs.tree.push(EditorTab {
             path: path.clone(),
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             tab_type: editor_type
@@ -107,7 +107,7 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
 fn render_ui(
     mut contexts: EguiContexts, 
     // viewport: ResMut<ViewportContainer>, 
-    tabs: ResMut<EditorTabs>,
+    tabs: ResMut<EditorTabs<'static>>,
     mut events: EventWriter<EditorOpenFileEvent>,
     images: Res<Assets<Image>>
 ) {

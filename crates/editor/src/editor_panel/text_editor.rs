@@ -10,7 +10,7 @@ pub struct TextContainer {
 impl TextContainer {
     pub fn ui(&mut self, ui: &mut egui::Ui, path: &PathBuf) {
         // create a scroll area
-        egui::ScrollArea::vertical().show(ui, |ui| {
+        // egui::ScrollArea::vertical().show(ui, |ui| {
             // add text edit area
             let text_area = ui.add_sized(ui.available_size(), 
                 egui::TextEdit::multiline(&mut self.text)
@@ -41,6 +41,6 @@ impl TextContainer {
                     }
                 }
             }
-        });
+        // });
     }
 }
