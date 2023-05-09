@@ -1,8 +1,8 @@
 use bevy::{prelude::*, input::{mouse::MouseMotion, gamepad::{GamepadEvent, GamepadConnection}}, asset::{AssetLoader, LoadedAsset}, reflect::TypeUuid};
 use enums::{mouse_button, gamepad_button_type, gamepad_axis_type};
 use json::JsonValue;
-use nebulousengine_utils::{optionals::{optional_string, optional_u32, optional_f32}};
-use std::{collections::*};
+use nebulousengine_utils::optionals::{optional_string, optional_u32, optional_f32};
+use std::collections::*;
 
 use types::*;
 

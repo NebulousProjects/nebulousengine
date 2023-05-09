@@ -110,7 +110,7 @@ fn render_ui(
     mut events: EventWriter<EditorOpenFileEvent>,
 
     images: Res<Assets<Image>>,
-    inputs: Res<Assets<InputContainer>>
+    inputs: ResMut<Assets<InputContainer>>
 ) {
     // make sure we have an image handle
     // if viewport.image_handle.is_none() { return }

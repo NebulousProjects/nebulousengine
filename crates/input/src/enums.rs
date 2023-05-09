@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use json::JsonValue;
 
+use crate::types::{InputType, InputDescription};
+
 pub fn mouse_button(target: &JsonValue) -> Result<MouseButton, String> {
     if target.is_number() {
         Ok(MouseButton::Other(target.as_u16().unwrap()))
@@ -77,5 +79,36 @@ pub fn gamepad_axis_type(target: &JsonValue) -> Result<GamepadAxisType, String> 
         }
     } else {
         Err("Could not decode gamepad axis".to_string())
+    }
+}
+
+pub fn from_input_description_verbose(desc: &InputDescription) -> String {
+    match desc {
+        InputDescription::Single { input_type } => from_input_type(input_type).to_string(),
+        InputDescription::Double { positive_type, negative_type } => {
+            if std::mem::discriminant(positive_type) == std::mem::discriminant(negative_type) {
+                format!("{} <-> {}", from_input_type(positive_type), from_input_type(negative_type))
+            } else {
+                from_input_type(positive_type).to_string()
+            }
+        }
+    }
+}
+
+pub fn from_input_description(desc: &InputDescription) -> &str {
+    match desc {
+        InputDescription::Single { input_type: _ } => "Single",
+        InputDescription::Double { positive_type: _, negative_type: _ } => "Double"
+    }
+}
+
+pub fn from_input_type(input_type: &InputType) -> &str {
+    match input_type {
+        InputType::Keyboard(_) => "Keyboard",
+        InputType::MouseMotionX() => "Mouse Motion Horizontal",
+        InputType::MouseMotionY() => "Mouse Motion Vertical",
+        InputType::MouseButton(_) => "Mouse Button",
+        InputType::GamepadButton(_) => "Gamepad Button",
+        InputType::GamepadAxis(_) => "Gamepad Axis"
     }
 }

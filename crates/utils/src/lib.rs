@@ -4,6 +4,7 @@ use json::{ JsonValue };
 
 pub mod optionals;
 pub mod enums;
+pub mod from_enums;
 
 #[derive(Component)]
 pub struct MainCamera;
@@ -57,5 +58,15 @@ pub struct RunningState {
 impl Default for RunningState {
     fn default() -> Self {
         Self { running: true }
+    }
+}
+
+#[macro_export]
+macro_rules! is_of_var {
+    ($val:ident, $var:path) => {
+        match $val {
+            $var{..} => true,
+            _ => false
+        }
     }
 }
