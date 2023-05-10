@@ -1,40 +1,7 @@
 [
     {
-        "name": "test",
-        "descriptions": [
-            {
-                "type": "single",
-                "input": {
-                    "type": "keyboard",
-                    "keycode": 30
-                }
-            },
-            {
-                "type": "single",
-                "input": {
-                    "type": "gamepad_button",
-                    "button": "dpad_up"
-                }
-            },
-            {
-                "type": "single",
-                "input": {
-                    "type": "mouse_button",
-                    "button": "left"
-                }
-            },
-            {
-                "type": "single",
-                "input": {
-                    "type": "gamepad_axis",
-                    "axis": "left_stick_x"
-                }
-            }
-        ]
-    },
-    {
         "name": "test2",
-        "press_threshold": 0.85,
+        "press_threshold": 0.8500000238418579,
         "descriptions": [
             {
                 "type": "single",
@@ -46,6 +13,40 @@
                 "type": "single",
                 "input": {
                     "type": "mouse_motion_y"
+                }
+            }
+        ]
+    },
+    {
+        "name": "horizontal",
+        "descriptions": [
+            {
+                "type": "double",
+                "positive_input": {
+                    "type": "gamepad_button",
+                    "button": "dpad_right"
+                },
+                "negative_input": {
+                    "type": "gamepad_button",
+                    "button": "dpad_left"
+                }
+            },
+            {
+                "type": "double",
+                "positive_input": {
+                    "type": "keyboard",
+                    "keycode": 32
+                },
+                "negative_input": {
+                    "type": "keyboard",
+                    "keycode": 30
+                }
+            },
+            {
+                "type": "single",
+                "input": {
+                    "type": "gamepad_axis",
+                    "axis": "left_stick_x"
                 }
             }
         ]

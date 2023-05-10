@@ -1,4 +1,6 @@
 use bevy::{prelude::*, input::mouse::{MouseMotion}};
+use json::JsonValue;
+use nebulousengine_utils::{insert_json, from_enums::{from_mouse_button, from_gamepad_button_type, from_gamepad_axis_type}};
 
 use crate::GamepadContainer;
 
@@ -36,6 +38,47 @@ pub enum InputType {
     MouseButton(MouseButton),
     GamepadButton(GamepadButtonType),
     GamepadAxis(GamepadAxisType)
+}
+
+impl InputType {
+    pub fn to_json(&self) -> JsonValue {
+        match self {
+            InputType::MouseMotionX() => {
+                let mut object =  JsonValue::new_object();
+                insert_json(&mut object, "type", "mouse_motion_x".into());
+                object
+            },
+            InputType::MouseMotionY() => {
+                let mut object =  JsonValue::new_object();
+                insert_json(&mut object, "type", "mouse_motion_y".into());
+                object
+            },
+            InputType::Keyboard(keycode) => {
+                let mut object = JsonValue::new_object();
+                insert_json(&mut object, "type", "keyboard".into());
+                insert_json(&mut object, "keycode", keycode.0.into());
+                object
+            },
+            InputType::MouseButton(button) => {
+                let mut object = JsonValue::new_object();
+                insert_json(&mut object, "type", "mouse_button".into());
+                insert_json(&mut object, "button", from_mouse_button(button).into());
+                object
+            },
+            InputType::GamepadButton(button) => {
+                let mut object = JsonValue::new_object();
+                insert_json(&mut object, "type", "gamepad_button".into());
+                insert_json(&mut object, "button", from_gamepad_button_type(button).into());
+                object
+            },
+            InputType::GamepadAxis(axis) => {
+                let mut object = JsonValue::new_object();
+                insert_json(&mut object, "type", "gamepad_axis".into());
+                insert_json(&mut object, "axis", from_gamepad_axis_type(axis).into());
+                object
+            }
+        }
+    }
 }
 
 fn eval_input_type(

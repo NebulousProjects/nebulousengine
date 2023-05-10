@@ -50,6 +50,13 @@ pub fn load_file_to_json(path: &str) -> Result<JsonValue, String> {
     }
 }
 
+pub fn insert_json(json: &mut JsonValue, name: &str, value: JsonValue) {
+    let result = json.insert(name, value);
+    if result.is_err() {
+        error!("JSON insert failed with error: {}", result.err().unwrap());
+    }
+}
+
 #[derive(Resource)]
 pub struct RunningState {
     pub running: bool

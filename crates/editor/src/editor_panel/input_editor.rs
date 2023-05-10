@@ -12,11 +12,14 @@ impl InputEditor {
         &mut self, ui: &mut egui::Ui, 
         inputs: &mut ResMut<Assets<InputContainer>>
     ) {
-        let mut is_dirty = false;
 
         let input_container = inputs.get_mut(&self.handle);
         if input_container.is_some() {
+            // unpack
+            let mut is_dirty = false;
             let input_container = input_container.unwrap();
+
+            // render
             ui.vertical(|ui| {
                 // add top bar
                 ui.horizontal(|ui| {
@@ -49,14 +52,21 @@ impl InputEditor {
                     });
                 });
             });
+
+            // if json is marked dirty, save it
+            if is_dirty {
+                // println!("Saving: {} CONTENTS: {}", input_container.path, input_container.to_json());
+                let result = std::fs::write(
+                    format!("./assets/{}", input_container.path), 
+                    input_container.to_json().to_string()
+                );
+                if result.is_err() {
+                    error!("Input saved with error: {}", result.err().unwrap());
+                }
+            } 
         } else {
             ui.label("Loading...");
-        }
-
-        // if json is marked dirty, save it
-        if is_dirty {
-             println!("TODO saving");
-        }  
+        } 
     }
 }
 
@@ -97,20 +107,20 @@ fn draw_input_option(ui: &mut egui::Ui, opt: &mut InputDescription) {
 
         // render option via match
         match opt {
-            InputDescription::Single { input_type } => { draw_input_type(ui, input_type, "Input Type:"); }
+            InputDescription::Single { input_type } => { draw_input_type(ui, input_type, "Input Type:", 1); }
             InputDescription::Double { positive_type, negative_type } => {
-                draw_input_type(ui, positive_type, "Positive Input Type:");
-                draw_input_type(ui, negative_type, "Negative Input Type:");
+                draw_input_type(ui, positive_type, "Positive Input Type:", 1);
+                draw_input_type(ui, negative_type, "Negative Input Type:", 2);
             }
         }
     });
 }
 
-fn draw_input_type(ui: &mut egui::Ui, input_type: &mut InputType, header: &str) {
+fn draw_input_type(ui: &mut egui::Ui, input_type: &mut InputType, header: &str, id: u8) {
     // add input type dropdown
     ui.horizontal(|ui| {
         ui.label(header);
-        egui::ComboBox::from_id_source(1)
+        egui::ComboBox::from_id_source(id)
             .selected_text(from_input_type(input_type))
             .show_ui(ui, |ui| {
                 if ui.selectable_label(false, "Keyboard").clicked() { println!("TODO set input type"); }

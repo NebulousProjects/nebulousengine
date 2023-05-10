@@ -1,7 +1,7 @@
 use bevy::{prelude::*, input::{mouse::MouseMotion, gamepad::{GamepadEvent, GamepadConnection}}, asset::{AssetLoader, LoadedAsset}, reflect::TypeUuid};
 use enums::{mouse_button, gamepad_button_type, gamepad_axis_type};
 use json::JsonValue;
-use nebulousengine_utils::optionals::{optional_string, optional_u32, optional_f32};
+use nebulousengine_utils::{optionals::{optional_string, optional_u32, optional_f32}, insert_json};
 use std::collections::*;
 
 use types::*;
@@ -162,7 +162,7 @@ pub fn get_input_value(
 pub struct InputContainer {
     pub inputs: HashMap<String, InputValue>,
     pub name: String,
-    // serverPath: String
+    pub path: String
 }
 impl InputContainer {
     pub fn get_input(&self, name: &String) -> Result<f32, String> {
@@ -172,6 +172,47 @@ impl InputContainer {
         } else {
             Err(format!("Could not find error with name: {}", name))
         }
+    }
+
+    pub fn to_json(&self) -> JsonValue {
+        let mut output: Vec<JsonValue> = Vec::with_capacity(self.inputs.len());
+
+        // assemble all input values into json
+        self.inputs.iter().for_each(|(name, value)| {
+            // create new object
+            let mut object = JsonValue::new_object();
+
+            // insert basics
+            insert_json(&mut object, "name", name.as_str().into());
+            if value.press_threshold != 1.0 { insert_json(&mut object, "press_threshold", value.press_threshold.into()); }
+
+            // insert descriptions
+            let mut descriptions: Vec<JsonValue> = Vec::with_capacity(value.descriptions.len());
+            value.descriptions.iter().for_each(|desc| {
+                let json = match desc {
+                    InputDescription::Single { input_type } => {
+                        let mut object = JsonValue::new_object();
+                        insert_json(&mut object, "type", "single".into());
+                        insert_json(&mut object, "input", input_type.to_json());
+                        object
+                    },
+                    InputDescription::Double { positive_type, negative_type } => {
+                        let mut object = JsonValue::new_object();
+                        insert_json(&mut object, "type", "double".into());
+                        insert_json(&mut object, "positive_input", positive_type.to_json());
+                        insert_json(&mut object, "negative_input", negative_type.to_json());
+                        object
+                    }
+                };
+                descriptions.push(json);
+            });
+            insert_json(&mut object, "descriptions", JsonValue::Array(descriptions));
+
+            // save
+            output.push(object);
+        });
+
+        return JsonValue::Array(output);
     }
 }
 
@@ -210,7 +251,7 @@ impl AssetLoader for InputContainerLoader {
                 let container = InputContainer {
                     inputs: map,
                     name: name.clone(),
-                    // serverPath: path.clone()
+                    path: path.clone()
                 };
 
                 // set default to final object
@@ -243,6 +284,8 @@ fn get_from_json_object(input: &JsonValue) -> (String, InputValue) {
             let result = decode_description(&descriptions_json[i]);
             if result.is_ok() {
                 descriptions.push(result.unwrap());
+            } else {
+                error!("{}", result.err().unwrap());
             }
         }
     }
@@ -275,7 +318,7 @@ fn decode_description(input: &JsonValue) -> Result<InputDescription, String> {
             if input_enum.is_ok() {
                 Ok(InputDescription::Single { input_type: input_enum.unwrap() })
             } else {
-                Err("Could not decode input".to_string())
+                Err(format!("Input evaluation failed with error: {}", input_enum.err().unwrap()))
             }
         },
         "double" => {
@@ -286,7 +329,11 @@ fn decode_description(input: &JsonValue) -> Result<InputDescription, String> {
             if positive_enum.is_ok() && negative_enum.is_ok() {
                 Ok(InputDescription::Double { positive_type: positive_enum.unwrap(), negative_type: negative_enum.unwrap() })
             } else {
-                Err("Could not decode axis input".to_string())
+                Err(
+                    format!("Double input evaluation failed with errors: Positive: {}, Negative: {}", 
+                    positive_enum.err().unwrap_or("Ok".to_string()), 
+                    negative_enum.err().unwrap_or("Ok".to_string())
+                ))
             }
         },
         _ => Err(format!("Unknown type {} for decode description", type_str))
