@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy_egui::*;
 use editor_panel::image_viewer::ImageRenderer;
@@ -95,7 +96,13 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
             let handle: Handle<InputContainer> = asset_server.load(bevy_path);
             Some(EditorTabType::Input(
                 InputEditor {
-                    handle: handle
+                    handle: handle,
+                    selected_id: usize::MAX,
+                    is_dirty: false,
+                    scancode: u32::MAX,
+                    name_entry_state: false,
+                    name_entry: "".to_string(),
+                    remove: None
                 }
             ))
         },
@@ -110,13 +117,9 @@ fn render_ui(
     mut events: EventWriter<EditorOpenFileEvent>,
 
     images: Res<Assets<Image>>,
-    inputs: ResMut<Assets<InputContainer>>
+    inputs: ResMut<Assets<InputContainer>>,
+    key_events: EventReader<KeyboardInput>
 ) {
-    // make sure we have an image handle
-    // if viewport.image_handle.is_none() { return }
-
-    // *rendered_texture_id = contexts.add_image(viewport.image_handle.clone().expect("why"));
-
     // create side panel for files and menu buttons
     egui::SidePanel::left("master_left").resizable(true).min_width(100.0).show(contexts.ctx_mut(), |ui| { 
         // add menu buttons
@@ -136,7 +139,8 @@ fn render_ui(
     // render editor
     render_editor(
         contexts, /*viewport, rendered_texture_id,*/ 
-        tabs.into_inner(), images, inputs
+        tabs.into_inner(), images, 
+        inputs, key_events
     );
 }
 // Example how to insert render image

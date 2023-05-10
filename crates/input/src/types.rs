@@ -26,6 +26,12 @@ pub struct InputValue {
     pub value: f32
 }
 
+impl Default for InputValue {
+    fn default() -> Self {
+        Self { press_threshold: 1.0, descriptions: Vec::new(), value: 0.0 }
+    }
+}
+
 pub enum InputDescription {
     Single { input_type: InputType },
     Double { positive_type: InputType, negative_type: InputType }
