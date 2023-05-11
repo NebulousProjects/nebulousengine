@@ -19,6 +19,22 @@ pub struct InputEditor {
 }
 
 impl InputEditor {
+    pub fn new(asset_server: &AssetServer, path: &str) -> Self {
+        Self {
+            handle: asset_server.load(path),
+            selected_id: usize::MAX,
+            is_dirty: false,
+            scancode: u32::MAX,
+            name_entry_state: false,
+            name_entry: "".to_string(),
+            remove: None
+        }
+    }
+
+    pub fn close(&mut self) {}
+    pub fn select(&mut self) {}
+    pub fn deselect(&mut self) {}
+
     pub fn ui(
         &mut self, ui: &mut egui::Ui, 
         inputs: &mut ResMut<Assets<InputContainer>>,

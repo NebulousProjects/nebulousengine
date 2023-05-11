@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_egui::EguiContexts;
 use egui::{Vec2, Rect};
 
 pub struct ImageRenderer {
@@ -8,6 +9,12 @@ pub struct ImageRenderer {
 }
 
 impl ImageRenderer {
+    pub fn new(asset_server: &AssetServer, contexts: &mut EguiContexts, path: &str) -> Self {
+        let image: Handle<Image> = asset_server.load(path);
+        let image_id = contexts.add_image(image.clone());
+        Self { handle: image, texture: image_id, texture_size: None }
+    }
+
     pub fn ui(&mut self, ui: &mut egui::Ui, rect: &Rect, images: &Res<Assets<Image>>) {
         if self.texture_size.is_some() {
             ui.image(self.texture, self.texture_size.unwrap());

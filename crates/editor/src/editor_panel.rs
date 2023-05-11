@@ -58,14 +58,29 @@ pub fn render_editor(
 
                         // horizontally stack the tabs button and its remove button
                         ui.horizontal(|ui| {
-                            let tab = &tabs.tree[i];
+                            let tree = &mut tabs.tree;
+                            let tab = tree.get(i).unwrap();
 
                             // add open button with custom fill
                             let color = if tabs.selected == i { Color32::DARK_GREEN } else { Color32::BLACK };
                             let open_button = egui::Button::new(&tab.name).fill(color);
-                            if ui.add(open_button).clicked() { tabs.selected = i.clone(); }
+                            if ui.add(open_button).clicked() {
+                                call_deselect(&mut tree[tabs.selected].tab_type);
+                                tabs.selected = i.clone();
+                                call_select(&mut tree[i].tab_type);
+                            }
 
                             if ui.button("x").clicked() {
+                                // get closing tab type
+                                let tab_type = &mut tree[i].tab_type;
+
+                                // call deselect if this is the selected tab
+                                if tabs.selected == i {
+                                    call_deselect(tab_type);
+                                }
+
+                                // close the tab and remove it from the stream
+                                call_close(tab_type);
                                 tabs.tree.remove(i);
                             }
                         });
@@ -98,4 +113,31 @@ fn draw_unknown(ui: &mut egui::Ui, tab: &EditorTab) {
     ui.vertical_centered(|ui| {
         ui.label(format!("Unknown file type for file {}", tab.name));
     });
+}
+
+fn call_close(tab_type: &mut EditorTabType) {
+    match tab_type {
+        EditorTabType::Input(editor) => editor.close(),
+        EditorTabType::Image(_) => {}, // TODO
+        EditorTabType::Text(_) => {},
+        EditorTabType::Unknown => {}
+    }
+}
+
+pub fn call_select(tab_type: &mut EditorTabType) {
+    match tab_type {
+        EditorTabType::Input(editor) => editor.select(),
+        EditorTabType::Image(_) => {}, // TODO
+        EditorTabType::Text(_) => {},
+        EditorTabType::Unknown => {}
+    }
+}
+
+fn call_deselect(tab_type: &mut EditorTabType) {
+    match tab_type {
+        EditorTabType::Input(editor) => editor.deselect(),
+        EditorTabType::Image(_) => {}, // TODO
+        EditorTabType::Text(_) => {},
+        EditorTabType::Unknown => {}
+    }
 }

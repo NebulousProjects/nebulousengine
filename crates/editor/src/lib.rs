@@ -55,11 +55,17 @@ fn load_tab(
         });
         
         // add tab
-        tabs.tree.push(EditorTab {
+        let tab = EditorTab {
             path: path.clone(),
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             tab_type: editor_type
-        });
+        };
+        tabs.tree.push(tab);
+
+        // call select if necessary
+        if tabs.tree.len() == 1 {
+            call_select(&mut tabs.tree[0].tab_type);
+        }
     });
 }
 
@@ -81,31 +87,8 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
 
     // match extension to load method
     match extension {
-        "png" => {
-            let image: Handle<Image> = asset_server.load(bevy_path);
-            let image_id = contexts.add_image(image.clone());
-            Some(EditorTabType::Image(
-                ImageRenderer {
-                    handle: image,
-                    texture: image_id,
-                    texture_size: None
-                }
-            ))
-        },
-        "input" => {
-            let handle: Handle<InputContainer> = asset_server.load(bevy_path);
-            Some(EditorTabType::Input(
-                InputEditor {
-                    handle: handle,
-                    selected_id: usize::MAX,
-                    is_dirty: false,
-                    scancode: u32::MAX,
-                    name_entry_state: false,
-                    name_entry: "".to_string(),
-                    remove: None
-                }
-            ))
-        },
+        "png" => Some(EditorTabType::Image(ImageRenderer::new(asset_server, contexts, bevy_path))),
+        "input" => Some(EditorTabType::Input(InputEditor::new(asset_server, bevy_path))),
         _ => None
     }
 }
