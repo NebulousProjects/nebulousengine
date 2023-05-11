@@ -15,7 +15,7 @@ pub struct InputEditor {
     pub name_entry: String,
 
     // remove stuff
-    pub remove: Option<String>
+    pub remove: Option<usize>
 }
 
 impl InputEditor {
@@ -38,13 +38,6 @@ impl InputEditor {
         if input_container.is_some() {
             // unpack
             let input_container = input_container.unwrap();
-
-            // remove
-            if self.remove.is_some() {
-                let to_remove = self.remove.as_ref().unwrap();
-                input_container.inputs.remove(to_remove);
-                self.is_dirty = true;
-            }
 
             if self.name_entry_state {
                 // ui.centered_and_justified(|ui| {
@@ -82,12 +75,13 @@ impl InputEditor {
                     });
 
                     // add list of collapsable inputs
-                    input_container.inputs.iter_mut().for_each(|(name, value)| {
+                    input_container.inputs.iter_mut().enumerate().for_each(|(id, (name, value))| {
                         egui::CollapsingHeader::new(name).default_open(true).show(ui, |ui| {
                             // remove button
-                            // if ui.button("Remove").clicked() {
-                            //     self.remove = Some(name.clone());
-                            // }
+                            if ui.button("Remove").clicked() {
+                                self.remove = Some(id);
+                                self.is_dirty = true;
+                            }
                             
                             // draw input basics
                             draw_input_basics(ui, value);
@@ -110,14 +104,27 @@ impl InputEditor {
 
                 // if json is marked dirty, save it
                 if self.is_dirty {
-                    // println!("Saving: {} CONTENTS: {}", input_container.path, input_container.to_json());
+                    // convert input container to json
+                    let mut json = input_container.to_json();
+
+                    // remove if necessary
+                    if self.remove.is_some() {
+                        json.array_remove(self.remove.unwrap());
+                        self.remove = None;
+                    }
+
+                    // save result
                     let result = std::fs::write(
                         format!("./assets/{}", input_container.path),
-                        input_container.to_json().to_string()
+                        json.to_string()
                     );
+
+                    // if result save returns an error, report that error
                     if result.is_err() {
                         error!("Input saved with error: {}", result.err().unwrap());
                     }
+                    
+                    // mark not dirty
                     self.is_dirty = false;
                 }
             }
