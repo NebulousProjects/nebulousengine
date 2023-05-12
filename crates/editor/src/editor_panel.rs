@@ -8,12 +8,13 @@ use nebulousengine_utils::*;
 
 use crate::text_editor::*;
 
-use self::{image_viewer::ImageRenderer, input_editor::InputEditor, model_viewer::ModelViewer};
+use self::{image_viewer::ImageRenderer, input_editor::InputEditor, model_viewer::ModelViewer, entity_editor::EntityEditor};
 
 pub mod text_editor;
 pub mod image_viewer;
 pub mod input_editor;
 pub mod model_viewer;
+pub mod entity_editor;
 
 #[derive(Resource)]
 pub struct EditorTabs {
@@ -38,6 +39,7 @@ pub enum EditorTabType {
     Image(ImageRenderer),
     Input(InputEditor),
     Model(ModelViewer),
+    Entity(EntityEditor),
     Unknown
 }
 
@@ -110,6 +112,7 @@ pub fn render_editor(
                 EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &images),
                 EditorTabType::Input(input) => input.ui(ui, &mut inputs, &mut key_events),
                 EditorTabType::Model(model) => model.ui(ui, &mut viewport, rendered_texture_id),
+                EditorTabType::Entity(entity) => entity.ui(ui),
                 EditorTabType::Unknown => draw_unknown(ui, tab)
             };
         });
@@ -126,6 +129,7 @@ fn call_close(tab_type: &mut EditorTabType) {
     match tab_type {
         EditorTabType::Input(editor) => editor.close(),
         EditorTabType::Model(model) => model.close(),
+        EditorTabType::Entity(entity) => entity.close(),
         EditorTabType::Image(_) => {}, // TODO
         EditorTabType::Text(_) => {},
         EditorTabType::Unknown => {}
@@ -136,6 +140,7 @@ pub fn call_select(tab_type: &mut EditorTabType, commands: &mut Commands, viewpo
     match tab_type {
         EditorTabType::Input(editor) => editor.select(),
         EditorTabType::Model(model) => model.select(commands, viewport),
+        EditorTabType::Entity(entity) => entity.select(),
         EditorTabType::Image(_) => {}, // TODO
         EditorTabType::Text(_) => {},
         EditorTabType::Unknown => {}
@@ -146,6 +151,7 @@ fn call_deselect(tab_type: &mut EditorTabType, commands: &mut Commands, viewport
     match tab_type {
         EditorTabType::Input(editor) => editor.deselect(),
         EditorTabType::Model(model) => model.deselect(commands, viewport),
+        EditorTabType::Entity(entity) => entity.deselect(),
         EditorTabType::Image(_) => {}, // TODO
         EditorTabType::Text(_) => {},
         EditorTabType::Unknown => {}

@@ -7,7 +7,7 @@ use editor_panel::input_editor::InputEditor;
 use editor_panel::text_editor::TextContainer;
 use nebulousengine_input::InputContainer;
 use nebulousengine_utils::{ViewportContainer, MainCamera};
-use crate::editor_panel::model_viewer::ModelViewer;
+use crate::editor_panel::{model_viewer::ModelViewer, entity_editor::EntityEditor};
 
 use self::files_editor_panel::render_files;
 use self::editor_panel::*;
@@ -95,13 +95,14 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
         "input" => Some(EditorTabType::Input(InputEditor::new(asset_server, bevy_path))),
         "glb" => Some(EditorTabType::Model(ModelViewer::new(asset_server, bevy_path))),
         "gltf" => Some(EditorTabType::Model(ModelViewer::new(asset_server, bevy_path))),
+        "entity" => Some(EditorTabType::Entity(EntityEditor::new())),
         _ => None
     }
 }
 
 fn render_ui(
     mut contexts: EguiContexts, 
-    mut viewport: ResMut<ViewportContainer>, 
+    viewport: ResMut<ViewportContainer>, 
     mut rendered_texture_id: Local<egui::TextureId>, 
 
     tabs: ResMut<EditorTabs>,
