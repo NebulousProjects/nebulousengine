@@ -27,7 +27,7 @@ impl Plugin for EditorPlugin {
             .add_event::<EditorOpenFileEvent>()
             .insert_resource(EditorTabs::new())
             .add_plugin(EguiPlugin)
-            .add_system(render_ui)
+            .add_system(render_ui.after(setup_viewport))
             .add_system(load_tab)
             .add_system(setup_viewport);
     }
@@ -101,7 +101,7 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
 
 fn render_ui(
     mut contexts: EguiContexts, 
-    viewport: ResMut<ViewportContainer>, 
+    mut viewport: ResMut<ViewportContainer>, 
     mut rendered_texture_id: Local<egui::TextureId>, 
 
     tabs: ResMut<EditorTabs>,
@@ -113,8 +113,9 @@ fn render_ui(
     key_events: EventReader<KeyboardInput>,
 ) {
     // make sure we have an image handle
-    if !viewport.image_handle.is_none() {
+    if viewport.image_handle.is_some() {
         *rendered_texture_id = contexts.add_image(viewport.image_handle.clone().expect("why"));
+        // viewport.force_update = false;
     }
     
     // create side panel for files and menu buttons
@@ -153,7 +154,7 @@ fn setup_viewport(
     mut cameras: Query<&mut Camera, With<MainCamera>>,
     mut last_size: Local<Extent3d>
 ) {
-    if viewport.enabled && viewport.size.width > 100 {
+    if viewport.enabled {
         if cameras.is_empty() {
             warn!("No cameras marked main camera!");
         } else {
@@ -161,7 +162,7 @@ fn setup_viewport(
             if *last_size == size && !viewport.force_update { return; }
             viewport.force_update = false;
             *last_size = size;
-            println!("Updating render image");
+            println!("Updating render image with size: {}, {}", size.width, size.height);
 
             // This is the texture that will be rendered to.
             let mut image = Image {
@@ -180,7 +181,7 @@ fn setup_viewport(
                 ..default()
             };
 
-            // fill image.data with zeroes
+            // fill image data with zeroes
             image.resize(size);
 
             // create and set image handles

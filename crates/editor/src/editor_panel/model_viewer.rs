@@ -36,7 +36,6 @@ impl ModelViewer {
         }).id());
 
         // enable viewport
-        viewport.enabled = true;
         viewport.force_update = true;
     }
     
@@ -59,6 +58,7 @@ impl ModelViewer {
         viewport: &mut ResMut<ViewportContainer>,
         rendered_texture_id: Local<egui::TextureId>
     ) {
+        viewport.enabled = true;
         let rect = ui.max_rect();
         viewport.size = Extent3d {
             width: rect.width() as u32,
