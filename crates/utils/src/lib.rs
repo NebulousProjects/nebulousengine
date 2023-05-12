@@ -16,7 +16,8 @@ pub struct Despawnable;
 pub struct ViewportContainer {
     pub image_handle: Option<Handle<Image>>,
     pub size: Extent3d,
-    pub setup: bool
+    pub enabled: bool,
+    pub force_update: bool
 }
 
 impl Default for ViewportContainer {
@@ -29,7 +30,8 @@ impl Default for ViewportContainer {
         ViewportContainer {
             image_handle: None,
             size: size,
-            setup: false
+            enabled: false,
+            force_update: false
         }
     }
 }

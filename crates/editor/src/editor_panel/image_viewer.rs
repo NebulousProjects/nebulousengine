@@ -15,7 +15,7 @@ impl ImageRenderer {
         Self { handle: image, texture: image_id, texture_size: None }
     }
 
-    pub fn ui(&mut self, ui: &mut egui::Ui, rect: &Rect, images: &Res<Assets<Image>>) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, rect: &Rect, images: &ResMut<Assets<Image>>) {
         if self.texture_size.is_some() {
             ui.image(self.texture, self.texture_size.unwrap());
         } else {
