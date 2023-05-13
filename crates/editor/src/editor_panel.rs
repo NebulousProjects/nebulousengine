@@ -1,6 +1,6 @@
 use std::{path::PathBuf};
 
-use bevy::{prelude::*, input::keyboard::KeyboardInput};
+use bevy::{prelude::*, input::keyboard::KeyboardInput, ecs::{archetype::Archetypes, component::Components}};
 use bevy_egui::EguiContexts;
 use egui::{ScrollArea, Color32};
 use nebulousengine_input::*;
@@ -54,6 +54,8 @@ pub fn render_editor(
     mut inputs: ResMut<Assets<InputContainer>>,
     mut key_events: EventReader<KeyboardInput>,
     mut viewport: ResMut<ViewportContainer>,
+    archetypes: &Archetypes,
+    components: &Components
 ) {
     // egui::CentralPanel::default().show(context, |ui| {
         egui::TopBottomPanel::top("top_tab_bar").show(contexts.ctx_mut(), |ui| {
@@ -112,7 +114,7 @@ pub fn render_editor(
                 EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &images),
                 EditorTabType::Input(input) => input.ui(ui, &mut inputs, &mut key_events),
                 EditorTabType::Model(model) => model.ui(ui, &mut viewport, rendered_texture_id),
-                EditorTabType::Entity(entity) => entity.ui(ui),
+                EditorTabType::Entity(entity) => entity.ui(ui, &mut viewport, rendered_texture_id, archetypes, components),
                 EditorTabType::Unknown => draw_unknown(ui, tab)
             };
         });
@@ -140,7 +142,7 @@ pub fn call_select(tab_type: &mut EditorTabType, commands: &mut Commands, viewpo
     match tab_type {
         EditorTabType::Input(editor) => editor.select(),
         EditorTabType::Model(model) => model.select(commands, viewport),
-        EditorTabType::Entity(entity) => entity.select(),
+        EditorTabType::Entity(entity) => entity.select(commands, viewport),
         EditorTabType::Image(_) => {}, // TODO
         EditorTabType::Text(_) => {},
         EditorTabType::Unknown => {}
@@ -151,7 +153,7 @@ fn call_deselect(tab_type: &mut EditorTabType, commands: &mut Commands, viewport
     match tab_type {
         EditorTabType::Input(editor) => editor.deselect(),
         EditorTabType::Model(model) => model.deselect(commands, viewport),
-        EditorTabType::Entity(entity) => entity.deselect(),
+        EditorTabType::Entity(entity) => entity.deselect(commands, viewport),
         EditorTabType::Image(_) => {}, // TODO
         EditorTabType::Text(_) => {},
         EditorTabType::Unknown => {}

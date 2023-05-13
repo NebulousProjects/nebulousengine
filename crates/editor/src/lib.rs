@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use bevy::{prelude::*, input::keyboard::KeyboardInput, render::{render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages}, camera::{RenderTarget, Viewport}}};
+use bevy::{prelude::*, input::keyboard::KeyboardInput, render::{render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages}, camera::{RenderTarget, Viewport}}, ecs::{archetype::Archetypes, component::Components}};
 use bevy_egui::*;
 use editor_panel::image_viewer::ImageRenderer;
 use editor_panel::input_editor::InputEditor;
@@ -95,7 +95,7 @@ fn get_tab_type(contexts: &mut EguiContexts, asset_server: &AssetServer, path: &
         "input" => Some(EditorTabType::Input(InputEditor::new(asset_server, bevy_path))),
         "glb" => Some(EditorTabType::Model(ModelViewer::new(asset_server, bevy_path))),
         "gltf" => Some(EditorTabType::Model(ModelViewer::new(asset_server, bevy_path))),
-        "entity" => Some(EditorTabType::Entity(EntityEditor::new())),
+        "entity" => Some(EditorTabType::Entity(EntityEditor::new(asset_server, bevy_path))),
         _ => None
     }
 }
@@ -112,6 +112,8 @@ fn render_ui(
     images: ResMut<Assets<Image>>,
     inputs: ResMut<Assets<InputContainer>>,
     key_events: EventReader<KeyboardInput>,
+    archetypes: &Archetypes,
+    components: &Components
 ) {
     // make sure we have an image handle
     if viewport.image_handle.is_some() {
@@ -140,7 +142,7 @@ fn render_ui(
         &mut contexts, tabs.into_inner(), 
         rendered_texture_id, commands, images, 
         inputs, key_events, 
-        viewport
+        viewport, archetypes, components
     );
 }
 // Example how to insert render image
@@ -163,7 +165,7 @@ fn setup_viewport(
             if *last_size == size && !viewport.force_update { return; }
             viewport.force_update = false;
             *last_size = size;
-            println!("Updating render image with size: {}, {}", size.width, size.height);
+            info!("Updating render image with size: {}, {}", size.width, size.height);
 
             // This is the texture that will be rendered to.
             let mut image = Image {

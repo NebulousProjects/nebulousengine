@@ -2440,6 +2440,7 @@ dependencies = [
  "egui",
  "egui_dock",
  "json",
+ "nebulousengine_entities",
  "nebulousengine_input",
  "nebulousengine_noneditor",
  "nebulousengine_utils",
