@@ -4,7 +4,7 @@ use json::{JsonValue, array};
 use nebulousengine_entities::EntityContainer;
 use nebulousengine_utils::{ViewportContainer, MainCamera, load_file_to_json};
 
-use crate::helpers;
+use crate::helpers::{self, edit_path};
 
 pub struct EntityEditor {
     handle: Handle<EntityContainer>,
@@ -70,6 +70,16 @@ impl EntityEditor {
     ) {
         let mut is_dirty = false;
 
+        // make sure we have a valid transform
+        if !self.json.has_key("transform") {
+            let mut transform = JsonValue::new_object();
+            let _ = transform.insert("position", array![0.0, 0.0, 0.0]);
+            let _ = transform.insert("rotation", array![0.0, 0.0, 0.0]);
+            let _ = transform.insert("scale", array![1.0, 1.0, 1.0]);
+            let _ = self.json.insert("transform", transform);
+            is_dirty = true; 
+        }
+
         // create a scroll area in the side panel
         egui::SidePanel::right("components").resizable(true).min_width(200.0).show_inside(ui, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
@@ -78,7 +88,8 @@ impl EntityEditor {
                 is_dirty = is_dirty || ui_transform(ui, transform_json);
 
                 // then a components editor
-
+                ui.separator();
+                is_dirty = is_dirty || ui_components(ui, &mut self.json["components"]);
             });
         });
 
@@ -153,5 +164,50 @@ fn ui_transform(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
         is_dirty = is_dirty || helpers::edit_f32(ui, scale, 2);
     });
 
+    is_dirty
+}
+
+fn ui_components(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    let mut is_dirty = false;
+
+    // label and add button
+    ui.horizontal(|ui| {
+        ui.label("Components:");
+        if ui.button("Add Component").clicked() {
+            println!("TODO add component")
+        }
+    });
+
+    // loop through all components and draw each
+    for i in 0 .. json.len() {
+        let component_json = &mut json[i];
+        // let type_str = &mut component_json["type"];
+        // ui.collapsing(type_str.as_str().unwrap(), |ui| {
+        //     ui.vertical(|ui| {
+                is_dirty = is_dirty || ui_component(ui, component_json);
+        //     });
+        // });
+    }
+
+    is_dirty
+}
+
+fn ui_component(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    let mut is_dirty = false;
+    let clone = json.clone();
+    let type_str = clone["type"].as_str().unwrap();
+    ui.collapsing(type_str, |ui| {
+        ui.vertical(|ui| {
+            match type_str {
+                "model" => {
+                    ui.horizontal(|ui| {
+                        ui.label("Path:");
+                        is_dirty = is_dirty || edit_path(ui, json, "model");
+                    });
+                }
+                _ => { error!("Unknown type string {}", type_str); }
+            }
+        });
+    });
     is_dirty
 }
