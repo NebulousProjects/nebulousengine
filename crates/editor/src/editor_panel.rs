@@ -1,6 +1,6 @@
 use std::{path::PathBuf};
 
-use bevy::{prelude::*, input::keyboard::KeyboardInput, ecs::{archetype::Archetypes, component::Components}};
+use bevy::{prelude::*, input::keyboard::KeyboardInput};
 use bevy_egui::EguiContexts;
 use egui::{ScrollArea, Color32};
 use nebulousengine_input::*;
@@ -54,8 +54,6 @@ pub fn render_editor(
     mut inputs: ResMut<Assets<InputContainer>>,
     mut key_events: EventReader<KeyboardInput>,
     mut viewport: ResMut<ViewportContainer>,
-    archetypes: &Archetypes,
-    components: &Components
 ) {
     // egui::CentralPanel::default().show(context, |ui| {
         egui::TopBottomPanel::top("top_tab_bar").show(contexts.ctx_mut(), |ui| {
@@ -114,7 +112,7 @@ pub fn render_editor(
                 EditorTabType::Image(image) => image.ui(ui, &ui.max_rect(), &images),
                 EditorTabType::Input(input) => input.ui(ui, &mut inputs, &mut key_events),
                 EditorTabType::Model(model) => model.ui(ui, &mut viewport, rendered_texture_id),
-                EditorTabType::Entity(entity) => entity.ui(ui, &mut viewport, rendered_texture_id, archetypes, components),
+                EditorTabType::Entity(entity) => entity.ui(ui, &mut viewport, rendered_texture_id),
                 EditorTabType::Unknown => draw_unknown(ui, tab)
             };
         });

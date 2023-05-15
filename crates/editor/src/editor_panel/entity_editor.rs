@@ -1,9 +1,15 @@
-use bevy::{prelude::*, render::render_resource::Extent3d, ecs::{archetype::Archetypes, component::{ComponentId, Components}}};
+use bevy::{prelude::*, render::render_resource::Extent3d};
+use egui::*;
+use json::{JsonValue, array};
 use nebulousengine_entities::EntityContainer;
-use nebulousengine_utils::{ViewportContainer, MainCamera};
+use nebulousengine_utils::{ViewportContainer, MainCamera, load_file_to_json};
+
+use crate::helpers;
 
 pub struct EntityEditor {
     handle: Handle<EntityContainer>,
+    json: JsonValue,
+    path: String,
     model: Option<Entity>,
     light: Option<Entity>,
     camera: Option<Entity>,
@@ -11,8 +17,14 @@ pub struct EntityEditor {
 
 impl EntityEditor {
     pub fn new(asset_server: &AssetServer, path: &str) -> Self {
+        let json = load_file_to_json(path);
+        if json.is_err() {
+            panic!("Json parse failed with error: {}", json.clone().err().unwrap()); 
+        }
+
         Self {
-            handle: asset_server.load(path), 
+            handle: asset_server.load(path), json: json.unwrap(),
+            path: path.clone().to_string(),
             model: None, camera: None, light: None
         }
     }
@@ -54,29 +66,19 @@ impl EntityEditor {
     pub fn ui(
         &mut self, ui: &mut egui::Ui,
         viewport: &mut ResMut<ViewportContainer>,
-        rendered_texture_id: Local<egui::TextureId>,
-        archetypes: &Archetypes,
-        components: &Components
+        rendered_texture_id: Local<egui::TextureId>
     ) {
+        let mut is_dirty = false;
+
+        // create a scroll area in the side panel
         egui::SidePanel::right("components").resizable(true).min_width(200.0).show_inside(ui, |ui| {
-            ui.vertical(|ui| {
-                let entity = self.model;
-                if entity.is_some() {
-                    let entity = entity.unwrap();
-                    let component_ids = get_components_for_entity(&entity, archetypes);
-                    // commands.entity(entity).log_components();
-                    if component_ids.is_some() {
-                        for comp_id in component_ids.unwrap() {
-                            if let Some(comp_info) = components.get_info(comp_id) {
-                                ui.collapsing(comp_info.name(), |ui| {
-                                    
-                                });
-                            }
-                        }
-                    } else {
-                        error!("Component IDs not found");
-                    }
-                }
+            ScrollArea::vertical().show(ui, |ui| {
+                // add a transform editor for the base entity
+                let transform_json = &mut self.json["transform"];
+                is_dirty = is_dirty || ui_transform(ui, transform_json);
+
+                // then a components editor
+
             });
         });
 
@@ -100,17 +102,56 @@ impl EntityEditor {
                 [rect.width(), rect.height()]
             ));
         });
+
+        // if the json is dirty, save it
+        if is_dirty {
+            let result = std::fs::write(
+                format!("./assets/{}", self.path),
+                self.json.to_string()
+            );
+    
+            // if result save returns an error, report that error
+            if result.is_err() {
+                error!("Input saved with error: {}", result.err().unwrap());
+            }
+        }
     }
 }
 
-fn get_components_for_entity<'a>(
-    entity: &Entity,
-    archetypes: &'a Archetypes,
-) -> Option<impl Iterator<Item = ComponentId> + 'a> {
-    for archetype in archetypes.iter() {
-        if archetype.entities().iter().any(|e| e.entity() == *entity) {
-            return Some(archetype.components());
-        }
-    }
-    None
+fn ui_transform(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    let mut is_dirty = false;
+
+    // make sure position, rotation, and scale exist in json
+    if !json.has_key("position") { let _ = json.insert("position", array![ 0.0, 0.0, 0.0 ]); }
+    if !json.has_key("rotation") { let _ = json.insert("rotation", array![ 0.0, 0.0, 0.0 ]); }
+    if !json.has_key("scale") { let _ = json.insert("scale", array![ 1.0, 1.0, 1.0 ]); }
+
+    // position editor made up of 3 editor_f32's
+    ui.label("Position");
+    let position = &mut json["position"];
+    ui.horizontal(|ui| {
+        is_dirty = is_dirty || helpers::edit_f32(ui, position, 0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, position, 1);
+        is_dirty = is_dirty || helpers::edit_f32(ui, position, 2);
+    });
+
+    // same for rotation
+    ui.label("Rotation");
+    let rotation = &mut json["rotation"];
+    ui.horizontal(|ui| {
+        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 1);
+        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 2);
+    });
+
+    // same for scale
+    ui.label("Scale");
+    let scale = &mut json["scale"];
+    ui.horizontal(|ui| {
+        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 1);
+        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 2);
+    });
+
+    is_dirty
 }

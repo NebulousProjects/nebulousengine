@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use bevy::{prelude::*, input::keyboard::KeyboardInput, render::{render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages}, camera::{RenderTarget, Viewport}}, ecs::{archetype::Archetypes, component::Components}};
+use bevy::{prelude::*, input::keyboard::KeyboardInput, render::{render_resource::*, camera::*}};
 use bevy_egui::*;
 use editor_panel::image_viewer::ImageRenderer;
 use editor_panel::input_editor::InputEditor;
@@ -14,6 +14,7 @@ use self::editor_panel::*;
 
 pub mod files_editor_panel;
 pub mod editor_panel;
+pub mod helpers;
 
 pub struct EditorOpenFileEvent {
     path: PathBuf
@@ -111,9 +112,7 @@ fn render_ui(
 
     images: ResMut<Assets<Image>>,
     inputs: ResMut<Assets<InputContainer>>,
-    key_events: EventReader<KeyboardInput>,
-    archetypes: &Archetypes,
-    components: &Components
+    key_events: EventReader<KeyboardInput>
 ) {
     // make sure we have an image handle
     if viewport.image_handle.is_some() {
@@ -142,7 +141,7 @@ fn render_ui(
         &mut contexts, tabs.into_inner(), 
         rendered_texture_id, commands, images, 
         inputs, key_events, 
-        viewport, archetypes, components
+        viewport
     );
 }
 // Example how to insert render image
@@ -192,15 +191,18 @@ fn setup_viewport(
             viewport.image_handle = Some(image_handle.clone());
 
             // set render target
-            let mut cam = cameras.single_mut();
-            cam.target = RenderTarget::Image(viewport.image_handle.clone().expect("hi"));
-            cam.viewport = Some(
-                Viewport {
-                    physical_size: UVec2 { x: size.width, y: size.height },
-                    physical_position: UVec2 { x: 0, y: 0 },
-                    depth: 0.0..1.0
-                }
-            )
+            let cam = cameras.get_single_mut();
+            if cam.is_ok() {
+                let mut cam = cam.unwrap();
+                cam.target = RenderTarget::Image(viewport.image_handle.clone().expect("hi"));
+                cam.viewport = Some(
+                    Viewport {
+                        physical_size: UVec2 { x: size.width, y: size.height },
+                        physical_position: UVec2 { x: 0, y: 0 },
+                        depth: 0.0..1.0
+                    }
+                )
+            }
         }
     }
 }
