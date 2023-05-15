@@ -9,7 +9,8 @@ pub fn add_children(
     input_json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: bool
 ) {
     // check if we have a children json object and grab it
     if input_json.has_key("children") {
@@ -24,11 +25,11 @@ pub fn add_children(
                     let mut entity = builder.spawn_empty();
                     build_entity_from_json(
                         &mut entity, json, asset_server, 
-                        meshes, materials
+                        meshes, materials, no_cam_spawn
                     );
                     add_children(
                         &mut entity, json, asset_server, 
-                        meshes, materials
+                        meshes, materials, no_cam_spawn
                     );
                 }
             });
@@ -41,7 +42,8 @@ pub fn build_entity_from_json(
     input_json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: bool
 ) {
     // unpack json
     let components = &input_json["components"];
@@ -53,7 +55,7 @@ pub fn build_entity_from_json(
     if components.is_array() {
         for i in 0 .. components.len() {
             // add each component to the entity
-            let bundle = unpack_component(&components[i], asset_server, meshes, materials);
+            let bundle = unpack_component(&components[i], asset_server, meshes, materials, no_cam_spawn);
             if bundle.is_ok() {
                 bundle.unwrap().attach(entity);
             } else {

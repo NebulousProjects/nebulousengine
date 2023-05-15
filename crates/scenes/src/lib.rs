@@ -65,6 +65,7 @@ fn load_scenes(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: Query<(Entity, With<NoCameraSpawn>)>,
 ) {
     // loop through all scene containers without scene container loaded
     for (entity, handle) in query.iter() {
@@ -74,7 +75,7 @@ fn load_scenes(
             // get id
             let id = handle.id();
 
-            load_scene(&mut commands, &asset_server, &mut running_state, &entities, &mut meshes, &mut materials, &container.unwrap().json);
+            load_scene(&mut commands, &asset_server, &mut running_state, &entities, &mut meshes, &mut materials, &no_cam_spawn, &container.unwrap().json);
 
             commands.entity(entity).insert(SceneContainerLoaded { path: id });
         }
@@ -109,6 +110,7 @@ fn load_scene(
     entities: &Query<Entity, With<Despawnable>>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: &Query<(Entity, With<NoCameraSpawn>)>,
     json: &JsonValue
 ) {
     // load scene to entity
@@ -132,7 +134,7 @@ fn load_scene(
     load_scene_from_json(
         commands, json, 
         &asset_server, meshes, 
-        materials
+        materials, no_cam_spawn
     );
 
     // call start on all scripts

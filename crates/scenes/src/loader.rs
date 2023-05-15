@@ -12,6 +12,7 @@ pub fn load_scene_from_json(
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: &Query<(Entity, With<NoCameraSpawn>)>
     // wrapper: &mut NonSendMut<ScriptEngineWrapper>
 ) {
     // load entities
@@ -21,7 +22,7 @@ pub fn load_scene_from_json(
             for i in 0 .. entities.len() {
                 load_entity(
                     commands, &entities[i], asset_server, 
-                    meshes, materials
+                    meshes, materials, no_cam_spawn
                 )
             }
         }
@@ -68,7 +69,8 @@ pub fn load_entity(
     json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: &Query<(Entity, With<NoCameraSpawn>)>
 ) {
     if json.is_object() {
         let mut entity = commands.spawn_empty();
@@ -105,7 +107,7 @@ pub fn load_entity(
             // let visible = optional_bool(json, "visible", true);
 
             // spawn entity from json
-            spawn_entity_from_json(&mut entity, json, asset_server, meshes, materials);
+            spawn_entity_from_json(&mut entity, json, asset_server, meshes, materials, !no_cam_spawn.is_empty());
         } else {
             error!("Could not load entity from json {}", json);
         }

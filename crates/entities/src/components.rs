@@ -72,7 +72,8 @@ pub fn unpack_component(
     input_json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>
+    materials: &mut ResMut<Assets<StandardMaterial>>, 
+    no_cam_spawn: bool
 ) -> Result<EntityBundle, String> {
     // unpack json
     let type_str = input_json["type"].as_str();
@@ -88,26 +89,30 @@ pub fn unpack_component(
         "model" => Ok(EntityBundle::Model(
             asset_server.load(format!("{}#Scene0", optional_string(input_json, "model")).as_str())
         )),
-        "camera" => Ok(EntityBundle::Camera((
-            (
-                Camera {
-                    viewport: optional_viewport(input_json, "viewport"),
-                    order: optional_isize(input_json, "order", 0),
-                    is_active: optional_bool(input_json, "active", true),
-                    hdr: optional_bool(input_json, "hdr", false), // WARN EXPERIMENTAL
-                    msaa_writeback: optional_bool(input_json, "msaa_writeback", true), // WARN EXPERIMENTAL
-                    ..Default::default()
+        "camera" => if no_cam_spawn {
+            Err(format!("No Camera Spawn"))
+        } else {
+                Ok(EntityBundle::Camera((
+                (
+                    Camera {
+                        viewport: optional_viewport(input_json, "viewport"),
+                        order: optional_isize(input_json, "order", 0),
+                        is_active: optional_bool(input_json, "active", true),
+                        hdr: optional_bool(input_json, "hdr", false), // WARN EXPERIMENTAL
+                        msaa_writeback: optional_bool(input_json, "msaa_writeback", true), // WARN EXPERIMENTAL
+                        ..Default::default()
+                    },
+                    projection(optional_string(input_json, "projection")),
+                    tonemapping(optional_string(input_json, "tonemapping")),
+                    optional_deband_dither(input_json, "dither"),
+                    optional_color_grading(input_json, "color_grading")
+                ),
+                UiCameraConfig {
+                    show_ui: optional_bool(input_json, "show_ui", true)
                 },
-                projection(optional_string(input_json, "projection")),
-                tonemapping(optional_string(input_json, "tonemapping")),
-                optional_deband_dither(input_json, "dither"),
-                optional_color_grading(input_json, "color_grading")
-            ),
-            UiCameraConfig {
-                show_ui: optional_bool(input_json, "show_ui", true)
-            },
-            if optional_bool(input_json, "main", false) { Some(MainCamera) } else { None }
-        ))),
+                if optional_bool(input_json, "main", false) { Some(MainCamera) } else { None }
+            )))
+        },
         "directional_light" => Ok(EntityBundle::DirectionalLight(
             DirectionalLight {
                 color: optional_color_default(input_json, "color", Color::WHITE),

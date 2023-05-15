@@ -205,13 +205,27 @@ fn ui_component(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
                     });
                 }
                 "camera" => {
-                    // make sure viewport exists in json
-                    if !json.has_key("viewport") { 
-                        let _ = json.insert("viewport", JsonValue::new_object());
-                        // is_dirty = true;
-                    }
+                    // enum dropdowns
+                    is_dirty = is_dirty 
+                        || edit_enum_dropdown(ui, json, "projection", &["perspective", "orthographic"], "perspective")
+                        || edit_enum_dropdown(
+                            ui, json, "tonemapping", 
+                            &["none", "reinhard", "reinhard_lumninance", "aces_fitted", "agx", "somewhat_boring_display_transform", "tony_mc_mapface", "blender_filmic"], 
+                            "reinhard_luminance"
+                        );
 
-                    is_dirty = is_dirty || edit_bool(ui, json, "hdr", true);
+                    // booleans
+                    is_dirty = is_dirty || edit_bool(ui, json, "hdr", false)
+                        || edit_bool(ui, json, "msaa_writeback", true)
+                        || edit_bool(ui, json, "deband_dither", true)
+                        || edit_bool(ui, json, "show_ui", true)
+                        || edit_bool(ui, json, "main", false);
+
+                    ui.separator();
+
+                    // color grading
+                    if !json.has_key("color_grading") { let _ = json.insert("color_grading", JsonValue::new_object()); }
+                    is_dirty = is_dirty || ui_color_grading(ui, &mut json["color_grading"]);
 
                 }
                 _ => { error!("Unknown type string {}", type_str); }
@@ -219,4 +233,12 @@ fn ui_component(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
         });
     });
     is_dirty
+}
+
+fn ui_color_grading(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    ui.label("Color Grading:");
+    edit_slider(ui, json, "exposure", 0.0, 1.0, 0.0) ||
+    edit_slider(ui, json, "gamma", 0.0, 1.0, 1.0) ||
+    edit_slider(ui, json, "pre_saturation", 0.0, 1.0, 1.0) ||
+    edit_slider(ui, json, "post_saturation", 0.0, 1.0, 1.0)
 }

@@ -84,6 +84,7 @@ fn reload(
 
 fn load_entities(
     query: Query<(Entity, &Handle<EntityContainer>), Without<EntityContainerLoaded>>,
+    no_cam_spawn: Query<(Entity, With<NoCameraSpawn>)>,
     assets: Res<Assets<EntityContainer>>,
     mut commands: Commands,
 
@@ -91,6 +92,8 @@ fn load_entities(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>
 ) {
+    let no_cam_spawn = !no_cam_spawn.is_empty();
+
     // loop through all entity containers without entity container loaded
     for (entity, handle) in query.iter() {
         // get entity container if it exists
@@ -101,7 +104,7 @@ fn load_entities(
 
             // add the entity components to entity from the json
             let mut entity_commands = commands.entity(entity);
-            spawn_entity_from_json(&mut entity_commands, &container.unwrap().json, &asset_server, &mut meshes, &mut materials);
+            spawn_entity_from_json(&mut entity_commands, &container.unwrap().json, &asset_server, &mut meshes, &mut materials, no_cam_spawn);
             entity_commands.insert(EntityContainerLoaded { path: path } );
         }
     }
@@ -112,7 +115,8 @@ pub fn spawn_entity_from_json(
     input_json: &JsonValue, 
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    no_cam_spawn: bool
 ) {
     // add despawnable unless marked persistent
     if !optional_bool(input_json, "persistent", false) {
@@ -123,10 +127,10 @@ pub fn spawn_entity_from_json(
     // call build functions
     build_entity_from_json(
         commands, input_json, asset_server, 
-        meshes, materials
+        meshes, materials, no_cam_spawn
     );
     add_children(
         commands, input_json, asset_server, 
-        meshes, materials
+        meshes, materials, no_cam_spawn
     );
 }

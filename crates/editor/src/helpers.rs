@@ -76,3 +76,53 @@ pub fn edit_bool(ui: &mut egui::Ui, json: &mut JsonValue, index: &str, default: 
         true
     } else { false }
 }
+
+pub fn edit_enum_dropdown(ui: &mut egui::Ui, json: &mut JsonValue, index: &str, options: &[&str], default: &str) -> bool {
+    let mut is_dirty = false;
+    
+    // make sure enum exists in json
+    if !json.has_key(index) { let _ = json.insert(index, default); }
+
+    // create labelled drop down
+    ui.horizontal(|ui| {
+        // get current
+        let current = json[index].as_str().unwrap();
+
+        // label
+        ui.label(index);
+
+        // drop down
+        egui::ComboBox::from_id_source(index)
+            .selected_text(current)
+            .show_ui(ui, |ui| {
+                for option in options {
+                    if ui.selectable_label(false, *option).clicked() {
+                        let _ = json.insert(index, *option);
+                        is_dirty = true;
+                    }
+                }
+            });
+    });
+
+    is_dirty
+}
+
+pub fn edit_slider(ui: &mut egui::Ui, json: &mut JsonValue, index: &str, min: f32, max: f32, default: f32) -> bool {
+    let mut is_dirty = false;
+
+    // make sure index exists
+    if !json.has_key(index) { let _ = json.insert(index, default); }
+
+    // add slider with label
+    ui.horizontal(|ui| {
+        let mut value = json[index].as_f32().unwrap();
+
+        ui.label(index);
+        if ui.add(egui::Slider::new(&mut value, min ..=max)).changed() {
+            let _ = json.insert(index, value);
+            is_dirty = true;
+        }
+    });
+
+    is_dirty
+}
