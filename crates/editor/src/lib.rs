@@ -6,7 +6,7 @@ use editor_panel::image_viewer::ImageRenderer;
 use editor_panel::input_editor::InputEditor;
 use editor_panel::text_editor::TextContainer;
 use nebulousengine_input::InputContainer;
-use nebulousengine_utils::{ViewportContainer, MainCamera};
+use nebulousengine_utils::{ViewportContainer};
 use crate::editor_panel::{model_viewer::ModelViewer, entity_editor::EntityEditor};
 
 use self::files_editor_panel::render_files;
@@ -15,6 +15,9 @@ use self::editor_panel::*;
 pub mod files_editor_panel;
 pub mod editor_panel;
 pub mod helpers;
+
+#[derive(Component)]
+pub struct EditorCamera;
 
 pub struct EditorOpenFileEvent {
     path: PathBuf
@@ -153,7 +156,7 @@ fn render_ui(
 fn setup_viewport(
     mut images: ResMut<Assets<Image>>,
     mut viewport: ResMut<ViewportContainer>,
-    mut cameras: Query<&mut Camera, With<MainCamera>>,
+    mut cameras: Query<&mut Camera, With<EditorCamera>>,
     mut last_size: Local<Extent3d>
 ) {
     if viewport.enabled {

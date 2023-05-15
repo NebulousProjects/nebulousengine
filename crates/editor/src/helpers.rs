@@ -1,5 +1,5 @@
 use egui::Color32;
-use json::JsonValue;
+use json::{JsonValue, array};
 
 pub fn edit_f32(ui: &mut egui::Ui, json: &mut JsonValue, index: usize) -> bool {
     let value = json[index].as_f32().unwrap_or(0.0);
@@ -54,4 +54,25 @@ pub fn edit_path(ui: &mut egui::Ui, json: &mut JsonValue, index: &str) -> bool {
     } else {
         false
     }
+}
+
+pub fn edit_vec2(ui: &mut egui::Ui, json: &mut JsonValue, index: &str) -> bool {
+    // make sure index exists in json
+    if !json.has_key(index) { let _ = json.insert(index, array![1.0, 1.0]); }
+    let json = &mut json[index];
+
+    // edit boxes and return the results
+    edit_f32(ui, json, 0) || edit_f32(ui, json, 1)
+}
+
+pub fn edit_bool(ui: &mut egui::Ui, json: &mut JsonValue, index: &str, default: bool) -> bool {
+    // make sure index exists in json
+    if !json.has_key(index) { let _ = json.insert(index, default); }
+
+    // make checkbox
+    let mut checkbox = json[index].as_bool().unwrap_or(default);
+    if ui.checkbox(&mut checkbox, index).changed() {
+        let _ = json.insert(index, checkbox);
+        true
+    } else { false }
 }

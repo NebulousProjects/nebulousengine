@@ -10,6 +10,9 @@ pub mod from_enums;
 pub struct MainCamera;
 
 #[derive(Component)]
+pub struct NoCameraSpawn;
+
+#[derive(Component)]
 pub struct Despawnable;
 
 #[derive(Resource)]

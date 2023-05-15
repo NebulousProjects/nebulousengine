@@ -2,9 +2,9 @@ use bevy::{prelude::*, render::render_resource::Extent3d};
 use egui::*;
 use json::{JsonValue, array};
 use nebulousengine_entities::EntityContainer;
-use nebulousengine_utils::{ViewportContainer, MainCamera, load_file_to_json};
+use nebulousengine_utils::{ViewportContainer, load_file_to_json, NoCameraSpawn};
 
-use crate::helpers::{self, edit_path};
+use crate::{helpers::{self, *}, EditorCamera};
 
 pub struct EntityEditor {
     handle: Handle<EntityContainer>,
@@ -35,7 +35,7 @@ impl EntityEditor {
         self.camera = Some(commands.spawn(Camera3dBundle {
             transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
-        }).insert(MainCamera).id());
+        }).insert(EditorCamera).insert(NoCameraSpawn).id());
         self.model = Some(commands.spawn(handle).id());
         self.light = Some(commands.spawn(DirectionalLightBundle {
             directional_light: DirectionalLight {
@@ -181,29 +181,38 @@ fn ui_components(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
     // loop through all components and draw each
     for i in 0 .. json.len() {
         let component_json = &mut json[i];
-        // let type_str = &mut component_json["type"];
-        // ui.collapsing(type_str.as_str().unwrap(), |ui| {
-        //     ui.vertical(|ui| {
-                is_dirty = is_dirty || ui_component(ui, component_json);
-        //     });
-        // });
+        is_dirty = is_dirty || ui_component(ui, component_json);
     }
 
     is_dirty
 }
 
 fn ui_component(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    // get type string
     let mut is_dirty = false;
     let clone = json.clone();
     let type_str = clone["type"].as_str().unwrap();
+    
+    // create vertical collapsable
     ui.collapsing(type_str, |ui| {
         ui.vertical(|ui| {
+            // match type to editor
             match type_str {
                 "model" => {
                     ui.horizontal(|ui| {
                         ui.label("Path:");
                         is_dirty = is_dirty || edit_path(ui, json, "model");
                     });
+                }
+                "camera" => {
+                    // make sure viewport exists in json
+                    if !json.has_key("viewport") { 
+                        let _ = json.insert("viewport", JsonValue::new_object());
+                        // is_dirty = true;
+                    }
+
+                    is_dirty = is_dirty || edit_bool(ui, json, "hdr", true);
+
                 }
                 _ => { error!("Unknown type string {}", type_str); }
             }
