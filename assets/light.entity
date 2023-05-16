@@ -1,1 +1,28 @@
-{"components":[{"type":"point_light","intensity":9000.0,"range":100.0,"shadows_enabled":true,"color":"#770202"}],"transform":{"position":[8.0,16.0,8.0],"rotation":[0,0,0],"scale":[1,1,1]}}
+{
+    "components": [
+        {
+            "type": "point_light",
+            "intensity": 9000,
+            "range": 100,
+            "shadows_enabled": true,
+            "color": "#770202"
+        }
+    ],
+    "transform": {
+        "position": [
+            8,
+            16,
+            8
+        ],
+        "rotation": [
+            0,
+            0,
+            0
+        ],
+        "scale": [
+            1,
+            1,
+            1
+        ]
+    }
+}

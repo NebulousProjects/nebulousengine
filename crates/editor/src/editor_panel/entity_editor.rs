@@ -90,6 +90,10 @@ impl EntityEditor {
                 // then a components editor
                 ui.separator();
                 is_dirty = is_dirty || ui_components(ui, &mut self.json["components"]);
+
+                // then children
+                ui.separator();
+                ui_children(ui, &mut self.json["children"]);
             });
         });
 
@@ -127,6 +131,56 @@ impl EntityEditor {
             }
         }
     }
+}
+
+fn ui_children(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    let mut is_dirty = false;
+
+    ui.horizontal(|ui| {
+        ui.label("Children: ");
+        if ui.button("Add Children").clicked() {
+            let mut new_json = JsonValue::new_object();
+            let _ = new_json.insert("transform", JsonValue::new_object());
+            let _ = new_json.insert("components", JsonValue::new_array());
+            let _ = new_json.insert("children", JsonValue::new_array());
+            let _ = json.push(new_json);
+            is_dirty = true;
+        }
+    });
+
+    let mut opt: Option<usize> = None;
+    for i in 0 .. json.len() {
+        ui.collapsing(format!("{}", i), |ui| {
+            ui.vertical(|ui| {
+                let json = &mut json[i];
+
+                // remove button
+                if ui.button("Remove").clicked() {
+                    opt = Some(i);
+                }
+
+                // add a transform editor for the base entity
+                let transform_json = &mut json["transform"];
+                is_dirty = is_dirty || ui_transform(ui, transform_json);
+
+                // then a components editor
+                ui.separator();
+                is_dirty = is_dirty || ui_components(ui, &mut json["components"]);
+
+                // then children
+                ui.separator();
+                ui_children(ui, &mut json["children"]);
+            });
+        });
+    }
+
+    // remove if option is something
+    if opt.is_some() {
+        json.array_remove(opt.unwrap());
+        is_dirty = true;
+    }
+
+    is_dirty
 }
 
 fn ui_transform(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
@@ -173,132 +227,160 @@ fn ui_components(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
     // label and add button
     ui.horizontal(|ui| {
         ui.label("Components:");
-        if ui.button("Add Component").clicked() {
-            println!("TODO add component")
-        }
+        egui::ComboBox::from_id_source(-1)
+            .selected_text("Add Component")
+            .show_ui(ui, |ui| {
+                is_dirty = is_dirty || 
+                    add_component_selectable(ui, json, "model") || 
+                    add_component_selectable(ui, json, "camera") || 
+                    add_component_selectable(ui, json, "directional_light") || 
+                    add_component_selectable(ui, json, "point_light") || 
+                    add_component_selectable(ui, json, "shape") || 
+                    add_component_selectable(ui, json, "elasticity") || 
+                    add_component_selectable(ui, json, "collider") ||
+                    add_component_selectable(ui, json, "rigidbody") || 
+                    add_component_selectable(ui, json, "character_controller");
+            });
     });
 
     // loop through all components and draw each
+    let mut opt: Option<usize> = None;
     for i in 0 .. json.len() {
         let component_json = &mut json[i];
-        is_dirty = is_dirty || ui_component(ui, component_json);
+        ui.collapsing(format!("{}: {}", i, component_json.clone()["type"].as_str().unwrap()), |ui| {
+            ui.vertical(|ui| {
+                if ui.button("Remove").clicked() {
+                    opt = Some(i);
+                }
+                is_dirty = is_dirty || ui_component(ui, component_json);
+            });
+        });
+    }
+
+    if opt.is_some() {
+        json.array_remove(opt.unwrap());
+        is_dirty = true;
     }
 
     is_dirty
 }
 
+fn add_component_selectable(ui: &mut egui::Ui, json: &mut JsonValue, type_str: &str) -> bool {
+    if ui.selectable_label(false, type_str).clicked() {
+        let mut new_json = JsonValue::new_object();
+        let _ = new_json.insert("type", type_str);
+        let _ = json.push(new_json);
+        true
+    } else { false }
+}
+
 fn ui_component(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
     // get type string
     let mut is_dirty = false;
-    let clone = json.clone();
-    let type_str = clone["type"].as_str().unwrap();
+    let type_str = json["type"].as_str().unwrap();
     
     // create vertical collapsable
-    ui.collapsing(type_str, |ui| {
-        ui.vertical(|ui| {
-            // match type to editor
-            match type_str {
-                "model" => {
-                    ui.horizontal(|ui| {
-                        ui.label("Path:");
-                        is_dirty = is_dirty || edit_path(ui, json, "model");
-                    });
-                }
-                "camera" => {
-                    // enum dropdowns
-                    is_dirty = is_dirty 
-                        || edit_enum_dropdown(ui, json, "projection", &["perspective", "orthographic"], "perspective")
-                        || edit_enum_dropdown(
-                            ui, json, "tonemapping", 
-                            &["none", "reinhard", "reinhard_lumninance", "aces_fitted", "agx", "somewhat_boring_display_transform", "tony_mc_mapface", "blender_filmic"], 
-                            "reinhard_luminance"
-                        );
+    match type_str {
+        "model" => {
+            ui.horizontal(|ui| {
+                ui.label("Path:");
+                is_dirty = is_dirty || edit_path(ui, json, "model");
+            });
+        }
+        "camera" => {
+            // enum dropdowns
+            is_dirty = is_dirty 
+                || edit_enum_dropdown(ui, json, "projection", &["perspective", "orthographic"], "perspective")
+                || edit_enum_dropdown(
+                    ui, json, "tonemapping", 
+                    &["none", "reinhard", "reinhard_lumninance", "aces_fitted", "agx", "somewhat_boring_display_transform", "tony_mc_mapface", "blender_filmic"], 
+                    "reinhard_luminance"
+                );
 
-                    // booleans
-                    is_dirty = is_dirty || edit_bool(ui, json, "hdr", false)
-                        || edit_bool(ui, json, "msaa_writeback", true)
-                        || edit_bool(ui, json, "deband_dither", true)
-                        || edit_bool(ui, json, "show_ui", true)
-                        || edit_bool(ui, json, "main", false);
+            // booleans
+            is_dirty = is_dirty || edit_bool(ui, json, "hdr", false)
+                || edit_bool(ui, json, "msaa_writeback", true)
+                || edit_bool(ui, json, "deband_dither", true)
+                || edit_bool(ui, json, "show_ui", true)
+                || edit_bool(ui, json, "main", false);
 
-                    ui.separator();
+            ui.separator();
 
-                    // color grading
-                    if !json.has_key("color_grading") { let _ = json.insert("color_grading", JsonValue::new_object()); }
-                    is_dirty = is_dirty || ui_color_grading(ui, &mut json["color_grading"]);
+            // color grading
+            if !json.has_key("color_grading") { let _ = json.insert("color_grading", JsonValue::new_object()); }
+            is_dirty = is_dirty || ui_color_grading(ui, &mut json["color_grading"]);
 
-                }
-                "point_light" => {
-                    is_dirty = is_dirty || edit_color(ui, json, "color")
-                        || edit_f32_at_str(ui, json, "intensity", 800.0)
-                        || edit_f32_at_str(ui, json, "range", 20.0)
-                        || edit_f32_at_str(ui, json, "radius", 1.0)
-                        || edit_bool(ui, json, "shadows_enabled", true)
-                        || edit_f32_at_str(ui, json, "shadow_depth_bias", 0.02)
-                        || edit_f32_at_str(ui, json, "shadow_normal_bias", 0.6);
-                }
-                "directional_light" => {
-                    is_dirty = is_dirty || edit_color(ui, json, "color")
-                        || edit_f32_at_str(ui, json, "intensity", 800.0)
-                        || edit_bool(ui, json, "shadows_enabled", true)
-                        || edit_f32_at_str(ui, json, "shadow_depth_bias", 0.02)
-                        || edit_f32_at_str(ui, json, "shadow_normal_bias", 0.6);
-                }
-                "elasticity" => {
-                    is_dirty = is_dirty || edit_f32_at_str(ui, json, "elasticity", 0.0);
-                }
-                "rigidbody" => {
-                    is_dirty = is_dirty ||
-                        edit_enum_dropdown(ui, json, "physics_type", &["dynamic", "fixed", "kinematic_position", "kinematic_velocity"], "dynamic")
-                }
-                "character_controller" => {
-                    is_dirty = is_dirty ||
-                        edit_vec3(ui, json, "translation", 0.0, 0.0, 0.0) ||
-                        edit_vec3(ui, json, "up", 0.0, 1.0, 0.0) ||
-                        edit_f32_at_str(ui, json, "mass", 1.0) ||
-                        edit_f32_at_str(ui, json, "offset", 0.01) ||
-                        edit_f32_at_str(ui, json, "snap_to_ground", 0.2) ||
-                        edit_f32_at_str(ui, json, "max_climb_angle", 45.0) ||
-                        edit_f32_at_str(ui, json, "min_slide_angle", 30.0) ||
-                        edit_bool(ui, json, "slide_enabled", false) ||
-                        edit_bool(ui, json, "move_dynamic_bodies", true);
+        }
+        "point_light" => {
+            is_dirty = is_dirty || edit_color(ui, json, "color")
+                || edit_f32_at_str(ui, json, "intensity", 800.0)
+                || edit_f32_at_str(ui, json, "range", 20.0)
+                || edit_f32_at_str(ui, json, "radius", 1.0)
+                || edit_bool(ui, json, "shadows_enabled", true)
+                || edit_f32_at_str(ui, json, "shadow_depth_bias", 0.02)
+                || edit_f32_at_str(ui, json, "shadow_normal_bias", 0.6);
+        }
+        "directional_light" => {
+            is_dirty = is_dirty || edit_color(ui, json, "color")
+                || edit_f32_at_str(ui, json, "intensity", 800.0)
+                || edit_bool(ui, json, "shadows_enabled", true)
+                || edit_f32_at_str(ui, json, "shadow_depth_bias", 0.02)
+                || edit_f32_at_str(ui, json, "shadow_normal_bias", 0.6);
+        }
+        "elasticity" => {
+            is_dirty = is_dirty || edit_f32_at_str(ui, json, "elasticity", 0.0);
+        }
+        "rigidbody" => {
+            is_dirty = is_dirty ||
+                edit_enum_dropdown(ui, json, "physics_type", &["dynamic", "fixed", "kinematic_position", "kinematic_velocity"], "dynamic")
+        }
+        "character_controller" => {
+            is_dirty = is_dirty ||
+                edit_vec3(ui, json, "translation", 0.0, 0.0, 0.0) ||
+                edit_vec3(ui, json, "up", 0.0, 1.0, 0.0) ||
+                edit_f32_at_str(ui, json, "mass", 1.0) ||
+                edit_f32_at_str(ui, json, "offset", 0.01) ||
+                edit_f32_at_str(ui, json, "snap_to_ground", 0.2) ||
+                edit_f32_at_str(ui, json, "max_climb_angle", 45.0) ||
+                edit_f32_at_str(ui, json, "min_slide_angle", 30.0) ||
+                edit_bool(ui, json, "slide_enabled", false) ||
+                edit_bool(ui, json, "move_dynamic_bodies", true);
 
-                    ui.separator();
+            ui.separator();
 
-                    ui.label("Autostep:");
-                    if !json.has_key("autostep") { let _ = json.insert("autostep", JsonValue::new_object()); }
-                    let autostep = &mut json["autostep"];
-                    is_dirty = is_dirty ||
-                        edit_f32_at_str(ui, autostep, "max_height", 0.25) ||
-                        edit_f32_at_str(ui, autostep, "min_width", 0.1) ||
-                        edit_bool(ui, autostep, "include_dynamic_bodies", true);
-                }
-                "collider" => {
-                    is_dirty = is_dirty || 
-                        edit_enum_dropdown(ui, json, "shape", &[
-                            "sphere", "cylinder", "rounded_cylinder", "cone",
-                            "rounded_cone", "capsule", "cube", "rounded_cube",
-                            "triangle", "rounded_triangle"
-                        ], "sphere") ||
-                        ui_collision_shape(ui, json) ||
-                        edit_f32_at_str(ui, json, "mass", 1.0) ||
-                        edit_f32_at_str(ui, json, "friction", 1000.0) ||
-                        edit_bool(ui, json, "is_sensor", false);
-                }
-                "shape" => {
-                    is_dirty = is_dirty ||
-                        edit_color(ui, json, "color") ||
-                        edit_enum_dropdown(ui, json, "shape", &[
-                            "box", "capsule", "circle", "cube",
-                            "cylinder", "ico_sphere", "plane",
-                            "quad", "polygon", "torus", "sphere"
-                        ], "ico_sphere") ||
-                        ui_mesh_shape(ui, json);
-                }
-                _ => { error!("Unknown type string {}", type_str); }
-            }
-        });
-    });
+            ui.label("Autostep:");
+            if !json.has_key("autostep") { let _ = json.insert("autostep", JsonValue::new_object()); }
+            let autostep = &mut json["autostep"];
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, autostep, "max_height", 0.25) ||
+                edit_f32_at_str(ui, autostep, "min_width", 0.1) ||
+                edit_bool(ui, autostep, "include_dynamic_bodies", true);
+        }
+        "collider" => {
+            is_dirty = is_dirty || 
+                edit_enum_dropdown(ui, json, "shape", &[
+                    "sphere", "cylinder", "rounded_cylinder", "cone",
+                    "rounded_cone", "capsule", "cube", "rounded_cube",
+                    "triangle", "rounded_triangle"
+                ], "sphere") ||
+                ui_collision_shape(ui, json) ||
+                edit_f32_at_str(ui, json, "mass", 1.0) ||
+                edit_f32_at_str(ui, json, "friction", 1000.0) ||
+                edit_bool(ui, json, "is_sensor", false);
+        }
+        "shape" => {
+            is_dirty = is_dirty ||
+                edit_color(ui, json, "color") ||
+                edit_enum_dropdown(ui, json, "shape", &[
+                    "box", "capsule", "circle", "cube",
+                    "cylinder", "ico_sphere", "plane",
+                    "quad", "polygon", "torus", "sphere"
+                ], "ico_sphere") ||
+                ui_mesh_shape(ui, json);
+        }
+        _ => { error!("Unknown type string {}", type_str); }
+    }
+
     is_dirty
 }
 
