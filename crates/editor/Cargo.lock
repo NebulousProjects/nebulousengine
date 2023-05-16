@@ -2437,6 +2437,7 @@ version = "0.0.1"
 dependencies = [
  "bevy",
  "bevy_egui",
+ "bevy_rapier3d",
  "egui",
  "egui_dock",
  "json",

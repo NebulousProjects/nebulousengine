@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use bevy::{prelude::*, input::keyboard::KeyboardInput, render::{render_resource::*, camera::*}};
 use bevy_egui::*;
+use bevy_rapier3d::render::RapierDebugRenderPlugin;
 use editor_panel::image_viewer::ImageRenderer;
 use editor_panel::input_editor::InputEditor;
 use editor_panel::text_editor::TextContainer;
@@ -30,6 +31,7 @@ impl Plugin for EditorPlugin {
             .init_resource::<ViewportContainer>()
             .add_event::<EditorOpenFileEvent>()
             .insert_resource(EditorTabs::new())
+            .add_plugin(RapierDebugRenderPlugin::default())
             .add_plugin(EguiPlugin)
             .add_system(render_ui.after(setup_viewport))
             .add_system(load_tab)

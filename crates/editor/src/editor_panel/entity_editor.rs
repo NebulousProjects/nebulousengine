@@ -141,27 +141,27 @@ fn ui_transform(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
     ui.label("Position");
     let position = &mut json["position"];
     ui.horizontal(|ui| {
-        is_dirty = is_dirty || helpers::edit_f32(ui, position, 0);
-        is_dirty = is_dirty || helpers::edit_f32(ui, position, 1);
-        is_dirty = is_dirty || helpers::edit_f32(ui, position, 2);
+        is_dirty = is_dirty || helpers::edit_f32(ui, position, 0, 0.0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, position, 1, 0.0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, position, 2, 0.0);
     });
 
     // same for rotation
     ui.label("Rotation");
     let rotation = &mut json["rotation"];
     ui.horizontal(|ui| {
-        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 0);
-        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 1);
-        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 2);
+        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 0, 0.0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 1, 0.0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, rotation, 2, 0.0);
     });
 
     // same for scale
     ui.label("Scale");
     let scale = &mut json["scale"];
     ui.horizontal(|ui| {
-        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 0);
-        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 1);
-        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 2);
+        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 0, 1.0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 1, 1.0);
+        is_dirty = is_dirty || helpers::edit_f32(ui, scale, 2, 1.0);
     });
 
     is_dirty
@@ -228,10 +228,217 @@ fn ui_component(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
                     is_dirty = is_dirty || ui_color_grading(ui, &mut json["color_grading"]);
 
                 }
+                "point_light" => {
+                    is_dirty = is_dirty || edit_color(ui, json, "color")
+                        || edit_f32_at_str(ui, json, "intensity", 800.0)
+                        || edit_f32_at_str(ui, json, "range", 20.0)
+                        || edit_f32_at_str(ui, json, "radius", 1.0)
+                        || edit_bool(ui, json, "shadows_enabled", true)
+                        || edit_f32_at_str(ui, json, "shadow_depth_bias", 0.02)
+                        || edit_f32_at_str(ui, json, "shadow_normal_bias", 0.6);
+                }
+                "directional_light" => {
+                    is_dirty = is_dirty || edit_color(ui, json, "color")
+                        || edit_f32_at_str(ui, json, "intensity", 800.0)
+                        || edit_bool(ui, json, "shadows_enabled", true)
+                        || edit_f32_at_str(ui, json, "shadow_depth_bias", 0.02)
+                        || edit_f32_at_str(ui, json, "shadow_normal_bias", 0.6);
+                }
+                "elasticity" => {
+                    is_dirty = is_dirty || edit_f32_at_str(ui, json, "elasticity", 0.0);
+                }
+                "rigidbody" => {
+                    is_dirty = is_dirty ||
+                        edit_enum_dropdown(ui, json, "physics_type", &["dynamic", "fixed", "kinematic_position", "kinematic_velocity"], "dynamic")
+                }
+                "character_controller" => {
+                    is_dirty = is_dirty ||
+                        edit_vec3(ui, json, "translation", 0.0, 0.0, 0.0) ||
+                        edit_vec3(ui, json, "up", 0.0, 1.0, 0.0) ||
+                        edit_f32_at_str(ui, json, "mass", 1.0) ||
+                        edit_f32_at_str(ui, json, "offset", 0.01) ||
+                        edit_f32_at_str(ui, json, "snap_to_ground", 0.2) ||
+                        edit_f32_at_str(ui, json, "max_climb_angle", 45.0) ||
+                        edit_f32_at_str(ui, json, "min_slide_angle", 30.0) ||
+                        edit_bool(ui, json, "slide_enabled", false) ||
+                        edit_bool(ui, json, "move_dynamic_bodies", true);
+
+                    ui.separator();
+
+                    ui.label("Autostep:");
+                    if !json.has_key("autostep") { let _ = json.insert("autostep", JsonValue::new_object()); }
+                    let autostep = &mut json["autostep"];
+                    is_dirty = is_dirty ||
+                        edit_f32_at_str(ui, autostep, "max_height", 0.25) ||
+                        edit_f32_at_str(ui, autostep, "min_width", 0.1) ||
+                        edit_bool(ui, autostep, "include_dynamic_bodies", true);
+                }
+                "collider" => {
+                    is_dirty = is_dirty || 
+                        edit_enum_dropdown(ui, json, "shape", &[
+                            "sphere", "cylinder", "rounded_cylinder", "cone",
+                            "rounded_cone", "capsule", "cube", "rounded_cube",
+                            "triangle", "rounded_triangle"
+                        ], "sphere") ||
+                        ui_collision_shape(ui, json) ||
+                        edit_f32_at_str(ui, json, "mass", 1.0) ||
+                        edit_f32_at_str(ui, json, "friction", 1000.0) ||
+                        edit_bool(ui, json, "is_sensor", false);
+                }
+                "shape" => {
+                    is_dirty = is_dirty ||
+                        edit_color(ui, json, "color") ||
+                        edit_enum_dropdown(ui, json, "shape", &[
+                            "box", "capsule", "circle", "cube",
+                            "cylinder", "ico_sphere", "plane",
+                            "quad", "polygon", "torus", "sphere"
+                        ], "ico_sphere") ||
+                        ui_mesh_shape(ui, json);
+                }
                 _ => { error!("Unknown type string {}", type_str); }
             }
         });
     });
+    is_dirty
+}
+
+fn ui_mesh_shape(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    let mut is_dirty = false;
+
+    match json["shape"].as_str().unwrap() {
+        "box" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "width", 1.0) ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "depth", 1.0);
+        }
+        "capsule" => {
+            is_dirty = is_dirty ||
+                edit_enum_dropdown(ui, json, "uv_profile", &[
+                    "aspect", "uniform", "fixed"
+                ], "fixed") ||
+                edit_f32_at_str(ui, json, "radius", 0.5) ||
+                edit_f32_at_str(ui, json, "depth", 1.0) ||
+                edit_usize(ui, json, "rings", 0) ||
+                edit_usize(ui, json, "latitudes", 16) ||
+                edit_usize(ui, json, "longitudes", 32);
+        }
+        "circle" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "raadius", 0.5) ||
+                edit_usize(ui, json, "vertices", 64);
+        }
+        "cube" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "size", 1.0);
+        }
+        "cylinder" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "radius", 0.5) ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_u32(ui, json, "resolution", 16) ||
+                edit_u32(ui, json, "segments", 1);
+        }
+        "ico_sphere" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "radius", 1.0) ||
+                edit_usize(ui, json, "subdivisions", 5);
+        }
+        "plane" => {
+            is_dirty = is_dirty || edit_f32_at_str(ui, json, "size", 1.0);
+        }
+        "quad" => {
+            is_dirty = is_dirty ||
+                edit_vec2(ui, json, "size", 1.0, 1.0) ||
+                edit_bool(ui, json, "flip", false);
+        }
+        "polygon" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "radius", 1.0) ||
+                edit_usize(ui, json, "sides", 3);
+        }
+        "torus" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "radius", 1.0) ||
+                edit_f32_at_str(ui, json, "ring_radius", 0.5) ||
+                edit_usize(ui, json, "subdivisions_segments", 32) ||
+                edit_usize(ui, json, "subdivisions_sides", 24);
+        }
+        "sphere" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "radius", 1.0) ||
+                edit_usize(ui, json, "sectors", 36) ||
+                edit_usize(ui, json, "stacks", 18);
+        }
+        _ => { error!("Unknown mesh shape"); }
+    }
+
+    is_dirty
+}
+
+fn ui_collision_shape(ui: &mut egui::Ui, json: &mut JsonValue) -> bool {
+    let mut is_dirty = false;
+
+    match json["shape"].as_str().unwrap() {
+        "sphere" => { 
+            is_dirty = is_dirty || edit_f32_at_str(ui, json, "radius", 1.0); 
+        }
+        "cylinder" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0);
+        }
+        "rounded_cylinder" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0) ||
+                edit_f32_at_str(ui, json, "border_radius", 0.0);
+        }
+        "cone" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0);
+        }
+        "rounded_cone" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0) ||
+                edit_f32_at_str(ui, json, "border_radius", 0.0);
+        }
+        "capsule" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0);
+        }
+        "cube" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "width", 1.0) ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "depth", 1.0);
+        }
+        "rounded_cube" => {
+            is_dirty = is_dirty ||
+                edit_f32_at_str(ui, json, "width", 1.0) ||
+                edit_f32_at_str(ui, json, "height", 1.0) ||
+                edit_f32_at_str(ui, json, "depth", 1.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0);
+        }
+        "triangle" => {
+            is_dirty = is_dirty ||
+                edit_vec3(ui, json, "point_a", 0.0, 0.0, 0.0) ||
+                edit_vec3(ui, json, "point_b", 0.0, 0.0, 0.0) ||
+                edit_vec3(ui, json, "point_c", 0.0, 0.0, 0.0);
+        }
+        "rounded_triangle" => {
+            is_dirty = is_dirty ||
+                edit_vec3(ui, json, "point_a", 0.0, 0.0, 0.0) ||
+                edit_vec3(ui, json, "point_b", 0.0, 0.0, 0.0) ||
+                edit_vec3(ui, json, "point_c", 0.0, 0.0, 0.0) ||
+                edit_f32_at_str(ui, json, "radius", 1.0);
+        }
+        _ => { error!("Unknown collision shape"); }
+    };
+
     is_dirty
 }
 
