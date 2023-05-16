@@ -177,7 +177,7 @@ pub fn unpack_component(
                 slide: optional_bool(input_json, "slide", false),
                 autostep: autostep,
                 max_slope_climb_angle: optional_f32(input_json, "max_climb_angle", 45.0).to_radians(),
-                min_slope_slide_angle: optional_f32(input_json, "max_climb_angle", 30.0).to_radians(),
+                min_slope_slide_angle: optional_f32(input_json, "min_slide_angle", 30.0).to_radians(),
                 apply_impulse_to_dynamic_bodies: optional_bool(input_json, "move_dynamic_bodies", true),
                 snap_to_ground: if input_json.has_key("snap_to_ground") { Some(character_length(input_json, "snap_to_ground", "snap_to_ground_length_type", 0.2)) } else { None },
                 ..Default::default()
