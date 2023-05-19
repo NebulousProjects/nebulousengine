@@ -31,9 +31,21 @@ fn render_directory_contents(ui: &mut Ui, tabs: &mut EventWriter<EditorOpenFileE
 
 fn render_file(ui: &mut Ui, events: &mut EventWriter<EditorOpenFileEvent>, path: DirEntry) {
     // add a button to the file that when clicked, run code
-    if ui.add(egui::widgets::Label::new(path.file_name().to_str().unwrap()).wrap(false).sense(egui::Sense::click())).clicked() {
-        events.send(EditorOpenFileEvent { path: path.path() })
-    }
+    // let response = ui.add(egui::widgets::Label::new(path.file_name().to_str().unwrap()).wrap(false).sense(egui::Sense::click()));
+    // if response.clicked_by(egui::PointerButton::Primary) {
+    //     events.send(EditorOpenFileEvent { path: path.path() })
+    // }
+    // if response.clicked_by(egui::PointerButton::Secondary) {
+    //     println!("Released");
+    // }
+    egui::menu::menu_button(ui, path.file_name().to_str().unwrap(), |ui| {
+        if ui.button("Open...").clicked() {
+            events.send(EditorOpenFileEvent { path: path.path() })
+        }
+        if ui.button("Delete...").clicked() {
+            let _ = std::fs::remove_file(path.path());
+        }
+    });
 }
 
 fn render_directory(ui: &mut Ui, tabs: &mut EventWriter<EditorOpenFileEvent>, dir: DirEntry) {
