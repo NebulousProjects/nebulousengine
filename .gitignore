@@ -9,3 +9,4 @@ target/
 /kotlin-test/.gradle/
 /kotlin/build/
 /kotlin-test/build/
+/out/
