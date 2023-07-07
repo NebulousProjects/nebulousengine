@@ -38,7 +38,7 @@
             "components": [
                 {
                     "type": "directional_light",
-                    "illuminance": 100000,
+                    "illuminance": 10000,
                     "shadows_enabled": true
                 }
             ],

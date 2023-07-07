@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 
-use nebulousengine_editor::EditorPlugin;
 use nebulousengine_input::*;
-use nebulousengine_noneditor::*;
 use nebulousengine_scenes::*;
 use nebulousengine_ui::*;
 use nebulousengine_utils::*;
@@ -19,13 +17,13 @@ fn main() {
         .add_plugin(UIPlugin)
         .add_plugin(ScenePlugin)
         .add_plugin(EntityPlugin)
+        .add_startup_system(setup)
         .insert_resource(RunningState::default());
 
-    if cfg!(feature = "editor") {
-        app.add_plugin(EditorPlugin);
-    } else {
-        app.add_plugin(NonEditorPlugin);
-    }
-
     app.run();
+}
+
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let handle: Handle<SceneContainer> = asset_server.load("test.scene");
+    commands.spawn_empty().insert(handle);
 }
