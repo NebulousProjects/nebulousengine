@@ -503,7 +503,7 @@ checksum = "f3c40ec476443b97d5d9c6f40668da7ded2d83b13955a7c94c062ad2b6f98120"
 dependencies = [
  "arboard",
  "bevy",
- "egui",
+ "egui 0.21.0",
  "thread_local",
  "webbrowser",
 ]
@@ -1472,13 +1472,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "ecolor"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e479a7fa3f23d4e794f8b2f8b3568dd4e47886ad1b12c9c095e141cb591eb63"
+
+[[package]]
 name = "egui"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6412a21e0bde7c0918f7fb44bbbb86b5e1f88e63c026a4e747cc7af02f76dfbe"
 dependencies = [
  "ahash 0.8.3",
- "epaint",
+ "epaint 0.21.0",
+ "nohash-hasher",
+]
+
+[[package]]
+name = "egui"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3aef8ec3ae1b772f340170c65bf27d5b8c28f543a0116c844d2ac08d01123e7"
+dependencies = [
+ "ahash 0.8.3",
+ "epaint 0.22.0",
  "nohash-hasher",
 ]
 
@@ -1489,7 +1506,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a682a90cd64cf1d25306bfd2d024f6893d57d8143c82adf7150778cbb872f8e"
 dependencies = [
  "duplicate",
- "egui",
+ "egui 0.21.0",
  "paste",
 ]
 
@@ -1507,6 +1524,12 @@ checksum = "b8ecd80612937e0267909d5351770fe150004e24dab93954f69ca62eecd3f77e"
 dependencies = [
  "bytemuck",
 ]
+
+[[package]]
+name = "emath"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3857d743a6e0741cdd60b622a74c7a36ea75f5f8f11b793b41d905d2c9721a4b"
 
 [[package]]
 name = "encase"
@@ -1550,8 +1573,23 @@ dependencies = [
  "ahash 0.8.3",
  "atomic_refcell",
  "bytemuck",
- "ecolor",
- "emath",
+ "ecolor 0.21.0",
+ "emath 0.21.0",
+ "nohash-hasher",
+ "parking_lot",
+]
+
+[[package]]
+name = "epaint"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09333964d4d57f40a85338ba3ca5ed4716070ab184dcfed966b35491c5c64f3b"
+dependencies = [
+ "ab_glyph",
+ "ahash 0.8.3",
+ "atomic_refcell",
+ "ecolor 0.22.0",
+ "emath 0.22.0",
  "nohash-hasher",
  "parking_lot",
 ]
@@ -2418,7 +2456,7 @@ version = "0.0.1"
 dependencies = [
  "bevy",
  "bevy_egui",
- "egui",
+ "egui 0.22.0",
  "json",
  "nebulousengine_editor",
  "nebulousengine_entities",
@@ -2436,7 +2474,7 @@ dependencies = [
  "bevy",
  "bevy_egui",
  "bevy_rapier3d",
- "egui",
+ "egui 0.21.0",
  "egui_dock",
  "json",
  "nebulousengine_entities",

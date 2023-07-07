@@ -20,8 +20,8 @@
         {
             "type": "shape",
             "shape": "plane",
-            "size": 50,
-            "color": "#011D03",
+            "size": 5,
+            "color": "#408040",
             "uv_profile": "fixed"
         },
         {
@@ -37,21 +37,19 @@
         {
             "components": [
                 {
-                    "type": "point_light",
-                    "intensity": 9000,
-                    "range": 100,
-                    "shadows_enabled": true,
-                    "color": "#FFFFFF"
+                    "type": "directional_light",
+                    "illuminance": 100000,
+                    "shadows_enabled": true
                 }
             ],
             "transform": {
                 "position": [
+                    4,
                     8,
-                    16,
-                    8
+                    4
                 ],
                 "rotation": [
-                    0,
+                    -45,
                     0,
                     0
                 ],

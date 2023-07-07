@@ -9,7 +9,7 @@ bevy = "0.10.1"
 
 # egui
 bevy_egui = "0.20"
-egui = "0.21"
+egui = "0.22"
 
 # json
 json = "0.12.4"
