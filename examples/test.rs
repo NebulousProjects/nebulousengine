@@ -5,7 +5,7 @@ use nebulousengine_scenes::*;
 use nebulousengine_ui::*;
 use nebulousengine_utils::*;
 use nebulousengine_entities::*;
-
+ 
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(AssetPlugin {
