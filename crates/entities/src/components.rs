@@ -116,7 +116,7 @@ pub fn unpack_component(
         "directional_light" => Ok(EntityBundle::DirectionalLight(
             DirectionalLight {
                 color: optional_color_default(input_json, "color", Color::WHITE),
-                illuminance: optional_f32(input_json, "intensity", 10000.0),
+                illuminance: optional_f32(input_json, "illuminance", 10000.0),
                 shadows_enabled: optional_bool(input_json, "shadows_enabled", true),
                 shadow_depth_bias: optional_f32(input_json, "shadow_depth_bias", 0.02),
                 shadow_normal_bias: optional_f32(input_json, "shadow_normal_bias", 0.6)
