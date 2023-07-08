@@ -17,8 +17,7 @@ fn main() {
         .add_plugin(UIPlugin)
         .add_plugin(ScenePlugin)
         .add_plugin(EntityPlugin)
-        .add_startup_system(setup)
-        .insert_resource(RunningState::default());
+        .add_startup_system(setup);
 
     app.run();
 }

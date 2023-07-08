@@ -62,17 +62,6 @@ pub fn insert_json(json: &mut JsonValue, name: &str, value: JsonValue) {
     }
 }
 
-#[derive(Resource)]
-pub struct RunningState {
-    pub running: bool
-}
-
-impl Default for RunningState {
-    fn default() -> Self {
-        Self { running: true }
-    }
-}
-
 #[macro_export]
 macro_rules! is_of_var {
     ($val:ident, $var:path) => {
