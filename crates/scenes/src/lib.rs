@@ -59,7 +59,6 @@ fn load_scenes(
     query: Query<(Entity, &Handle<SceneContainer>), Without<SceneContainerLoaded>>,
     entities: Query<Entity, With<Despawnable>>,
     assets: Res<Assets<SceneContainer>>,
-    mut running_state: ResMut<RunningState>,
     mut commands: Commands,
 
     asset_server: Res<AssetServer>,
@@ -75,7 +74,7 @@ fn load_scenes(
             // get id
             let id = handle.id();
 
-            load_scene(&mut commands, &asset_server, &mut running_state, &entities, &mut meshes, &mut materials, &no_cam_spawn, &container.unwrap().json);
+            load_scene(&mut commands, &asset_server, &entities, &mut meshes, &mut materials, &no_cam_spawn, &container.unwrap().json);
 
             commands.entity(entity).insert(SceneContainerLoaded { path: id });
         }
@@ -106,25 +105,12 @@ fn reload(
 fn load_scene(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    running_state: &mut ResMut<RunningState>,
     entities: &Query<Entity, With<Despawnable>>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     no_cam_spawn: &Query<(Entity, With<NoCameraSpawn>)>,
     json: &JsonValue
 ) {
-    // load scene to entity
-    let running_state = running_state.as_mut();
-        
-    // pause
-    running_state.running = false;
-
-    // call stop on all scripts
-    // execute_functions(&mut wrapper, "stop".to_string()); TODO
-
-    // remove scripts all scripts
-    // wrapper.engine.scripts.clear();
-
     // clear old entities and UIs
     for entity in entities.iter() {
         commands.entity(entity).despawn_recursive();
@@ -136,55 +122,4 @@ fn load_scene(
         &asset_server, meshes, 
         materials, no_cam_spawn
     );
-
-    // call start on all scripts
-    // execute_functions(&mut wrapper, "start".to_string()); TODO
-
-    // resume
-    running_state.running = true;
 }
-
-/*
-fn load_scene_loop(
-    mut commands: Commands,
-    mut events: EventReader<LoadSceneEvent>,
-    entities: Query<Entity, With<Despawnable>>, // theres gotta be a better way to do this
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    // mut wrapper: NonSendMut<ScriptEngineWrapper>,
-    mut running_state: ResMut<RunningState>
-) {
-    // run for each event
-    for event in events.iter() {
-        let running_state = running_state.as_mut();
-        
-        // pause
-        running_state.running = false;
-
-        // call stop on all scripts
-        // execute_functions(&mut wrapper, "stop".to_string()); TODO
-
-        // remove scripts all scripts
-        // wrapper.engine.scripts.clear();
-
-        // clear old entities and UIs
-        for entity in entities.iter() {
-            commands.entity(entity).despawn_recursive();
-        }
-
-        // load new scene
-        load_scene_from_path(
-            &mut commands, event.path.as_str(), 
-            &asset_server, &mut meshes, 
-            &mut materials
-        );
-
-        // call start on all scripts
-        // execute_functions(&mut wrapper, "start".to_string()); TODO
-
-        // resume
-        running_state.running = true;
-    }
-}
-*/

@@ -1,7 +1,6 @@
 use bevy::{prelude::*, asset::{AssetLoader, HandleId, LoadedAsset}, reflect::TypeUuid, ecs::system::EntityCommands};
 use json::JsonValue;
 use loader::*;
-use nebulousengine_utils::*;
 
 mod loader;
 
@@ -111,16 +110,13 @@ fn button_listener(
         (&Interaction, &ButtonID),
         (Changed<Interaction>, With<Button>)
     >,
-    running_state: ResMut<RunningState>,
     mut events: EventWriter<UIInteractEvent>
 ) {
-    if running_state.running {
-        for (interaction, tag) in &mut button_query {
-            events.send(UIInteractEvent {
-                id: tag.id.clone(),
-                interaction: interaction.clone()
-            })
-        }
+    for (interaction, tag) in &mut button_query {
+        events.send(UIInteractEvent {
+            id: tag.id.clone(),
+            interaction: interaction.clone()
+        })
     }
 }
 

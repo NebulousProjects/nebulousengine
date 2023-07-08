@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use nebulousengine_input::*;
 use nebulousengine_scenes::*;
 use nebulousengine_ui::*;
-use nebulousengine_utils::*;
 use nebulousengine_entities::*;
  
 fn main() {
