@@ -19,6 +19,7 @@ nebulousengine_entities = { path = "./crates/entities" }
 nebulousengine_input = { path = "./crates/input" }
 nebulousengine_scenes = { path = "./crates/scenes" }
 nebulousengine_ui = { path = "./crates/ui" }
+nebulousengine_iced_ui = { path = "./crates/iced_ui" }
 nebulousengine_utils = { path = "./crates/utils" }
 
 [features]

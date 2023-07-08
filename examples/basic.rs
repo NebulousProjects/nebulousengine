@@ -1,24 +1,21 @@
 use bevy::prelude::*;
 
+use nebulousengine_iced_ui::IcedUIPlugin;
 use nebulousengine_input::*;
 use nebulousengine_scenes::*;
 use nebulousengine_ui::*;
 use nebulousengine_entities::*;
  
 fn main() {
-    let mut app = App::new();
-    app.add_plugins(DefaultPlugins.set(AssetPlugin {
-            watch_for_changes: true,
-            ..Default::default()
-        }))
-        // .add_plugins(DefaultPlugins)
+    App::new()
+        .add_plugins(DefaultPlugins)
         .add_plugin(InputPlugin)
-        .add_plugin(UIPlugin)
+        // .add_plugin(UIPlugin)
         .add_plugin(ScenePlugin)
         .add_plugin(EntityPlugin)
-        .add_startup_system(setup);
-
-    app.run();
+        .add_plugin(IcedUIPlugin)
+        .add_startup_system(setup)
+        .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
