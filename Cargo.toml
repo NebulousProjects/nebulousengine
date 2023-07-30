@@ -5,22 +5,16 @@ edition = "2021"
 
 [dependencies]
 # bevy
-bevy = "0.10.1"
-
-# egui
-bevy_egui = "0.20"
-egui = "0.22"
+bevy = "0.11"
+bevy_rapier3d = "0.22.0"
 
 # json
 json = "0.12.4"
 
 # internal
-nebulousengine_entities = { path = "./crates/entities" }
-nebulousengine_input = { path = "./crates/input" }
-nebulousengine_scenes = { path = "./crates/scenes" }
-nebulousengine_ui = { path = "./crates/ui" }
-nebulousengine_iced_ui = { path = "./crates/iced_ui" }
 nebulousengine_utils = { path = "./crates/utils" }
+nebulousengine_input = { path = "./crates/input" }
+nebulousengine_models = { path = "./crates/models" }
 
 [features]
 editor = []

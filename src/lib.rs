@@ -1,6 +1,3 @@
-pub use bevy::prelude::*;
-pub use nebulousengine_input::*;
-pub use nebulousengine_scenes::*;
-pub use nebulousengine_ui::*;
-pub use nebulousengine_utils::*;
-pub use nebulousengine_entities::*;
+pub use nebulousengine_models as models;
+pub use nebulousengine_utils as utils;
+pub use nebulousengine_input as input;
