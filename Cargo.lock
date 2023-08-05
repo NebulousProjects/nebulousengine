@@ -2316,10 +2316,18 @@ dependencies = [
  "bevy",
  "bevy_rapier3d",
  "json",
+ "nebulousengine_camera",
  "nebulousengine_input",
  "nebulousengine_models",
  "nebulousengine_ui",
  "nebulousengine_utils",
+]
+
+[[package]]
+name = "nebulousengine_camera"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

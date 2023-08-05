@@ -1,12 +1,2 @@
-/.idea
-*.iml
-/kotlin/.gradle
-/kotlin/build
-
-target/
-
-/kotlin/.gradle/
-/kotlin-test/.gradle/
-/kotlin/build/
-/kotlin-test/build/
-/out/
+target
+*.lock

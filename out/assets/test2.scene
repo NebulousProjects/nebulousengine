@@ -1,0 +1,20 @@
+{
+    "entities": [
+        { 
+            "path": "camera.entity",
+            "transform": {
+                "position": [0.0, 0.0, 0.0]
+            }
+        },
+        { 
+            "path": "ground.entity"
+        }
+    ],
+    "uis": [
+        "test.ui"
+    ],
+    "scripts": [],
+    "inputs": [
+        "default.input"
+    ]
+}
