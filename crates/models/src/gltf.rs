@@ -59,6 +59,7 @@ impl GLTFModel {
     pub fn get_current_animation_as_string(&self) -> String { self.current_animation.clone().unwrap_or("none".to_string()) }
     pub fn has_next_animation(&self) -> bool { self.next_animation.is_some() }
     pub fn has_animation(&self) -> bool { self.current_animation.is_some() }
+    pub fn get_animations(&self) -> Vec<String> { self.animations.iter().map(|a| { a.0.clone() }).collect() }
 }
 
 // Component to mark gltf models as loaded
