@@ -2,8 +2,17 @@
     "id": "root",
     "align_items": "Start",
     "justify_content": "Start",
+    "flex_direction": "Column",
     "type": "Node",
     "children": [
+        {
+            "id": "fps",
+            "type": "Text",
+            "text": "0.0",
+            "color": "white",
+            "font_size": 25,
+            "margin": 10
+        },
         {
             "type": "Node",
             "padding": 5,

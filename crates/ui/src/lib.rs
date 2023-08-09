@@ -1,8 +1,12 @@
-use bevy::{prelude::*, asset::{AssetLoader, LoadedAsset}, ecs::system::EntityCommands};
+use bevy::{prelude::*, ecs::system::EntityCommands};
+use loader::UiLoader;
 use serde_json::Value;
-use structs::UiElement;
+use serializables::*;
+use component::*;
 
-pub mod structs;
+pub mod serializables;
+pub mod component;
+mod loader;
 
 #[derive(Component)]
 pub struct SpawnedUi;
@@ -30,57 +34,43 @@ impl Plugin for ConfigurableUiPlugin {
             .add_event::<UiHoverStart>()
             .add_event::<UiReset>()
             .add_asset_loader(UiLoader)
-            .add_systems(Update, (spawn_uis, handle_buttons));
-    }
-}
-
-// asset loader to load ui files
-pub struct UiLoader;
-impl AssetLoader for UiLoader {
-    fn load<'a>(
-        &'a self,
-        bytes: &'a [u8],
-        load_context: &'a mut bevy::asset::LoadContext,
-    ) -> bevy::utils::BoxedFuture<'a, Result<(), bevy::asset::Error>> {
-        Box::pin(async move {
-            // load content
-            let content = std::str::from_utf8(bytes);
-            if content.is_err() { error!("Failed to load ui json!"); return Err(bevy::asset::Error::msg("Failed to load json")) }
-            let content = content.unwrap();
-            
-            // load description
-            let description: Result<UiElement, serde_json::Error> = serde_json::from_str(content);
-            if description.is_err() { error!("Failed to load ui description from json"); return Err(bevy::asset::Error::msg("Failed to load description")) }
-            
-            // load final input map
-            load_context.set_default_asset(LoadedAsset::new(description.unwrap()));
-            
-            Ok(())
-        })
-    }
-
-    fn extensions(&self) -> &[&str] {
-        &["ui"]
+            .add_systems(Update, (spawn_uis, handle_buttons, handle_commands));
     }
 }
 
 // spawn all uis
 fn spawn_uis(
     mut commands: Commands,
-    entities: Query<(Entity, &Handle<UiElement>, Without<SpawnedUi>)>,
+    entities: Query<(Entity, Option<&Ui>, Option<&Handle<UiElement>>), (Without<SpawnedUi>, Or<(&Ui, &Handle<UiElement>)>)>,
     uis: Res<Assets<UiElement>>
 ) {
     // loop through all uis to spawn
-    entities.for_each(|(entity, handle, _)| {
-        // get ui element
-        let ui = uis.get(handle);
-        if ui.is_none() { return }
-        let ui = ui.unwrap();
+    entities.for_each(|(entity, ui, handle)| {
+        // get ui element from spawnable
+        let element = if handle.is_some() {
+            let handle = uis.get(handle.unwrap());
+            if handle.is_none() { return }
+            handle.unwrap()
+        } else {
+            match &ui.unwrap().spawnable {
+                UiSpawnable::Handle { handle } => {
+                    let handle = uis.get(handle);
+                    if handle.is_none() { return }
+                    handle.unwrap()
+                },
+                UiSpawnable::Direct { element } => &element,
+            }
+        };
+        println!("Spawning... {} : {}", ui.is_some(), handle.is_some());
 
         // spawn ui
         let mut entity_commands = commands.entity(entity);
         entity_commands.insert(SpawnedUi);
-        attach_ui(ui, &mut entity_commands);
+        // entity_commands.with_children(|builder| {
+        //     let mut child_commands = builder.spawn_empty();
+            attach_ui(element, &mut entity_commands);
+            println!("Adding root child!");
+        // });
     });
 }
 
@@ -120,5 +110,61 @@ fn handle_buttons(
             Interaction::Hovered => hover_start_events.send(UiHoverStart(entity, id.0.clone(), data)),
             Interaction::None => reset_events.send(UiReset(entity, id.0.clone(), data))
         }
+    });
+}
+
+fn handle_commands(
+    mut commands: Commands,
+    mut ui_assets: ResMut<Assets<UiElement>>,
+    mut uis: Query<&mut Ui, With<SpawnedUi>>,
+    mut ui_elements: Query<(Entity, &UiID, Option<&mut Text>, Option<&mut BackgroundColor>, Option<&mut BorderColor>)>
+) {
+    // for each ui
+    uis.for_each_mut(|mut ui| {
+        // if no commands stop here
+        if ui.commands.is_empty() { return }
+
+        // handle commands
+        ui.commands.iter_mut().for_each(|command| {
+            // get target
+            let target = ui_elements.iter_mut().find(|(_, id, _, _, _)| id.0 == command.target);
+            let (target, _, text, bg_color, border_color) = if target.is_some() { target.unwrap() } else { return };
+
+            // process command
+            match &mut command.command {
+                UiCommandType::Add { spawnable } => {
+                    // get handle to ui element
+                    let handle = match spawnable {
+                        UiSpawnable::Handle { handle } => handle.clone(),
+                        UiSpawnable::Direct { element } => ui_assets.add(element.clone()),
+                    };
+
+                    // add ui
+                    commands.entity(target).remove::<SpawnedUi>().insert(handle);
+                },
+                UiCommandType::Remove => commands.entity(target).despawn_recursive(),
+                UiCommandType::ModText { new_text } => {
+                    if text.is_some() {
+                        let mut text = text.unwrap();
+                        text.as_reflect_mut().apply(new_text.as_reflect_mut());
+                    }
+                },
+                UiCommandType::ModBGColor { color } => {
+                    if bg_color.is_some() {
+                        let mut bg_color = bg_color.unwrap();
+                        bg_color.0 = color.clone();
+                    }
+                },
+                UiCommandType::ModBorderColor { color } => {
+                    if border_color.is_some() {
+                        let mut border_color = border_color.unwrap();
+                        border_color.0 = color.clone();
+                    }
+                },
+            }
+        });
+
+        // clear commands
+        ui.commands.clear();
     });
 }

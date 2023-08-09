@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::structs::UiElement;
+use nebulousengine_ui::component::{Ui, UiCommand, UiCommandType};
 
 fn main() {
     App::new()
         .add_plugins((DefaultPlugins, NebulousEngine))
         .add_systems(Startup, setup)
+        .add_systems(Update, update)
         .run();
 }
 
@@ -48,10 +49,30 @@ fn setup(
     });
 
     // ui
-    let handle: Handle<UiElement> = asset_server.load("test.ui");
     commands.spawn((
         TransformBundle::default(),
         VisibilityBundle::default(),
-        handle
+        Ui::from_handle(asset_server.load("test.ui"))
     ));
+}
+
+fn update(
+    time: Res<Time>,
+    mut ui: Query<&mut Ui>
+) {
+    let ui = ui.iter_mut().next();
+    let mut ui = if ui.is_some() { ui.unwrap() } else { return };
+    ui.commands.push(UiCommand { 
+        target: "fps".to_string(), 
+        command: UiCommandType::ModText { 
+            new_text: Text::from_section(
+                format!("FPS: {}", 1. / time.delta_seconds()), 
+                TextStyle { 
+                    font_size: 25.0, 
+                    color: Color::WHITE, 
+                    ..Default::default() 
+                }
+            )
+        } 
+    });
 }
