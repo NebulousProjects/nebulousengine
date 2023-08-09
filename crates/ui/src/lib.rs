@@ -1,4 +1,5 @@
 use bevy::{prelude::*, asset::{AssetLoader, LoadedAsset}, ecs::system::EntityCommands};
+use serde_json::Value;
 use structs::UiElement;
 
 pub mod structs;
@@ -9,12 +10,15 @@ pub struct SpawnedUi;
 #[derive(Component)]
 pub struct UiID(String);
 
+#[derive(Component)]
+pub struct UiData(Value);
+
 #[derive(Event)]
-pub struct UiPressed(pub Entity, pub String);
+pub struct UiPressed(pub Entity, pub String, pub Option<Value>);
 #[derive(Event)]
-pub struct UiHoverStart(pub Entity, pub String);
+pub struct UiHoverStart(pub Entity, pub String, pub Option<Value>);
 #[derive(Event)]
-pub struct UiReset(pub Entity, pub String);
+pub struct UiReset(pub Entity, pub String, pub Option<Value>);
 
 // plugin for uis
 pub struct ConfigurableUiPlugin;
@@ -89,7 +93,7 @@ fn attach_ui(
 
     // add children
     commands.with_children(|builder| {
-        element.get_children().iter().for_each(|element| {
+        element.children.iter().for_each(|element| {
             let mut entity_commands = builder.spawn_empty();
             attach_ui(element, &mut entity_commands);
         });
@@ -97,17 +101,24 @@ fn attach_ui(
 }
 
 fn handle_buttons(
-    buttons_changed: Query<(Entity, &Interaction, &UiID), (With<Button>, Changed<Interaction>)>,
+    buttons_changed: Query<(Entity, &Interaction, &UiID, Option<&UiData>), (With<Button>, Changed<Interaction>)>,
     mut pressed_events: EventWriter<UiPressed>,
     mut hover_start_events: EventWriter<UiHoverStart>,
     mut reset_events: EventWriter<UiReset>
 ) {
     // if a button is pressed, send event for each type of interaction
-    buttons_changed.for_each(|(entity, interaction, id)| {
+    buttons_changed.for_each(|(entity, interaction, id, data)| {
+        // handle data
+        let data = match data {
+            None => None,
+            Some(data) => Some(data.0.clone())
+        };
+
+        // broadcast event
         match *interaction {
-            Interaction::Pressed => pressed_events.send(UiPressed(entity, id.0.clone())),
-            Interaction::Hovered => hover_start_events.send(UiHoverStart(entity, id.0.clone())),
-            Interaction::None => reset_events.send(UiReset(entity, id.0.clone()))
+            Interaction::Pressed => pressed_events.send(UiPressed(entity, id.0.clone(), data)),
+            Interaction::Hovered => hover_start_events.send(UiHoverStart(entity, id.0.clone(), data)),
+            Interaction::None => reset_events.send(UiReset(entity, id.0.clone(), data))
         }
     });
 }

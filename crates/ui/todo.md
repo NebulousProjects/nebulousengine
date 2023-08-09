@@ -1,9 +1,9 @@
 ==== Quality of Life ====
 [ ] remove need to directly apply handle, load dynamically like with gltfs
-[ ] shrink each component type by using inheiritance so more components can be created
+[x] shrink each component type by using inheiritance so more components can be created
 [ ] allow for dynamic adding/removing of objects to/from other objects in UIs
 [ ] easier way of detecting UI events at the UI root
-[ ] maybe IDs could be components instead of strings to make them easier to reference
+[x] add optional hashmap of data for each element
 
 ==== New UI Elements ====
 [ ] scrolling lists
