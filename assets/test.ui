@@ -1,0 +1,30 @@
+{
+    "id": "root",
+    "align_items": "Start",
+    "justify_content": "Start",
+    "type": "Node",
+    "children": [
+        {
+            "type": "Node",
+            "padding": 5,
+            "background_color": "white",
+            "children": [
+                {
+                    "type": "Button",
+                    "padding": 5,
+                    "border_color": "black",
+                    "border": 1,
+                    "children": [
+                        {
+                            "type": "Text",
+                            "text": "Hi!",
+                            "color": "black",
+                            "font_size": 25,
+                            "margin": 10
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
