@@ -50,27 +50,25 @@ fn spawn_uis(
         let element = if handle.is_some() {
             let handle = uis.get(handle.unwrap());
             if handle.is_none() { return }
-            handle.unwrap()
+            Some(handle.unwrap())
         } else {
             match &ui.unwrap().spawnable {
                 UiSpawnable::Handle { handle } => {
                     let handle = uis.get(handle);
                     if handle.is_none() { return }
-                    handle.unwrap()
+                    Some(handle.unwrap())
                 },
-                UiSpawnable::Direct { element } => &element,
+                UiSpawnable::Direct { element } => Some(element),
+                UiSpawnable::Empty => None
             }
         };
-        println!("Spawning... {} : {}", ui.is_some(), handle.is_some());
 
         // spawn ui
         let mut entity_commands = commands.entity(entity);
         entity_commands.insert(SpawnedUi);
-        // entity_commands.with_children(|builder| {
-        //     let mut child_commands = builder.spawn_empty();
-            attach_ui(element, &mut entity_commands);
-            println!("Adding root child!");
-        // });
+        if element.is_some() {
+            attach_ui(element.unwrap(), &mut entity_commands);
+        }
     });
 }
 
@@ -137,6 +135,7 @@ fn handle_commands(
                     let handle = match spawnable {
                         UiSpawnable::Handle { handle } => handle.clone(),
                         UiSpawnable::Direct { element } => ui_assets.add(element.clone()),
+                        UiSpawnable::Empty => return
                     };
 
                     // add ui

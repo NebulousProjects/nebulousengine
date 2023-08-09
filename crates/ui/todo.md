@@ -3,7 +3,7 @@
 [x] shrink each component type by using inheiritance so more components can be created
 [x] allow for dynamic adding/removing of objects to/from other objects in UIs
 [x] add optional hashmap of data for each element
-[ ] bundle
+[x] bundle
 
 ==== New UI Elements ====
 [ ] scrolling lists

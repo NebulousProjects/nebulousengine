@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::component::{Ui, UiCommand, UiCommandType};
+use nebulousengine_ui::component::{Ui, UiCommand, UiCommandType, UiBundle};
 
 fn main() {
     App::new()
@@ -49,11 +49,15 @@ fn setup(
     });
 
     // ui
-    commands.spawn((
-        TransformBundle::default(),
-        VisibilityBundle::default(),
-        Ui::from_handle(asset_server.load("test.ui"))
-    ));
+    commands.spawn(UiBundle {
+        ui: Ui::from_handle(asset_server.load("test.ui")),
+        ..Default::default()
+    });
+    // commands.spawn((
+    //     TransformBundle::default(),
+    //     VisibilityBundle::default(),
+    //     Ui::from_handle(asset_server.load("test.ui"))
+    // ));
 }
 
 fn update(
