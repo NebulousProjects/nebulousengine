@@ -7,7 +7,7 @@
 
 ==== New UI Elements ====
 [ ] scrolling lists
-- [ ] scroll via scroll wheel or other specifiable input
-- [ ] scroll bar
+- [x] scroll via scroll wheel or other specifiable input
+- [ ] optional scroll bar
 [ ] collapsable elements
 [ ] text inputs
