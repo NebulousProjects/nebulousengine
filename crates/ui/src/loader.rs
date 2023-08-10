@@ -18,7 +18,7 @@ impl AssetLoader for UiLoader {
             
             // load description
             let description: Result<UiElement, serde_json::Error> = serde_json::from_str(content);
-            if description.is_err() { error!("Failed to load ui description from json"); return Err(bevy::asset::Error::msg("Failed to load description")) }
+            if description.is_err() { error!("Failed to load ui description from json with error: {}", description.err().unwrap()); return Err(bevy::asset::Error::msg("Failed to load description")) }
             
             // load final input map
             load_context.set_default_asset(LoadedAsset::new(description.unwrap()));

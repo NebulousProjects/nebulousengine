@@ -47,4 +47,17 @@ impl Ui {
     pub fn from_element(element: UiElement) -> Self {
         Self { spawnable: UiSpawnable::Direct { element }, commands: Vec::new() }
     }
+
+    // functions to make commands easy
+    pub fn add_element(&mut self, target: String, new: UiElement) {
+        self.commands.push(UiCommand { target, command: UiCommandType::Add { spawnable: UiSpawnable::Direct { element: new } } });
+    }
+
+    pub fn remove_element(&mut self, target: String) {
+        self.commands.push(UiCommand { target, command: UiCommandType::Remove });
+    }
+
+    pub fn set_text(&mut self, target: String, text: Text) {
+        self.commands.push(UiCommand { target, command: UiCommandType::ModText { new_text: text } });
+    }
 }

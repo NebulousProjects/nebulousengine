@@ -53,11 +53,11 @@ fn setup(
         ui: Ui::from_handle(asset_server.load("test.ui")),
         ..Default::default()
     });
-    // commands.spawn((
-    //     TransformBundle::default(),
-    //     VisibilityBundle::default(),
-    //     Ui::from_handle(asset_server.load("test.ui"))
-    // ));
+    let scroll_ui = Ui::from_handle(asset_server.load("test_scroll.ui"));
+    commands.spawn(UiBundle {
+        ui: scroll_ui,
+        ..Default::default()
+    });
 }
 
 fn update(

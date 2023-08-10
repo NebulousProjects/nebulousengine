@@ -1,4 +1,4 @@
-use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle, Handle, Component}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
+use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
 use serde::*;
 use serde_json::Value;
 
@@ -9,7 +9,7 @@ mod uirect_serde;
 mod val_serde;
 mod zindex_serde;
 
-#[derive(Serialize, Deserialize, TypePath, TypeUuid, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, TypePath, TypeUuid, Debug, Clone)]
 #[uuid = "cf1d2afd-c9ce-4c89-83ab-6473873f9398"]
 pub struct UiElement {
     #[serde(rename = "type")]
@@ -112,6 +112,58 @@ pub struct UiElement {
     pub data: Option<Value>,
     #[serde(default)] //  = "default_children"
     pub children: Vec<UiElement>
+}
+
+impl Default for UiElement {
+    fn default() -> Self {
+        Self {
+            subtype: UiElementType::default(),
+            display: Display::default(),
+            position_type: PositionType::default(),
+            overflow: Overflow::default(),
+            direction: Direction::default(),
+            left: Val::Auto,
+            right: Val::Auto,
+            top: Val::Auto,
+            bottom: Val::Auto,
+            width: Val::Auto,
+            height: Val::Auto,
+            min_width: Val::Auto,
+            min_height: Val::Auto,
+            max_width: Val::Auto,
+            max_height: Val::Auto,
+            aspect_ratio: None,
+            align_items: AlignItems::default(),
+            justify_items: JustifyItems::default(),
+            align_self: AlignSelf::default(),
+            justify_self: JustifySelf::default(),
+            align_content: AlignContent::default(),
+            justify_content: JustifyContent::default(),
+            margin: UiRect::all(Val::Px(0.0)),
+            padding: UiRect::all(Val::Px(0.0)),
+            border: UiRect::all(Val::Px(0.0)),
+            flex_direction: FlexDirection::default(),
+            flex_wrap: FlexWrap::default(),
+            flex_grow: 0.0,
+            flex_shrink: 1.0,
+            flex_basis: Val::Auto,
+            row_gap: Val::Px(0.0),
+            column_gap: Val::Px(0.0),
+            grid_auto_flow: GridAutoFlow::default(),
+            grid_row: GridPlacement::default(),
+            grid_column: GridPlacement::default(),
+            background_color: Color::Rgba { red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0 },
+            border_color: Color::BLACK,
+            focus_policy: FocusPolicy::default(),
+            z_index: ZIndex::default(),
+            text: String::new(),
+            color: Color::WHITE,
+            font_size: 25.0,
+            id: None,
+            data: None,
+            children: Vec::new()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]

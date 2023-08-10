@@ -1,0 +1,23 @@
+{
+    "id": "root",
+    "position_type": "Absolute",
+    "top": 0,
+    "right": 0,
+    "height": "100%",
+    "flex_direction": "Column",
+    "type": "Node",
+    "children": [
+        {
+            "id": "list",
+            "type": "Node",
+            "background_color": "white",
+            "width": 200,
+            "height": "50%",
+            "overflow": {
+                "x": "Visible",
+                "y": "Clip"
+            },
+            "children": []
+        }
+    ]
+}
