@@ -51,6 +51,21 @@ impl Default for ScrollList {
     }
 }
 
+#[derive(Component)]
+pub struct Collapsable {
+    pub collapsed: bool
+}
+
+impl Default for Collapsable {
+    fn default() -> Self {
+        Self { collapsed: false }
+    }
+}
+
+// marker component that markes a entity as it should not be hidden if its direct parent is a collapsable
+#[derive(Component)]
+pub struct NoCollapse;
+
 impl Ui {
     // functions to make creating commands easier
     pub fn from_handle(handle: Handle<UiElement>) -> Self {

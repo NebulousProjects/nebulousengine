@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ecs::system::EntityCommands, input::mouse::{MouseWheel, MouseScrollUnit}};
+use bevy::{prelude::*, ecs::system::EntityCommands, input::mouse::{MouseWheel, MouseScrollUnit}, window::PrimaryWindow, math::Vec3Swizzles};
 use loader::UiLoader;
 use serde_json::Value;
 use serializables::*;
@@ -168,24 +168,44 @@ fn handle_commands(
 
 fn update_scrolling_lists(
     mut mouse_wheel: EventReader<MouseWheel>,
-    mut query: Query<(&mut ScrollList, &mut Style, &Parent, &Node)>,
-    nodes: Query<&Node>
+    mut query: Query<(&mut ScrollList, &mut Style, &GlobalTransform, &Parent, &Node)>,
+    nodes: Query<&Node>,
+    window: Query<&Window, With<PrimaryWindow>>
 ) {
-    for event in mouse_wheel.iter() {
-        for (mut scroll, mut style, parent, node) in &mut query {
-            let items_height = node.size().y;
-            let container_height = nodes.get(parent.get()).unwrap().size().y;
+    // get window
+    let window = window.get_single();
+    let window = if window.is_ok() { window.unwrap() } else { return };
+    let pointer = window.cursor_position();
+    let pointer = if pointer.is_some() { pointer.unwrap() } else { return };
 
+    // handle mouse wheel eve nt
+    for event in mouse_wheel.iter() {
+        query.for_each_mut(|(mut scroll, mut style, transform, parent, node)| {
+            // get the heights of this element and of its children
+            let items_height = node.size().y;
+            let container_size = nodes.get(parent.get()).unwrap().size();
+            let container_height = container_size.y;
+
+            // if this element is not hovered, cancel
+            let node_position = transform.translation().xy();
+            let half_size = 0.5 * container_size;
+            let min = node_position - half_size;
+            let max = node_position + half_size;
+            if !((min.x .. max.x).contains(&pointer.x) && (min.y .. max.y).contains(&pointer.y)) { return }
+
+            // get maximum scroll distance
             let max_scroll = (items_height - container_height).max(0.);
 
+            // get the change in the y access
             let dy = match event.unit {
                 MouseScrollUnit::Line => event.y * 20.,
                 MouseScrollUnit::Pixel => event.y,
             };
 
+            // apply scroll
             scroll.amount += dy;
             scroll.amount = scroll.amount.clamp(-max_scroll, 0.);
             style.top = Val::Px(scroll.amount);
-        }
+        });
     }
 }
