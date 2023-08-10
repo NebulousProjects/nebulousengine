@@ -1,8 +1,8 @@
-use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
+use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle, BuildChildren}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
 use serde::*;
 use serde_json::Value;
 
-use crate::{UiID, UiData};
+use crate::{UiID, UiData, component::ScrollList};
 
 mod color_serde;
 mod uirect_serde;
@@ -171,7 +171,8 @@ pub enum UiElementType {
     #[default]
     Node, 
     Text, 
-    Button
+    Button,
+    ScrollList
 }
 
 impl UiElement {
@@ -227,6 +228,10 @@ impl UiElement {
                     z_index: self.z_index,
                     ..Default::default()
                 });
+
+                // add id and data components
+                if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
+                if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
             },
 
             // spawn a button element (clickable div)
@@ -239,6 +244,10 @@ impl UiElement {
                     z_index: self.z_index,
                     ..Default::default()
                 });
+
+                // add id and data components
+                if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
+                if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
             },
 
             // spawn a text element
@@ -254,12 +263,41 @@ impl UiElement {
                     z_index: self.z_index,
                     ..Default::default()
                 });
+
+                // add id and data components
+                if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
+                if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
+            },
+
+            // add scroll element
+            UiElementType::ScrollList => {
+                commands.insert(
+                    NodeBundle {
+                        style: self.get_style(),
+                        background_color: BackgroundColor(self.background_color),
+                        border_color: BorderColor(self.border_color),
+                        focus_policy: self.focus_policy,
+                        z_index: self.z_index,
+                        ..Default::default()
+                    }
+                ).with_children(|parent| {
+                    let mut child = parent.spawn((
+                        NodeBundle {
+                            style: Style {
+                                flex_direction: FlexDirection::Column,
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        ScrollList::default()
+                    ));
+
+                    // add id and data components
+                    if self.id.is_some() { child.insert(UiID(self.id.clone().unwrap())); }
+                    if self.data.is_some() { child.insert(UiData(self.data.clone().unwrap())); }
+                });
             },
         }
-
-        // add id and data components
-        if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
-        if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
     }
 }
 

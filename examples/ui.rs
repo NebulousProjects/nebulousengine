@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::component::{Ui, UiCommand, UiCommandType, UiBundle};
+use nebulousengine_ui::{component::*, serializables::*};
 
 fn main() {
     App::new()
@@ -53,7 +53,17 @@ fn setup(
         ui: Ui::from_handle(asset_server.load("test.ui")),
         ..Default::default()
     });
-    let scroll_ui = Ui::from_handle(asset_server.load("test_scroll.ui"));
+    let mut scroll_ui = Ui::from_handle(asset_server.load("test_scroll.ui"));
+    for i in 0 .. 30 {
+        scroll_ui.add_element("list", UiElement {
+            subtype: UiElementType::Text,
+            text: format!("Item {}", i + 1),
+            font_size: 25.,
+            color: Color::BLACK,
+            ..Default::default()
+        });
+    }
+
     commands.spawn(UiBundle {
         ui: scroll_ui,
         ..Default::default()

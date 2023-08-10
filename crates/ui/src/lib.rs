@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ecs::system::EntityCommands};
+use bevy::{prelude::*, ecs::system::EntityCommands, input::mouse::{MouseWheel, MouseScrollUnit}};
 use loader::UiLoader;
 use serde_json::Value;
 use serializables::*;
@@ -34,7 +34,7 @@ impl Plugin for ConfigurableUiPlugin {
             .add_event::<UiHoverStart>()
             .add_event::<UiReset>()
             .add_asset_loader(UiLoader)
-            .add_systems(Update, (spawn_uis, handle_buttons, handle_commands));
+            .add_systems(Update, (spawn_uis, handle_buttons, handle_commands, update_scrolling_lists));
     }
 }
 
@@ -113,7 +113,6 @@ fn handle_buttons(
 
 fn handle_commands(
     mut commands: Commands,
-    mut ui_assets: ResMut<Assets<UiElement>>,
     mut uis: Query<&mut Ui, With<SpawnedUi>>,
     mut ui_elements: Query<(Entity, &UiID, Option<&mut Text>, Option<&mut BackgroundColor>, Option<&mut BorderColor>)>
 ) {
@@ -131,15 +130,14 @@ fn handle_commands(
             // process command
             match &mut command.command {
                 UiCommandType::Add { spawnable } => {
-                    // get handle to ui element
-                    let handle = match spawnable {
-                        UiSpawnable::Handle { handle } => handle.clone(),
-                        UiSpawnable::Direct { element } => ui_assets.add(element.clone()),
-                        UiSpawnable::Empty => return
-                    };
-
                     // add ui
-                    commands.entity(target).remove::<SpawnedUi>().insert(handle);
+                    commands.entity(target).with_children(|parent| {
+                        let spawnable = spawnable.clone();
+                        parent.spawn((UiBundle {
+                            ui: Ui::from_spawnable(spawnable),
+                            ..Default::default()
+                        }, Node::default(), Style::default()));
+                    });
                 },
                 UiCommandType::Remove => commands.entity(target).despawn_recursive(),
                 UiCommandType::ModText { new_text } => {
@@ -166,4 +164,28 @@ fn handle_commands(
         // clear commands
         ui.commands.clear();
     });
+}
+
+fn update_scrolling_lists(
+    mut mouse_wheel: EventReader<MouseWheel>,
+    mut query: Query<(&mut ScrollList, &mut Style, &Parent, &Node)>,
+    nodes: Query<&Node>
+) {
+    for event in mouse_wheel.iter() {
+        for (mut scroll, mut style, parent, node) in &mut query {
+            let items_height = node.size().y;
+            let container_height = nodes.get(parent.get()).unwrap().size().y;
+
+            let max_scroll = (items_height - container_height).max(0.);
+
+            let dy = match event.unit {
+                MouseScrollUnit::Line => event.y * 20.,
+                MouseScrollUnit::Pixel => event.y,
+            };
+
+            scroll.amount += dy;
+            scroll.amount = scroll.amount.clamp(-max_scroll, 0.);
+            style.top = Val::Px(scroll.amount);
+        }
+    }
 }

@@ -9,7 +9,7 @@
     "children": [
         {
             "id": "list",
-            "type": "Node",
+            "type": "ScrollList",
             "background_color": "white",
             "width": 200,
             "height": "50%",
@@ -17,6 +17,7 @@
                 "x": "Visible",
                 "y": "Clip"
             },
+            "flex_direction": "Column",
             "children": []
         }
     ]

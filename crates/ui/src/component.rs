@@ -17,7 +17,7 @@ pub struct Ui {
     pub commands: Vec<UiCommand>
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub enum UiSpawnable {
     Handle { handle: Handle<UiElement> },
     Direct { element: UiElement },
@@ -25,17 +25,30 @@ pub enum UiSpawnable {
     Empty
 }
 
+#[derive(Clone)]
 pub struct UiCommand {
     pub target: String,
     pub command: UiCommandType
 }
 
+#[derive(Clone)]
 pub enum UiCommandType {
     Add { spawnable: UiSpawnable },
     Remove,
     ModText { new_text: Text },
     ModBGColor { color: Color },
     ModBorderColor { color: Color }
+}
+
+#[derive(Component)]
+pub struct ScrollList {
+    pub amount: f32
+}
+
+impl Default for ScrollList {
+    fn default() -> Self {
+        Self { amount: 0. }
+    }
 }
 
 impl Ui {
@@ -48,16 +61,20 @@ impl Ui {
         Self { spawnable: UiSpawnable::Direct { element }, commands: Vec::new() }
     }
 
+    pub fn from_spawnable(spawnable: UiSpawnable) -> Self {
+        Self { spawnable, commands: Vec::new() }
+    }
+
     // functions to make commands easy
-    pub fn add_element(&mut self, target: String, new: UiElement) {
-        self.commands.push(UiCommand { target, command: UiCommandType::Add { spawnable: UiSpawnable::Direct { element: new } } });
+    pub fn add_element(&mut self, target: impl Into<String>, new: UiElement) {
+        self.commands.push(UiCommand { target: target.into(), command: UiCommandType::Add { spawnable: UiSpawnable::Direct { element: new } } });
     }
 
-    pub fn remove_element(&mut self, target: String) {
-        self.commands.push(UiCommand { target, command: UiCommandType::Remove });
+    pub fn remove_element(&mut self, target: impl Into<String>) {
+        self.commands.push(UiCommand { target: target.into(), command: UiCommandType::Remove });
     }
 
-    pub fn set_text(&mut self, target: String, text: Text) {
-        self.commands.push(UiCommand { target, command: UiCommandType::ModText { new_text: text } });
+    pub fn set_text(&mut self, target: impl Into<String>, text: Text) {
+        self.commands.push(UiCommand { target: target.into(), command: UiCommandType::ModText { new_text: text } });
     }
 }
