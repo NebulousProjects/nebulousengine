@@ -9,5 +9,5 @@
 [ ] scrolling lists
 - [x] scroll via scroll wheel or other specifiable input
 - [ ] optional scroll bar
-[ ] collapsable elements
+[x] collapsable elements
 [ ] text inputs
