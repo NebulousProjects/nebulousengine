@@ -23,6 +23,10 @@ pub struct UiPressed(pub Entity, pub String, pub Option<Value>);
 pub struct UiHoverStart(pub Entity, pub String, pub Option<Value>);
 #[derive(Event)]
 pub struct UiReset(pub Entity, pub String, pub Option<Value>);
+#[derive(Event)]
+pub struct UiCollapsibleOpen(pub Entity, pub Option<String>, pub Option<Value>);
+#[derive(Event)]
+pub struct UiCollapsibleClose(pub Entity, pub Option<String>, pub Option<Value>);
 
 // plugin for uis
 pub struct ConfigurableUiPlugin;
@@ -33,8 +37,10 @@ impl Plugin for ConfigurableUiPlugin {
             .add_event::<UiPressed>()
             .add_event::<UiHoverStart>()
             .add_event::<UiReset>()
+            .add_event::<UiCollapsibleOpen>()
+            .add_event::<UiCollapsibleClose>()
             .add_asset_loader(UiLoader)
-            .add_systems(Update, (spawn_uis, handle_buttons, handle_commands, update_scrolling_lists));
+            .add_systems(Update, (spawn_uis, handle_buttons, handle_commands, update_scrolling_lists, update_collapsible));
     }
 }
 
@@ -89,7 +95,7 @@ fn attach_ui(
 }
 
 fn handle_buttons(
-    buttons_changed: Query<(Entity, &Interaction, &UiID, Option<&UiData>), (With<Button>, Changed<Interaction>)>,
+    buttons_changed: Query<(Entity, &Interaction, &UiID, Option<&UiData>), (With<Button>, Changed<Interaction>, Without<Collapsible>)>,
     mut pressed_events: EventWriter<UiPressed>,
     mut hover_start_events: EventWriter<UiHoverStart>,
     mut reset_events: EventWriter<UiReset>
@@ -208,4 +214,52 @@ fn update_scrolling_lists(
             style.top = Val::Px(scroll.amount);
         });
     }
+}
+
+fn update_collapsible(
+    mut collapsibles: Query<(Entity, &Interaction, Option<&UiID>, Option<&UiData>, &mut Collapsible, &Children), (With<Button>, Changed<Interaction>, With<Collapsible>)>,
+    mut possible_children: Query<&mut Visibility, (Without<NoCollapse>, With<Style>)>,
+    mut open_events: EventWriter<UiCollapsibleOpen>,
+    mut close_events: EventWriter<UiCollapsibleClose>
+) {
+    // for each collapsible that changed
+    collapsibles.for_each_mut(|(entity, interaction, id, data, mut collapsible, children)| {
+        // make sure pressed
+        if !matches!(interaction, Interaction::Pressed) { return }
+
+        // get target visibility
+        let target_visibility = collapsible.collapsed;
+        collapsible.collapsed = !target_visibility;
+        let new_visibility = match target_visibility {
+            true => Visibility::Inherited,
+            false => Visibility::Hidden
+        };
+
+        // update visiblity of children
+        children.iter().for_each(|child| {
+            let visibility = possible_children.get_mut(*child);
+            if visibility.is_ok() { 
+                let mut visibility = visibility.unwrap();
+                visibility.as_reflect_mut().apply(new_visibility.as_reflect());
+            }
+        });
+
+        // map id to optional string
+        let id = match id {
+            Some(_) => Some(id.unwrap().0.clone()),
+            None => None,
+        };
+
+        // map data
+        let data = match data {
+            Some(_) => Some(data.unwrap().0.clone()),
+            None => None
+        };
+
+        // broadcast event
+        match target_visibility {
+            true => open_events.send(UiCollapsibleOpen(entity, id, data)),
+            false => close_events.send(UiCollapsibleClose(entity, id, data))
+        }
+    });
 }

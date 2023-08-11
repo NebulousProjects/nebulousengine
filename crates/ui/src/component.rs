@@ -52,11 +52,11 @@ impl Default for ScrollList {
 }
 
 #[derive(Component)]
-pub struct Collapsable {
+pub struct Collapsible {
     pub collapsed: bool
 }
 
-impl Default for Collapsable {
+impl Default for Collapsible {
     fn default() -> Self {
         Self { collapsed: false }
     }

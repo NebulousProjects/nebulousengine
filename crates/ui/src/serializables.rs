@@ -2,7 +2,7 @@ use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle, BuildCh
 use serde::*;
 use serde_json::Value;
 
-use crate::{UiID, UiData, component::ScrollList};
+use crate::{UiID, UiData, component::{ScrollList, Collapsible, NoCollapse}};
 
 mod color_serde;
 mod uirect_serde;
@@ -110,6 +110,8 @@ pub struct UiElement {
     pub id: Option<String>,
     #[serde(default)]
     pub data: Option<Value>,
+    #[serde(default = "default_true")]
+    pub allow_collapse: bool,
     #[serde(default)] //  = "default_children"
     pub children: Vec<UiElement>
 }
@@ -161,6 +163,7 @@ impl Default for UiElement {
             font_size: 25.0,
             id: None,
             data: None,
+            allow_collapse: true,
             children: Vec::new()
         }
     }
@@ -172,7 +175,8 @@ pub enum UiElementType {
     Node, 
     Text, 
     Button,
-    ScrollList
+    ScrollList,
+    Collapsible
 }
 
 impl UiElement {
@@ -297,7 +301,27 @@ impl UiElement {
                     if self.data.is_some() { child.insert(UiData(self.data.clone().unwrap())); }
                 });
             },
+
+            UiElementType::Collapsible => {
+                commands.insert((
+                    ButtonBundle {
+                        style: self.get_style(),
+                        background_color: BackgroundColor(self.background_color),
+                        border_color: BorderColor(self.border_color),
+                        focus_policy: self.focus_policy,
+                        z_index: self.z_index,
+                        ..Default::default()
+                    }, Collapsible::default()
+                ));
+
+                // add id and data components
+                if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
+                if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
+            },
         }
+
+        // if marked do not allow collapse, mark
+        if !self.allow_collapse { commands.insert(NoCollapse); }
     }
 }
 
@@ -311,4 +335,4 @@ fn default_uirect_0() -> UiRect { UiRect::all(Val::Px(0.)) }
 fn default_val_auto() -> Val { Val::Auto }
 fn default_val_0() -> Val { Val::Px(0.0) }
 fn default_local_0() -> ZIndex { ZIndex::Local(0) }
-// fn default_children() -> Vec<UiElement<_>> { Vec::new() }
+fn default_true() -> bool { true }
