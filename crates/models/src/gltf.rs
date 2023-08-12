@@ -21,9 +21,9 @@ pub struct GLTFModel {
 
 // functions for making gltf models easier
 impl GLTFModel {
-    pub fn from_str(asset_server: &Res<AssetServer>, model: &str, offset: Vec3, scale: Vec3) -> Self {
+    pub fn from_str(asset_server: &Res<AssetServer>, model: impl Into<String>, offset: Vec3, scale: Vec3) -> Self {
         Self { 
-            handle: asset_server.load(model), 
+            handle: asset_server.load(model.into()), 
             animations: HashMap::new(), 
             offset, scale,
             current_animation: Option::None, 
@@ -45,12 +45,12 @@ impl GLTFModel {
     }
 
     // setters
-    pub fn set_next_animation(&mut self, anim: String) {
-        self.next_animation = Some(anim);
+    pub fn set_next_animation(&mut self, anim: impl Into<String>) {
+        self.next_animation = Some(anim.into());
     }
 
-    pub fn set_current_animation(&mut self, anim: String) {
-        self.next_animation = Some(anim);
+    pub fn set_current_animation(&mut self, anim: impl Into<String>) {
+        self.next_animation = Some(anim.into());
         self.force_next_animation = true;
     }
 

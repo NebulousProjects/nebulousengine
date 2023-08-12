@@ -12,10 +12,10 @@ mod loader;
 pub struct SpawnedUi;
 
 #[derive(Component)]
-pub struct UiID(String);
+pub struct UiID(pub String);
 
 #[derive(Component)]
-pub struct UiData(Value);
+pub struct UiData(pub Value);
 
 #[derive(Event)]
 pub struct UiPressed(pub Entity, pub String, pub Option<Value>);

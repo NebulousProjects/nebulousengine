@@ -4,7 +4,6 @@
 [x] allow for dynamic adding/removing of objects to/from other objects in UIs
 [x] add optional hashmap of data for each element
 [x] bundle
-[ ] allow components to be added in ui add command
 
 ==== New UI Elements ====
 [ ] scrolling lists
