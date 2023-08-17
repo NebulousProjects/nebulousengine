@@ -21,7 +21,7 @@ impl Plugin for StateMachinePlugin {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StateMachineResult {
     pub next: String,
     pub triggered: Option<String>
@@ -69,10 +69,6 @@ impl StateMachine {
             // return next state if one was found, otherwise, default
             if next_state.is_some() { next_state.unwrap() } else { self.default.clone() }
         } else { self.default.clone() }; // if current element was not found, return default
-
-        // todo instead of returning what the current state should be, 
-        // return what the current prioritized next state is and a optional immeidiate state
-        // todo greater than and less than conditions
 
         // pass back result
         StateMachineResult { next, triggered }

@@ -39,5 +39,8 @@ fn update_animated_gltfs(
         if state.triggered.is_some() {
             model.set_current_animation(state.triggered.unwrap());
         }
+
+        // make sure current animation is up to date
+        animator.current_animation = model.get_current_animation().clone();
     })
 }
