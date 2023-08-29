@@ -11,6 +11,7 @@ pub use nebulousengine_utils as utils;
 pub use nebulousengine_input as input;
 pub use nebulousengine_ui as ui;
 pub use nebulousengine_camera as camera;
+pub use nebulousengine_networking as networking;
 
 // combination plugin for all plugins
 pub struct NebulousEngine;
