@@ -27,6 +27,7 @@ impl <T: NetworkedState> Plugin for NetworkedStateController<T> {
 // system for controlling states
 fn control_state<T: NetworkedState>(
     mut net: ResMut<Networking>,
+    current_state: Res<State<T>>,
     mut state: ResMut<NextState<T>>,
     mut recv_states: EventReader<NetworkStateReceiveEvent>,
     mut set_states: EventReader<SetState<T>>
@@ -54,6 +55,6 @@ fn control_state<T: NetworkedState>(
         let new_state = serde_json::from_value::<T>(new_state.0.clone()).unwrap();
 
         // change state
-        state.set(new_state);
+        if new_state != *current_state.get() { state.set(new_state); }
     }
 }

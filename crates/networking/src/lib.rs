@@ -16,7 +16,7 @@ pub mod structs;
 #[derive(Resource, Debug, Default)]
 pub struct Networking {
     pub server: Option<TcpListener>,
-    pub connections: Vec<WebSocket<TcpStream>>,
+    pub connections: HashMap<u8, WebSocket<TcpStream>>,
     pub client: Option<WebSocket<MaybeTlsStream<TcpStream>>>,
     pub waiting_events: Vec<NetworkEventWrapper>,
     pub event_tickers: HashMap<String, usize>,
@@ -62,8 +62,8 @@ impl Networking {
 
         if self.is_server() {
             // send to each connection
-            self.connections.iter_mut().for_each(|a| {
-                let send_result = a.send(Message::Text(message.clone()));
+            self.connections.iter_mut().for_each(|(_id, socket)| {
+                let send_result = socket.send(Message::Text(message.clone()));
                 if send_result.is_err() { error!("Failed server broadcast send {}", send_result.err().unwrap()); }
             });
         } else {
@@ -73,6 +73,22 @@ impl Networking {
         }
     }
 
+    pub fn server_send_targeted(&mut self, id: &u8, packet: NetworkPacketWrapper) {
+        // make sure is server
+        if !self.is_server() { error!("server_send_targeted is only allowed for servers!"); return }
+
+        // generate message
+        let message = serde_json::to_string(&packet).unwrap();
+
+        // get connection of given ID
+        let connection = self.connections.get_mut(id);
+        let connection = if connection.is_some() { connection.unwrap() } else { error!("No connection with ID: {}", id); return };
+
+        // send packet
+        let send_result = connection.send(Message::Text(message));
+        if send_result.is_err() { error!("Failed client send {}", send_result.err().unwrap()); }
+    }
+
     // todo function that sends to all except a specific client
     pub fn broadcast_ignorable(&mut self, ignore_addr: SocketAddr, packet: NetworkPacketWrapper) {
         // create message
@@ -80,7 +96,7 @@ impl Networking {
 
         if self.is_server() {
             // send to each connection
-            self.connections.iter_mut().for_each(|socket| {
+            self.connections.iter_mut().for_each(|(_id, socket)| {
                 // skip if ignored
                 if socket.get_ref().peer_addr().unwrap() == ignore_addr { return }
 
@@ -150,8 +166,9 @@ fn accept_connections(
     // accept incoming connections
     if net.is_server() {
         // unpack net
+        let mut net_id_offset = net.id_tracker;
         let server = net.server.as_mut().unwrap();
-        let mut new_connections = Vec::new();
+        let mut new_connections = HashMap::new();
         
         // for each incoming connections
         for stream in server.incoming() {
@@ -162,7 +179,8 @@ fn accept_connections(
                     let socket = accept(stream);
                     match socket {
                         Ok(socket) => {
-                            new_connections.push(socket);
+                            net_id_offset += 1;
+                            new_connections.insert(net_id_offset, socket);
                         },
                         Err(error) => error!("Accepting connection failed with error: {}", error)
                     };
@@ -172,13 +190,12 @@ fn accept_connections(
         }
 
         // send entities to new connections
-        new_connections.iter_mut().for_each(|connection| {
+        new_connections.iter_mut().for_each(|(conn_id, connection)| {
             // set net id
-            net.id_tracker += 1;
-            let wrapper = NetworkPacketWrapper::SetNetID(net.id_tracker);
+            let wrapper = NetworkPacketWrapper::SetNetID(*conn_id);
             let send_result = connection.send(Message::Text(serde_json::to_string(&wrapper).unwrap()));
             if send_result.is_err() { error!("Error in new connection net ID update: {:?}", send_result); }
-            connect_events.send(NetworkServerNewConnectionEvent(net.id_tracker));
+            connect_events.send(NetworkServerNewConnectionEvent(*conn_id));
 
             // send networked entities
             networked_entities.for_each(|(info, transform, id)| {
@@ -189,6 +206,7 @@ fn accept_connections(
         });
 
         // update connections
+        net.id_tracker = net_id_offset;
         net.connections.extend(new_connections);
     }
 }
@@ -206,7 +224,7 @@ fn recv_packets(
 
     // receive from connections
     if net.is_server() {
-        net.connections.iter_mut().for_each(|stream| {
+        net.connections.iter_mut().for_each(|(_, stream)| {
             // read all waiting
             while let Ok(read) = stream.read() {
                 // read message
