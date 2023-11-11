@@ -15,6 +15,7 @@ json = "0.12.4"
 nebulousengine_utils = { path = "./crates/utils" }
 nebulousengine_input = { path = "./crates/input" }
 nebulousengine_models = { path = "./crates/models" }
+nebulousengine_networking = { path = "./crates/networking" }
 nebulousengine_ui = { path = "./crates/ui" }
 nebulousengine_camera = { path = "./crates/camera" }
 
