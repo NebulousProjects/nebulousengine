@@ -8,3 +8,7 @@
 [ ] text input
 [ ] scroll areas
 [ ] maybe for buttons we could have an easier way of having different hover/pressed colors
+
+
+[ ] ability to add text straight onto buttons to automate child creation
+[ ] optionally allow for an array to be given instead of single root element for easier UI creation (will be useful with editor as well)
