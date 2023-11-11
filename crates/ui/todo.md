@@ -1,13 +1,10 @@
-==== Quality of Life ====
-[x] remove need to directly apply handle, load dynamically like with gltfs
-[x] shrink each component type by using inheiritance so more components can be created
-[x] allow for dynamic adding/removing of objects to/from other objects in UIs
-[x] add optional hashmap of data for each element
-[x] bundle
+[ ] insert components from text (maybe just markers)
+[ ] load styles from those files (mostly complete, just need to double check)
+[ ] ability to insert into ui nodes (like adding buttons for different types)
+[ ] maybe change system like interactions could be used for buttons instead of reading events every frame (then we could use said marker components)
+[ ] when a ui element is spawned as a root, make sure it has its own root panel (centered 100% 100% blank empty panel)
 
-==== New UI Elements ====
-[ ] scrolling lists
-- [x] scroll via scroll wheel or other specifiable input
-- [ ] optional scroll bar
-[x] collapsable elements
-[ ] text inputs
+
+[ ] text input
+[ ] scroll areas
+[ ] maybe for buttons we could have an easier way of having different hover/pressed colors
