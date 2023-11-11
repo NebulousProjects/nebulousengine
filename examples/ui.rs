@@ -2,6 +2,9 @@ use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
 use nebulousengine_ui::{component::*, serializables::*};
 
+#[derive(Component, Reflect, Debug)]
+pub struct TestComponent;
+
 fn main() {
     App::new()
         .add_plugins((DefaultPlugins, NebulousEngine))
@@ -50,8 +53,11 @@ fn setup(
 
 fn update(
     time: Res<Time>,
-    mut ui: Query<&mut Ui>
+    mut ui: Query<&mut Ui>,
+    test: Query<&TestComponent>
 ) {
+    println!("Test components: {:?}", test.get_single());
+
     let ui = ui.iter_mut().next();
     let mut ui = if ui.is_some() { ui.unwrap() } else { return };
     ui.commands.push(UiCommand { 

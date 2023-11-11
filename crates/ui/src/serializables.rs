@@ -109,6 +109,8 @@ pub struct UiElement {
     #[serde(default)]
     pub id: Option<String>,
     #[serde(default)]
+    pub marker: Option<String>,
+    #[serde(default)]
     pub data: Option<Value>,
     #[serde(default = "default_true")]
     pub allow_collapse: bool,
@@ -162,6 +164,7 @@ impl Default for UiElement {
             color: Color::WHITE,
             font_size: 25.0,
             id: None,
+            marker: None,
             data: None,
             allow_collapse: true,
             children: Vec::new()
@@ -271,6 +274,12 @@ impl UiElement {
                 // add id and data components
                 if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
                 if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
+
+                // marker component
+                if self.marker.is_some() {
+                    let marker = self.marker.as_ref().unwrap();
+                    
+                }
             },
 
             // add scroll element

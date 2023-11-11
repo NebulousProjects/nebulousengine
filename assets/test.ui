@@ -23,6 +23,7 @@
                     "padding": 5,
                     "border_color": "black",
                     "border": 1,
+                    "marker": "TestComponent",
                     "children": [
                         {
                             "type": "Text",

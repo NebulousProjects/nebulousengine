@@ -1,4 +1,6 @@
-use bevy::{prelude::*, utils::HashMap, asset::{AssetLoader, LoadedAsset}};
+use std::error::Error;
+
+use bevy::{prelude::*, utils::HashMap, asset::{AssetLoader, LoadedAsset, AssetLoadError, io::AssetReaderError}};
 use structs::*;
 
 pub mod structs;
@@ -20,34 +22,60 @@ impl Plugin for ConfigurableInputPlugin {
     }
 }
 
+#[derive(Debug)]
+pub struct InputLoadError(String);
+
+impl std::fmt::Display for InputLoadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "InputLoadError({})", self.0)
+    }
+}
+
+impl std::error::Error for InputLoadError {}
+
 // Asset loader for loading input files
 #[derive(Default)]
 pub struct InputLoader;
 impl AssetLoader for InputLoader {
-    fn load<'a>(
-        &'a self,
-        bytes: &'a [u8],
-        load_context: &'a mut bevy::asset::LoadContext,
-    ) -> bevy::utils::BoxedFuture<'a, Result<(), bevy::asset::Error>> {
-        Box::pin(async move {
-            // load content
-            let content = std::str::from_utf8(bytes);
-            if content.is_err() { error!("Failed to load input json!"); return Err(bevy::asset::Error::msg("Failed to load json")) }
-            let content = content.unwrap();
+    type Asset = InputDescription;
+    type Error = InputLoadError;
+    type Settings = ();
+
+    // fn load<'a>(
+    //     &'a self,
+    //     bytes: &'a [u8],
+    //     load_context: &'a mut bevy::asset::LoadContext,
+    // ) -> bevy::utils::BoxedFuture<'a, Result<(), InputLoadError>> {
+    //     Box::pin(async move {
+    //         // load content
+    //         let content = std::str::from_utf8(bytes);
+    //         AssetLoadError::
+    //         AssetLoadError::AssetReaderError(AssetReaderError::);
+    //         if content.is_err() { error!("Failed to load input json!"); return Err(InputLoadError("Failed to load json".into())) }
+    //         let content = content.unwrap();
             
-            // load description
-            let description: Result<InputDescription, serde_json::Error> = serde_json::from_str(content);
-            if description.is_err() { error!("Failed to load input description from json"); return Err(bevy::asset::Error::msg("Failed to load description")) }
+    //         // load description
+    //         let description: Result<InputDescription, serde_json::Error> = serde_json::from_str(content);
+    //         if description.is_err() { error!("Failed to load input description from json"); return Err(InputLoadError("Failed to load description".into())) }
             
-            // load final input map
-            load_context.set_default_asset(LoadedAsset::new(description.unwrap()));
+    //         // load final input map
+    //         load_context.set_default_asset(LoadedAsset::new(description.unwrap()));
             
-            Ok(())
-        })
-    }
+    //         Ok(())
+    //     })
+    // }
 
     fn extensions(&self) -> &[&str] {
         &["input"]
+    }
+
+    fn load<'a>(
+        &'a self,
+        reader: &'a mut bevy::asset::io::Reader,
+        settings: &'a Self::Settings,
+        load_context: &'a mut bevy::asset::LoadContext,
+    ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
+        todo!()
     }
 }
 

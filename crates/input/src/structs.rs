@@ -2,7 +2,7 @@ use bevy::{prelude::*, reflect::{TypeUuid, TypePath}, utils::HashMap};
 use serde::*;
 
 // A serializable version of input map
-#[derive(Serialize, Deserialize, Component, TypeUuid, TypePath)]
+#[derive(Serialize, Deserialize, Component, TypeUuid, TypePath, Asset)]
 #[uuid = "135601b6-2de3-4497-8f4b-3f4841948584"]
 pub struct InputDescription {
     pub elements: HashMap<String, Vec<InputType>>
