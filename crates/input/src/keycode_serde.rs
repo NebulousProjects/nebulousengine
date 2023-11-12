@@ -1,8 +1,8 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, reflect::Enum};
 use serde::*;
 
 pub fn serialize<S>(keycode: &KeyCode, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-    serializer.serialize_str(keycode.type_name())
+    serializer.serialize_str(keycode.variant_name())
 }
 
 pub fn deserialize<'de, D>(deserializer: D) -> Result<KeyCode, D::Error> where D: Deserializer<'de> {

@@ -1,8 +1,8 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, reflect::Enum};
 use serde::*;
 
 pub fn serialize<S>(button: &MouseButton, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-    serializer.serialize_str(button.type_name())
+    serializer.serialize_str(button.variant_name())
 }
 
 pub fn deserialize<'de, D>(deserializer: D) -> Result<MouseButton, D::Error> where D: Deserializer<'de> {
