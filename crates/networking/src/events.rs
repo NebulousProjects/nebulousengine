@@ -36,7 +36,7 @@ fn push_event<T: NetworkedEvent>(
     mut reader: EventReader<T>
 ) {
     // read incoming events
-    reader.iter().for_each(|event| {
+    reader.read().for_each(|event| {
         if event.get_received() { return }
 
         // serialize event to value

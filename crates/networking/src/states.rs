@@ -35,7 +35,7 @@ fn control_state<T: NetworkedState>(
     // if server, broadcast set states and update own state
     if net.is_server() && !set_states.is_empty() {
         // get next state
-        let new_state = set_states.iter().next();
+        let new_state = set_states.read().next();
         let new_state = if new_state.is_some() { new_state.unwrap() } else { return };
 
         // change state
@@ -48,7 +48,7 @@ fn control_state<T: NetworkedState>(
     // if client, update state based on recv states
     if net.is_client() && !recv_states.is_empty() {
         // get next state
-        let new_state = recv_states.iter().next();
+        let new_state = recv_states.read().next();
         let new_state = if new_state.is_some() { new_state.unwrap() } else { return };
 
         // deserialize new state

@@ -16,8 +16,8 @@ pub struct StateMachinePlugin;
 impl Plugin for StateMachinePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_asset::<StateMachine>()
-            .add_asset_loader(StateMachineLoader);
+            .init_asset::<StateMachine>()
+            .init_asset_loader::<StateMachineLoader>();
     }
 }
 

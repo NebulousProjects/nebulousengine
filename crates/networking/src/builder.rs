@@ -68,12 +68,12 @@ pub fn handle_builder_queues<T: Serialize + DeserializeOwned + Debug + Clone + E
     mut transform_events: EventReader<NetworkCallUpdateTransformEvent>
 ) {
     // handle spawn events
-    spawn_events.iter().for_each(|event| {
+    spawn_events.read().for_each(|event| {
         builder.queue_build(serde_json::from_value(event.build.clone()).unwrap(), event.transform.to_bevy(), event.network_id);
     });
 
     // handle transform updates
-    transform_events.iter().for_each(|event| {
+    transform_events.read().for_each(|event| {
         let to_move = net_query.iter_mut().find(|(_, a, _, _)| a.net_id == event.network_id.net_id);
         if to_move.is_some() {
             let (_, _, mut transform, mut tracker) = to_move.unwrap();
@@ -85,7 +85,7 @@ pub fn handle_builder_queues<T: Serialize + DeserializeOwned + Debug + Clone + E
     });
 
     // handle despawn events
-    despawn_events.iter().for_each(|event| {
+    despawn_events.read().for_each(|event| {
         builder.queue_despawn(event.network_id);
     });
 

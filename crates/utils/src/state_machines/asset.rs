@@ -1,29 +1,49 @@
-use bevy::{reflect::{TypeUuid, TypePath}, asset::{AssetLoader, LoadedAsset}, prelude::error};
+use bevy::{reflect::{TypeUuid, TypePath}, asset::{AssetLoader, AsyncReadExt}, prelude::*};
 use serde::*;
 
+#[derive(Debug)]
+pub struct StateMachineLoadError(String);
+
+impl std::fmt::Display for StateMachineLoadError {
+    fn fmt(&self, f: &mut __private::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "StateMachineLoadError({})", self.0)
+    }
+}
+
+impl std::error::Error for StateMachineLoadError {}
+
 // asset loader for state machines
+#[derive(Default)]
 pub struct StateMachineLoader;
 impl AssetLoader for StateMachineLoader {
+    type Asset = StateMachine;
+    type Error = StateMachineLoadError;
+    type Settings = ();
+
     fn load<'a>(
         &'a self,
-        bytes: &'a [u8],
-        load_context: &'a mut bevy::asset::LoadContext,
-    ) -> bevy::utils::BoxedFuture<'a, Result<(), bevy::asset::Error>> {
+        reader: &'a mut bevy::asset::io::Reader,
+        _settings: &'a Self::Settings,
+        _load_context: &'a mut bevy::asset::LoadContext,
+    ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
             // load content
-            let content = std::str::from_utf8(bytes);
-            if content.is_err() { error!("Failed to load state machine json!"); return Err(bevy::asset::Error::msg("Failed to load json for state machine")) }
+            let mut bytes = Vec::new();
+            let error = reader.read_to_end(&mut bytes).await;
+            if error.is_err() { return Err(StateMachineLoadError("Failed to load text bytes!".into())) }
+            let content = std::str::from_utf8(&bytes);
+            if content.is_err() { error!("Failed to load state machine json!"); return Err(StateMachineLoadError("Failed to load json for state machine".into())) }
             let content = content.unwrap();
             
             // load description
             let machine: Result<StateMachine, serde_json::Error> = 
                 serde_json::from_str(content);
-            if machine.is_err() { error!("Failed to load state machine from json with error: {}", machine.err().unwrap()); return Err(bevy::asset::Error::msg("Failed to load struct for state machine")) }
+            if machine.is_err() { error!("Failed to load state machine from json with error: {}", machine.err().unwrap()); return Err(StateMachineLoadError("Failed to load struct for state machine".into())) }
             
             // load final input map
-            load_context.set_default_asset(LoadedAsset::new(machine.unwrap()));
+            // load_context.set_default_asset(LoadedAsset::new());
             
-            Ok(())
+            Ok(machine.unwrap())
         })
     }
 
@@ -33,7 +53,7 @@ impl AssetLoader for StateMachineLoader {
 }
 
 // struct representing a state machine
-#[derive(TypeUuid, TypePath, Serialize, Deserialize)]
+#[derive(TypeUuid, TypePath, Serialize, Deserialize, Asset)]
 #[uuid = "cdd4fda9-ae74-4589-bfd0-267530f5a57e"]
 pub struct StateMachine {
     pub default: String,
