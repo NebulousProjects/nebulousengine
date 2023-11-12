@@ -7,7 +7,8 @@ pub struct UiBundle {
     pub transform: Transform,
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,
-    pub computed_visibility: ComputedVisibility,
+    pub view_visibility: ViewVisibility,
+    pub inherited_visibility: InheritedVisibility,
     pub ui: Ui
 }
 

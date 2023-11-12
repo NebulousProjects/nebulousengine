@@ -33,13 +33,13 @@ pub struct ConfigurableUiPlugin;
 impl Plugin for ConfigurableUiPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_asset::<UiElement>()
+            .init_asset::<UiElement>()
             .add_event::<UiPressed>()
             .add_event::<UiHoverStart>()
             .add_event::<UiReset>()
             .add_event::<UiCollapsibleOpen>()
             .add_event::<UiCollapsibleClose>()
-            .add_asset_loader(UiLoader)
+            .init_asset_loader::<UiLoader>()
             .add_systems(Update, (spawn_uis, handle_buttons, handle_commands, update_scrolling_lists, update_collapsible));
     }
 }
@@ -185,7 +185,7 @@ fn update_scrolling_lists(
     let pointer = if pointer.is_some() { pointer.unwrap() } else { return };
 
     // handle mouse wheel eve nt
-    for event in mouse_wheel.iter() {
+    for event in mouse_wheel.read() {
         query.for_each_mut(|(mut scroll, mut style, transform, parent, node)| {
             // get the heights of this element and of its children
             let items_height = node.size().y;

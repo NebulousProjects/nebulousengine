@@ -1,4 +1,4 @@
-use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle, BuildChildren}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
+use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle, BuildChildren, Asset}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
 use serde::*;
 use serde_json::Value;
 
@@ -9,7 +9,7 @@ mod uirect_serde;
 mod val_serde;
 mod zindex_serde;
 
-#[derive(Serialize, Deserialize, TypePath, TypeUuid, Debug, Clone)]
+#[derive(Serialize, Deserialize, TypePath, TypeUuid, Debug, Clone, Asset)]
 #[uuid = "cf1d2afd-c9ce-4c89-83ab-6473873f9398"]
 pub struct UiElement {
     #[serde(rename = "type")]
