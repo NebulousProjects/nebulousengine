@@ -1,6 +1,6 @@
 - [x] Spawn UIs
 - [x] Update UIs via change detection
-- [ ] Borders and shadows (check 0.12 changelog)
+- [x] Borders and shadows (check 0.12 changelog)
 - [x] Button hover and press colors
 - [ ] Events for buttons
 
