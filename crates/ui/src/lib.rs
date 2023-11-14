@@ -1,88 +1,16 @@
 use bevy::prelude::*;
-use serde_json::Value;
+use node::UINode;
+use ui::render_ui;
 
-#[derive(Resource, Default, Debug, Clone)]
-pub struct UINode {
-    pub id: Option<String>,
-    pub data: Option<Value>,
-    pub ui: UI,
-    pub representation: Option<Entity>,
-    pub children: Vec<UINode>,
-    pub is_dirty: bool
-}
+pub mod node;
+pub mod ui;
 
-impl UINode {
-    pub fn id(&mut self, id: impl Into<String>) { self.id = Some(id.into()); self.is_dirty = true; }
-    pub fn data(&mut self, data: Value) { self.data = Some(data); self.is_dirty = true; }
-
-    pub fn add(&mut self, ui: UI) -> &mut UINode {
-        self.children.push(UINode { id: None, data: None, ui, representation: None, children: Vec::new(), is_dirty: false });
-        self.is_dirty = true;
-        return self.children.last_mut().unwrap(); // kinda clunky but necessary for memory safety rust reasons
-    }
-
-    pub fn get(&self, id: &String) -> Option<&UINode> {
-        // if this id is too self, return self
-        if id == self.id.as_ref().unwrap() { return Some(self) }
-        else {
-            // otherwise, attempt to find id in children
-            let mut iter = self.children.iter();
-            while let Some(node) = iter.next() {
-                let found = node.get(id);
-                if found.is_some() { return found }
-            }
-
-            // default to none
-            return None;
-        }
-    }
-
-    pub fn get_mut(&mut self, id: &String) -> Option<&mut UINode> {
-        // if this id is too self, return self
-        if id == self.id.as_ref().unwrap() { return Some(self) }
-        else {
-            // otherwise, attempt to find id in children
-            let mut iter = self.children.iter_mut();
-            while let Some(node) = iter.next() {
-                let found = node.get_mut(id);
-                if found.is_some() { return found }
-            }
-
-            // default to none
-            return None;
-        }
-    }
-
-    pub fn remove(&mut self, id: &String) {
-        // only keep child nodes if they do not have the same id as given
-        self.children.retain_mut(|a| {
-            a.remove(id);
-            a.id.as_ref().unwrap() != id
-        });
-        self.is_dirty = true;
-    }
-}
-
-#[derive(Resource, Debug, Clone)]
-pub enum UI {
-    Panel { style: Style },
-    Text {
-        style: Style,
-        text: String
-    },
-    Button {
-        style: Style,
-        text: String,
-        hover_bg: Option<Color>,
-        press_bg: Option<Color>
-    }
-}
-
-impl Default for UI {
-    fn default() -> Self {
-        Self::Panel { style: Style::default() }
-    }
-}
+#[derive(Component)]
+pub struct OriginalColor(Color);
+#[derive(Component)]
+pub struct HoverColor(Color);
+#[derive(Component)]
+pub struct PressColor(Color);
 
 // plugin for uis
 pub struct ConfigurableUIPlugin;
@@ -90,18 +18,68 @@ impl Plugin for ConfigurableUIPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<UINode>()
-            .add_systems(Update, update_ui);
+            .add_systems(Update, (update_ui, update_hover_press));
     }
 }
 
 fn update_ui(
-    ui: ResMut<UINode>
+    mut commands: Commands,
+    mut ui: ResMut<UINode>
 ) {
-    recr_render(ui.as_ref(), false);
+    // if no root representation, create one and stop, otherwise, return entity reference
+    let entity = if ui.representation.is_none() {
+        let entity = commands.spawn(NodeBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        ui.representation = Some(entity.id());
+        return;
+    } else { ui.representation.as_ref().unwrap().clone() };
+
+    // check if each child should render
+    ui.children.iter_mut().for_each(|child| {
+        check_should_render(&mut commands, &entity, child, true);
+    });
 }
 
-fn recr_render(ui: &UINode, force_render: bool) {
-    if ui.is_dirty || force_render {
+fn check_should_render(commands: &mut Commands, parent: &Entity, ui: &mut UINode, is_root: bool) {
+    // if should render, remove old representation and render
+    if ui.is_dirty || ui.representation.is_none() {
+        // remove old representation
+        if ui.representation.is_some() {
+            commands.entity(ui.representation.unwrap()).despawn_recursive();
+        }
 
+        // call render
+        commands.entity(*parent).with_children(|builder| {
+            render_ui(builder, ui, is_root);
+        });
+    } 
+    // otherwise, check if children need to render
+    else {
+        ui.children.iter_mut().for_each(|child| {
+            check_should_render(commands, ui.representation.as_ref().unwrap(), child, false);
+        });
     }
+}
+
+fn update_hover_press(
+    mut query: Query<(&mut BackgroundColor, &OriginalColor, Option<&HoverColor>, Option<&PressColor>, &Interaction), Changed<Interaction>>
+) {
+    // for each button interaction, update background color
+    query.for_each_mut(|(
+        mut bg, original, 
+        hover, press, interaction
+    )| {
+        match interaction {
+            Interaction::Pressed => if press.is_some() { *bg = press.unwrap().0.into() },
+            Interaction::Hovered => if hover.is_some() { *bg = hover.unwrap().0.into() },
+            Interaction::None => *bg = original.0.into(),
+        }
+    });
 }
