@@ -1,4 +1,6 @@
-use bevy::{prelude::*, ecs::system::EntityCommands, input::mouse::{MouseWheel, MouseScrollUnit}, window::PrimaryWindow, math::Vec3Swizzles};
+use std::cell::RefCell;
+
+use bevy::{prelude::*, input::mouse::{MouseWheel, MouseScrollUnit}, window::PrimaryWindow, math::Vec3Swizzles};
 use loader::UiLoader;
 use serde_json::Value;
 use serializables::*;
@@ -45,51 +47,61 @@ impl Plugin for ConfigurableUiPlugin {
 }
 
 // spawn all uis
-fn spawn_uis(
-    mut commands: Commands,
-    entities: Query<(Entity, Option<&Ui>, Option<&Handle<UiElement>>), (Without<SpawnedUi>, Or<(&Ui, &Handle<UiElement>)>)>,
-    uis: Res<Assets<UiElement>>
-) {
-    // loop through all uis to spawn
-    entities.for_each(|(entity, ui, handle)| {
-        // get ui element from spawnable
-        let element = if handle.is_some() {
-            let handle = uis.get(handle.unwrap());
-            if handle.is_none() { return }
-            Some(handle.unwrap())
-        } else {
-            match &ui.unwrap().spawnable {
-                UiSpawnable::Handle { handle } => {
-                    let handle = uis.get(handle);
-                    if handle.is_none() { return }
-                    Some(handle.unwrap())
-                },
-                UiSpawnable::Direct { element } => Some(element),
-                UiSpawnable::Empty => None
-            }
-        };
+fn spawn_uis(world: &mut World) {
+    // create a world and get mutable and immute refs to each
+    let cell = RefCell::new(world);
+    let world_immut = &cell.borrow();
+    let mut world_mut = cell.borrow_mut();
 
-        // spawn ui
-        let mut entity_commands = commands.entity(entity);
-        entity_commands.insert(SpawnedUi);
-        if element.is_some() {
-            attach_ui(element.unwrap(), &mut entity_commands);
-        }
-    });
+    // get resources
+    let uis = world_immut.resource::<Assets<UiElement>>();
+    let type_registry = world_immut.resource::<AppTypeRegistry>();
+
+    // query unspawned ui elements
+    world_mut
+        .query_filtered::<(Entity, Option<&Ui>, Option<&Handle<UiElement>>), (Without<SpawnedUi>, Or<(&Ui, &Handle<UiElement>)>)>()
+        .for_each(&world_immut, |(e, ui, handle)| {
+            // get entity
+            let mut entity = world_mut.entity_mut(e);
+
+            // get ui element from spawnable
+            let element = if handle.is_some() {
+                let handle = uis.get(handle.unwrap());
+                if handle.is_none() { return }
+                Some(handle.unwrap())
+            } else {
+                match &ui.unwrap().spawnable {
+                    UiSpawnable::Handle { handle } => {
+                        let handle = uis.get(handle);
+                        if handle.is_none() { return }
+                        Some(handle.unwrap())
+                    },
+                    UiSpawnable::Direct { element } => Some(element),
+                    UiSpawnable::Empty => None
+                }
+            };
+
+            // spawn ui
+            entity.insert(SpawnedUi);
+            if element.is_some() {
+                attach_ui(element.unwrap(), &mut entity, &type_registry);
+            }
+        });
 }
 
 fn attach_ui(
     element: &UiElement,
-    commands: &mut EntityCommands
+    commands: &mut EntityWorldMut,
+    type_registry: &AppTypeRegistry
 ) {
     // add bundle to element
-    element.insert_bundle(commands);
+    element.insert_bundle(commands, type_registry);
 
     // add children
     commands.with_children(|builder| {
         element.children.iter().for_each(|element| {
             let mut entity_commands = builder.spawn_empty();
-            attach_ui(element, &mut entity_commands);
+            attach_ui(element, &mut entity_commands, type_registry);
         });
     });
 }

@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
 use nebulousengine_ui::{component::*, serializables::*};
+use serde::*;
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Component, Reflect, Default, Debug, Serialize, Deserialize)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct TestComponent;
 
 fn main() {
@@ -10,6 +12,7 @@ fn main() {
         .add_plugins((DefaultPlugins, NebulousEngine))
         .add_systems(Startup, setup)
         .add_systems(Update, update)
+        .register_type::<TestComponent>()
         .run();
 }
 
