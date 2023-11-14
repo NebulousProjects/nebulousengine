@@ -2470,8 +2470,6 @@ dependencies = [
  "nebulousengine_networking",
  "nebulousengine_ui",
  "nebulousengine_utils",
- "serde",
- "serde_json",
 ]
 
 [[package]]

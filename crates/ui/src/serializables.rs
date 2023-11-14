@@ -1,4 +1,4 @@
-use bevy::{ui::*, prelude::*, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}};
+use bevy::{ui::*, prelude::{Color, NodeBundle, ButtonBundle, TextBundle, BuildChildren, Asset}, reflect::{TypeUuid, TypePath}, text::{Text, TextStyle}, ecs::system::EntityCommands};
 use serde::*;
 use serde_json::Value;
 
@@ -222,7 +222,7 @@ impl UiElement {
         }
     }
 
-    pub fn insert_bundle(&self, commands: &mut EntityWorldMut, type_registry: &AppTypeRegistry) {
+    pub fn insert_bundle(&self, commands: &mut EntityCommands) {
         // insert ui bundle based on sub type
         match self.subtype {
             // spawn node element (essentially a div)
@@ -274,6 +274,12 @@ impl UiElement {
                 // add id and data components
                 if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
                 if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
+
+                // marker component
+                if self.marker.is_some() {
+                    let marker = self.marker.as_ref().unwrap();
+                    
+                }
             },
 
             // add scroll element
@@ -321,41 +327,6 @@ impl UiElement {
                 if self.id.is_some() { commands.insert(UiID(self.id.clone().unwrap())); }
                 if self.data.is_some() { commands.insert(UiData(self.data.clone().unwrap())); }
             },
-        }
-
-        // marker component
-        if self.marker.is_some() {
-            let marker = self.marker.as_ref().unwrap();
-            let type_registry = type_registry.read();
-
-            let register = type_registry.iter()
-                .find(|reg| reg.type_info().type_path_table().short_path() == marker);
-                // .filter(|registration| registration.data::<ReflectComponent>().is_some())
-                // .for_each(|registration| println!("Registration {:?}", registration.type_info().type_path_table().short_path()));
-
-            if register.is_none() { error!("No register for marker {} found", marker) }
-            else {
-                let register = register.unwrap();
-                let data = register.data::<ReflectComponent>();
-                if data.is_some() {
-                    let data = data.unwrap();
-                    data.insert(commands, &());
-                    // data.insert(commands, data);
-                    // commands.insert(data.unwrap());
-                } else {  }
-            }
-
-            // let found = type_registry.get_type_data::<ReflectComponent>(Any::type_id(marker));
-            // if found.is_some() { println!("Found reflect!") } else { println!("Lost reflect!") }
-
-            // type_registry.data::<ReflectComponent>();
-
-            // let marker_registration = type_registry.get_with_short_type_path(&marker);
-            // println!("Marker Registration {}", found);
-            // if marker_registration.is_some() {
-            //     let marker_registration = marker_registration.unwrap();
-
-            // }
         }
 
         // if marked do not allow collapse, mark

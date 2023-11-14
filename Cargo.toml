@@ -11,10 +11,6 @@ bevy_rapier3d = "0.23.0"
 # json
 json = "0.12.4"
 
-# serde
-serde = "1.0.177"
-serde_json = "1.0.104"
-
 # internal
 nebulousengine_utils = { path = "./crates/utils" }
 nebulousengine_input = { path = "./crates/input" }
