@@ -6,15 +6,18 @@ pub struct UINode {
     pub id: Option<String>,
     pub data: Option<Value>,
     pub ui: UI,
-    pub children: Vec<UINode>
+    pub representation: Option<Entity>,
+    pub children: Vec<UINode>,
+    pub is_dirty: bool
 }
 
 impl UINode {
-    pub fn id(&mut self, id: impl Into<String>) { self.id = Some(id.into()); }
-    pub fn data(&mut self, data: Value) { self.data = Some(data); }
+    pub fn id(&mut self, id: impl Into<String>) { self.id = Some(id.into()); self.is_dirty = true; }
+    pub fn data(&mut self, data: Value) { self.data = Some(data); self.is_dirty = true; }
 
     pub fn add(&mut self, ui: UI) -> &mut UINode {
-        self.children.push(UINode { id: None, data: None, ui, children: Vec::new() });
+        self.children.push(UINode { id: None, data: None, ui, representation: None, children: Vec::new(), is_dirty: false });
+        self.is_dirty = true;
         return self.children.last_mut().unwrap(); // kinda clunky but necessary for memory safety rust reasons
     }
 
@@ -56,6 +59,7 @@ impl UINode {
             a.remove(id);
             a.id.as_ref().unwrap() != id
         });
+        self.is_dirty = true;
     }
 }
 
@@ -85,6 +89,19 @@ pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .init_resource::<UINode>();
+            .init_resource::<UINode>()
+            .add_systems(Update, update_ui);
+    }
+}
+
+fn update_ui(
+    ui: ResMut<UINode>
+) {
+    recr_render(ui.as_ref(), false);
+}
+
+fn recr_render(ui: &UINode, force_render: bool) {
+    if ui.is_dirty || force_render {
+
     }
 }
