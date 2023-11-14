@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use camera::BetterCameraPlugin;
 use input::ConfigurableInputPlugin;
 use models::ModelPlugins;
-use ui::ConfigurableUiPlugin;
+use ui::ConfigurableUIPlugin;
 use utils::NebulousEngineUtils;
 
 // reexport all internal modules
@@ -17,6 +17,6 @@ pub use nebulousengine_networking as networking;
 pub struct NebulousEngine;
 impl Plugin for NebulousEngine {
     fn build(&self, app: &mut App) {
-        app.add_plugins((BetterCameraPlugin, ConfigurableInputPlugin, ModelPlugins, ConfigurableUiPlugin, NebulousEngineUtils));
+        app.add_plugins((BetterCameraPlugin, ConfigurableInputPlugin, ModelPlugins, ConfigurableUIPlugin, NebulousEngineUtils));
     }
 }
