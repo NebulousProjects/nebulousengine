@@ -6,7 +6,9 @@ use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollL
 pub enum UI {
     #[default]
     Panel,
-    ScrollPanel,
+    ScrollPanel {
+        flex_direction: FlexDirection
+    },
     Text {
         text: String
     },
@@ -39,10 +41,15 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
 
             spawned
         },
-        UI::ScrollPanel => {
+        UI::ScrollPanel { flex_direction } => {
             // update style
-            style.overflow = Overflow::clip_y();
-            style.flex_direction = FlexDirection::Column;
+            style.flex_direction = *flex_direction;
+            style.overflow = match flex_direction {
+                FlexDirection::Row => Overflow::clip_x(),
+                FlexDirection::Column => Overflow::clip_y(),
+                FlexDirection::RowReverse => Overflow::clip_x(),
+                FlexDirection::ColumnReverse => Overflow::clip_y(),
+            };
 
             // spawn node
             let mut spawned = commands.spawn(NodeBundle { 
@@ -55,9 +62,8 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
             spawned.with_children(|builder| {
                 builder.spawn(NodeBundle {
                     style: Style {
-                        flex_direction: FlexDirection::Column,
+                        flex_direction: *flex_direction,
                         align_items: AlignItems::Center,
-                        top: Val::Px(-200.0),
                         ..Default::default()
                     },
                     ..Default::default()

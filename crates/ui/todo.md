@@ -10,5 +10,4 @@
 - [x] id + data return node
 
 - [ ] Text inputs
-- [ ] Sliders
-- [ ] Scroll Areas (both directions)
+- [x] Scroll Areas (both directions)

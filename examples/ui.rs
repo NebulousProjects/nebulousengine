@@ -36,7 +36,7 @@ fn setup(
             ui.text("Click me!");
         });
 
-    ui.scroll_panel().id("Scrolling List")
+    ui.scroll_panel(FlexDirection::Column).id("Scrolling List")
         .bg(Color::GRAY)
         .style(Style {
             position_type: PositionType::Absolute,
