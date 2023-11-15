@@ -27,27 +27,21 @@ fn setup(
         .border(UiRect::all(Val::Px(5.0)), Color::BLACK)
         .id("Test_Button")
         .bg(Color::RED)
-        .style(Style {
-            position_type: PositionType::Absolute,
-            top:   Val::Px(0.0),
-            right: Val::Px(500.0),
-            padding: UiRect::all(Val::Px(5.0)),
-            width: Val::Px(200.0),
-            ..Default::default()
-        })
+        .position_type(PositionType::Absolute)
+        .top(Val::Px(0.0))
+        .right(Val::Px(500.0))
+        .width(Val::Px(200.0))
+        .padding(UiRect::all(Val::Px(5.0)))
         .children(|ui| {
             ui.text("Click me!");
         });
 
     ui.scroll_panel(FlexDirection::Column).id("Scrolling List")
         .bg(Color::GRAY)
-        .style(Style {
-            position_type: PositionType::Absolute,
-            top:    Val::Percent(25.0),
-            right:  Val::Px(20.0),
-            height: Val::Percent(50.0),
-            ..Default::default()
-        })
+        .position_type(PositionType::Absolute)
+        .top(Val::Percent(25.0))
+        .right(Val::Px(20.0))
+        .height(Val::Percent(50.0))
         .children(|ui| {
             for i in 0 .. 30 {
                 ui.text(format!("Text {}", i));
