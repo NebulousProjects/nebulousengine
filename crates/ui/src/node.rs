@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use serde_json::*;
 
-use crate::ui::UI;
+use crate::{ui::UI, HoverColor, PressColor};
+
+#[derive(Default, Debug, Clone, Copy)]
+pub struct BorderInfo(pub UiRect, pub Color);
 
 #[derive(Resource, Default, Debug, Clone)]
 pub struct UINode {
@@ -11,6 +14,7 @@ pub struct UINode {
     pub ui: UI,
     pub style: Style,
     pub background_color: Color,
+    pub border: Option<BorderInfo>,
 
     pub representation: Option<Entity>,
     pub children: Vec<UINode>,
@@ -25,12 +29,13 @@ impl UINode {
     pub fn data(&mut self, data: Value) -> &mut UINode { self.data = Some(data); self.mark_dirty() }
     pub fn style(&mut self, style: Style) -> &mut UINode { self.style = style; self.mark_dirty() }
     pub fn bg(&mut self, color: Color) -> &mut UINode { self.background_color = color; self.mark_dirty() }
+    pub fn border(&mut self, shape: UiRect, color: Color) -> &mut UINode { self.border = Some(BorderInfo(shape, color)); self.mark_dirty() }
 
     // enum ez functions
     pub fn panel(&mut self) -> &mut UINode { self.add(UI::Panel) }
     pub fn scroll_panel(&mut self, flex_direction: FlexDirection) -> &mut UINode { self.add(UI::ScrollPanel { flex_direction }) }
     pub fn text(&mut self, text: impl Into<String>) -> &mut UINode { self.add(UI::Text { text: text.into() }) }
-    pub fn button(&mut self, hover_bg: Option<Color>, press_bg: Option<Color>) -> &mut UINode { self.add(UI::Button { hover_bg, press_bg }) }
+    pub fn button(&mut self, hover_bg: Option<HoverColor>, press_bg: Option<PressColor>) -> &mut UINode { self.add(UI::Button { hover_bg, press_bg }) }
 
     // functions to update ui
     pub fn ui(&mut self, ui: UI) -> &mut UINode { self.ui = ui; self.mark_dirty() }
@@ -44,7 +49,7 @@ impl UINode {
             id: None, data: None, ui, 
             style: Style::default(), 
             background_color: Color::Rgba { red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0 },
-            representation: None, 
+            border: None, representation: None, 
             children: Vec::new(), is_dirty: true
         });
         self.is_dirty = true;

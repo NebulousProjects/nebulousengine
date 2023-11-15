@@ -8,11 +8,11 @@ pub mod node;
 pub mod ui;
 
 #[derive(Component, Default, Debug, Clone, Copy)]
-pub struct OriginalColor(Color);
+pub struct OriginalColor(pub Color, pub Option<Color>);
 #[derive(Component, Default, Debug, Clone, Copy)]
-pub struct HoverColor(Color);
+pub struct HoverColor(pub Color, pub Option<Color>);
 #[derive(Component, Default, Debug, Clone, Copy)]
-pub struct PressColor(Color);
+pub struct PressColor(pub Color, pub Option<Color>);
 
 #[derive(Component, Default, Debug, Clone)]
 pub struct UIID(String);

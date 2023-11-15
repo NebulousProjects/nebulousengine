@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::{node::UINode, ui::UI, events::UIEvents};
+use nebulousengine_ui::{*, node::UINode, ui::UI, events::UIEvents};
 
 fn main() {
     App::new()
@@ -21,7 +21,10 @@ fn setup(
     ui.text("FPS").id("FPS_Text");
     
     ui
-        .button(Some(Color::BLUE), Some(Color::GREEN))
+        .button(Some(HoverColor(Color::BLUE, None)), Some(PressColor(Color::GREEN, None)))
+        .border(UiRect::all(Val::Px(5.0)), Color::BLACK)
+        .id("Test_Button")
+        .bg(Color::RED)
         .style(Style {
             position_type: PositionType::Absolute,
             top:   Val::Px(0.0),
@@ -30,8 +33,6 @@ fn setup(
             width: Val::Px(200.0),
             ..Default::default()
         })
-        .bg(Color::RED)
-        .id("Test_Button")
         .children(|ui| {
             ui.text("Click me!");
         });

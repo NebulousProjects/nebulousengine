@@ -13,14 +13,17 @@ pub enum UI {
         text: String
     },
     Button {
-        hover_bg: Option<Color>,
-        press_bg: Option<Color>
+        hover_bg: Option<HoverColor>,
+        press_bg: Option<PressColor>
     }
 }
 
 pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
     // setup style
     let mut style = ui.style.clone();
+    if ui.border.is_some() {
+        style.border = ui.border.unwrap().0;
+    }
 
     // render
     let mut entity = match &ui.ui {
@@ -95,6 +98,9 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
             spawned
         },
         UI::Button { hover_bg, press_bg } => {
+            // get border color
+            let border_color = if ui.border.is_some() { Some(ui.border.unwrap().1) } else { None };
+
             // spawn button
             let mut spawned = commands.spawn((
                 ButtonBundle {
@@ -102,12 +108,12 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
                     background_color: BackgroundColor(ui.background_color),
                     ..Default::default()
                 },
-                OriginalColor(ui.background_color)
+                OriginalColor(ui.background_color, border_color)
             ));
 
             // add hover and press colors
-            if hover_bg.is_some() { spawned.insert(HoverColor(hover_bg.unwrap())); }
-            if press_bg.is_some() { spawned.insert(PressColor(press_bg.unwrap())); }
+            if hover_bg.is_some() { spawned.insert(hover_bg.unwrap()); }
+            if press_bg.is_some() { spawned.insert(press_bg.unwrap()); }
             
             // add children
             spawned.with_children(|builder| {
@@ -119,6 +125,11 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
             spawned
         }
     };
+
+    // give border color
+    if ui.border.is_some() {
+        entity.insert(BorderColor(ui.border.unwrap().1));
+    }
 
     // add id
     if ui.id.is_some() {
