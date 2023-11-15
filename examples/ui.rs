@@ -21,11 +21,10 @@ fn setup(
     ui.text("FPS").id("FPS_Text");
     
     ui
-        .button()
+        .button().id("Test Button")
         .hover_color(Color::BLUE, None)
         .press_color(Color::GREEN, None)
         .border(UiRect::all(Val::Px(5.0)), Color::BLACK)
-        .id("Test_Button")
         .bg(Color::RED)
         .position_type(PositionType::Absolute)
         .top(Val::Px(0.0))
@@ -48,7 +47,8 @@ fn setup(
             }
         });
 
-    ui.panel().image("image.png")
+    ui.panel()
+        .image("image.png").id("Test Image")
         .position_type(PositionType::Absolute)
         .width(Val::Percent(20.0))
         .height(Val::Percent(20.0))
