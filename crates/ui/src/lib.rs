@@ -1,7 +1,9 @@
 use bevy::prelude::*;
+use events::*;
 use node::UINode;
 use ui::render_ui;
 
+pub mod events;
 pub mod node;
 pub mod ui;
 
@@ -12,11 +14,15 @@ pub struct HoverColor(Color);
 #[derive(Component)]
 pub struct PressColor(Color);
 
+#[derive(Component)]
+pub struct UIID(String);
+
 // plugin for uis
 pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugins(UIEventsPlugin)
             .init_resource::<UINode>()
             .add_systems(Update, (update_ui, update_hover_press));
     }

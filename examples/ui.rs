@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::{node::UINode, ui::UI};
+use nebulousengine_ui::{node::UINode, ui::UI, events::UIEvents};
 
 fn main() {
     App::new()
@@ -12,7 +12,6 @@ fn main() {
 
 fn setup(
     mut commands: Commands,
-    // asset_server: Res<AssetServer>,
     mut ui: ResMut<UINode>
 ) {
     // camera
@@ -52,25 +51,12 @@ fn setup(
 
 fn update(
     time: Res<Time>,
-    mut ui: ResMut<UINode>
+    mut ui: ResMut<UINode>,
+    ui_events: Res<UIEvents>
     // test: Query<&TestComponent>
 ) {
     // update fps counter
     ui.get_mut("FPS_Text").unwrap().ui(UI::Text { text: format!("FPS: {}", 1. / time.delta_seconds()) });
 
-    // let ui = ui.iter_mut().next();
-    // let mut ui = if ui.is_some() { ui.unwrap() } else { return };
-    // ui.commands.push(UiCommand { 
-    //     target: "fps".to_string(), 
-    //     command: UiCommandType::ModText { 
-    //         new_text: Text::from_section(
-    //             format!("FPS: {}", 1. / time.delta_seconds()), 
-    //             TextStyle { 
-    //                 font_size: 25.0, 
-    //                 color: Color::WHITE, 
-    //                 ..Default::default() 
-    //             }
-    //         )
-    //     } 
-    // });
+    if ui_events.just_pressed("Test_Button") { println!("Test button pressed!") }
 }

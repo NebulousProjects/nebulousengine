@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{node::UINode, OriginalColor, HoverColor, PressColor};
+use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID};
 
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
@@ -51,6 +51,11 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode, is_root: bool) {
             spawned
         },
     };
+
+    // add id
+    if ui.id.is_some() {
+        entity.insert(UIID(ui.id.clone().unwrap()));
+    }
 
     // render children
     entity.with_children(|builder| {
