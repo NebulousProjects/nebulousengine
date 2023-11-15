@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::{*, node::UINode, ui::UI, events::UIEvents};
+use nebulousengine_ui::{node::UINode, ui::UI, events::UIEvents};
 
 fn main() {
     App::new()
@@ -21,7 +21,9 @@ fn setup(
     ui.text("FPS").id("FPS_Text");
     
     ui
-        .button(Some(HoverColor(Color::BLUE, None)), Some(PressColor(Color::GREEN, None)))
+        .button()
+        .hover_color(Color::BLUE, None)
+        .press_color(Color::GREEN, None)
         .border(UiRect::all(Val::Px(5.0)), Color::BLACK)
         .id("Test_Button")
         .bg(Color::RED)
