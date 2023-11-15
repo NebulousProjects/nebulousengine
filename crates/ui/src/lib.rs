@@ -7,15 +7,18 @@ pub mod events;
 pub mod node;
 pub mod ui;
 
-#[derive(Component)]
+#[derive(Component, Default, Debug, Clone, Copy)]
 pub struct OriginalColor(Color);
-#[derive(Component)]
+#[derive(Component, Default, Debug, Clone, Copy)]
 pub struct HoverColor(Color);
-#[derive(Component)]
+#[derive(Component, Default, Debug, Clone, Copy)]
 pub struct PressColor(Color);
 
-#[derive(Component)]
+#[derive(Component, Default, Debug, Clone)]
 pub struct UIID(String);
+
+#[derive(Component, Default, Debug, Clone, Copy)]
+pub struct UIScrollList { pub position: f32 }
 
 // plugin for uis
 pub struct ConfigurableUIPlugin;
@@ -49,11 +52,11 @@ fn update_ui(
 
     // check if each child should render
     ui.children.iter_mut().for_each(|child| {
-        check_should_render(&mut commands, &entity, child, true);
+        check_should_render(&mut commands, &entity, child);
     });
 }
 
-fn check_should_render(commands: &mut Commands, parent: &Entity, ui: &mut UINode, is_root: bool) {
+fn check_should_render(commands: &mut Commands, parent: &Entity, ui: &mut UINode) {
     // if should render, remove old representation and render
     if ui.is_dirty || ui.representation.is_none() {
         // remove old representation
@@ -63,13 +66,13 @@ fn check_should_render(commands: &mut Commands, parent: &Entity, ui: &mut UINode
 
         // call render
         commands.entity(*parent).with_children(|builder| {
-            render_ui(builder, ui, is_root);
+            render_ui(builder, ui);
         });
     } 
     // otherwise, check if children need to render
     else {
         ui.children.iter_mut().for_each(|child| {
-            check_should_render(commands, ui.representation.as_ref().unwrap(), child, false);
+            check_should_render(commands, ui.representation.as_ref().unwrap(), child);
         });
     }
 }

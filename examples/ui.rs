@@ -18,34 +18,37 @@ fn setup(
     commands.spawn(Camera2dBundle::default());
 
     // draw ui
-    ui.panel().id("FPS_Panel")
-        .style(Style {
-            align_items: AlignItems::Start,
-            justify_content: JustifyContent::Start,
-            ..Default::default()
-        })
-        .children(|ui| {
-            ui.text("FPS").id("FPS_Text");
-        });
+    ui.text("FPS").id("FPS_Text");
     
-    ui.panel().id("Button_Panel")
+    ui
+        .button(Some(Color::BLUE), Some(Color::GREEN))
         .style(Style {
-            align_items: AlignItems::Start,
-            justify_content: JustifyContent::End,
+            position_type: PositionType::Absolute,
+            top:   Val::Px(0.0),
+            right: Val::Px(500.0),
+            padding: UiRect::all(Val::Px(5.0)),
+            width: Val::Px(200.0),
+            ..Default::default()
+        })
+        .bg(Color::RED)
+        .id("Test_Button")
+        .children(|ui| {
+            ui.text("Click me!");
+        });
+
+    ui.scroll_panel().id("Scrolling List")
+        .bg(Color::GRAY)
+        .style(Style {
+            position_type: PositionType::Absolute,
+            top:    Val::Percent(25.0),
+            right:  Val::Px(20.0),
+            height: Val::Percent(50.0),
             ..Default::default()
         })
         .children(|ui| {
-            ui
-                .button(Some(Color::BLUE), Some(Color::GREEN))
-                .style(Style {
-                    padding: UiRect::all(Val::Px(5.0)),
-                    ..Default::default()
-                })
-                .bg(Color::RED)
-                .id("Test_Button")
-                .children(|ui| {
-                    ui.text("Click me!");
-                });
+            for i in 0 .. 30 {
+                ui.text(format!("Text {}", i));
+            }
         });
 }
 

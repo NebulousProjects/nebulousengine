@@ -28,6 +28,7 @@ impl UINode {
 
     // enum ez functions
     pub fn panel(&mut self) -> &mut UINode { self.add(UI::Panel) }
+    pub fn scroll_panel(&mut self) -> &mut UINode { self.add(UI::ScrollPanel) }
     pub fn text(&mut self, text: impl Into<String>) -> &mut UINode { self.add(UI::Text { text: text.into() }) }
     pub fn button(&mut self, hover_bg: Option<Color>, press_bg: Option<Color>) -> &mut UINode { self.add(UI::Button { hover_bg, press_bg }) }
 
