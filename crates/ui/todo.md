@@ -10,4 +10,10 @@
 - [x] id + data return node
 
 - [ ] Text inputs
+- [ ] Split up button functions
+- [ ] Sliders 
+- [ ] Moveable sliders
+- [ ] Images
+- [ ] Camera Images
+- [ ] Ez Style Images
 - [x] Scroll Areas (both directions)
