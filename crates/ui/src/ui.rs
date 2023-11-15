@@ -12,6 +12,7 @@ pub enum UI {
         hover_bg: Option<HoverColor>,
         press_bg: Option<PressColor>
     },
+    Slider { left: Color, right: Color, amount: f32 }
 }
 
 pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBuilder, ui: &mut UINode) {
@@ -113,6 +114,25 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             
             // add children
             spawned.with_children(|builder| {
+                ui.children.iter_mut().for_each(|child| {
+                    render_ui(asset_server, builder, child);
+                });
+            });
+
+            spawned
+        }
+        UI::Slider { left, right, amount } => {
+            // spawn root
+            let mut spawned = commands.spawn(NodeBundle { 
+                style, 
+                background_color: BackgroundColor(ui.background_color), 
+                ..Default::default() 
+            });
+            
+            // add children
+            spawned.with_children(|builder| {
+                // add left and right displays
+
                 ui.children.iter_mut().for_each(|child| {
                     render_ui(asset_server, builder, child);
                 });
