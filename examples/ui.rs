@@ -47,6 +47,13 @@ fn setup(
                 ui.text(format!("Text {}", i));
             }
         });
+
+    ui.panel().image("image.png")
+        .position_type(PositionType::Absolute)
+        .width(Val::Percent(20.0))
+        .height(Val::Percent(20.0))
+        .bottom(Val::Px(0.0))
+        .left(Val::Px(0.0));
 }
 
 fn update(

@@ -15,6 +15,7 @@ pub struct UINode {
     pub style: Style,
     pub background_color: Color,
     pub border: Option<BorderInfo>,
+    pub image: Option<String>,
 
     pub representation: Option<Entity>,
     pub children: Vec<UINode>,
@@ -30,6 +31,7 @@ impl UINode {
     pub fn style(&mut self, style: Style) -> &mut UINode { self.style = style; self.mark_dirty() }
     pub fn bg(&mut self, color: Color) -> &mut UINode { self.background_color = color; self.mark_dirty() }
     pub fn border(&mut self, shape: UiRect, color: Color) -> &mut UINode { self.border = Some(BorderInfo(shape, color)); self.mark_dirty() }
+    pub fn image(&mut self, path: impl Into<String>) -> &mut Self { self.image = Some(path.into()); self.bg(Color::WHITE) }
 
     // enum ez functions
     pub fn panel(&mut self) -> &mut UINode { self.add(UI::Panel) }
@@ -102,8 +104,8 @@ impl UINode {
             id: None, data: None, ui, 
             style: Style::default(), 
             background_color: Color::Rgba { red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0 },
-            border: None, representation: None, 
-            children: Vec::new(), is_dirty: true
+            border: None, representation: None, image: None,
+            children: Vec::new(), is_dirty: true,
         });
         self.is_dirty = true;
         return self.children.last_mut().unwrap(); // kinda clunky but necessary for memory safety rust reasons

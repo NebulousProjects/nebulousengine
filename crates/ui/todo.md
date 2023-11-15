@@ -13,7 +13,7 @@
 - [x] Split up button functions
 - [ ] Sliders 
 - [ ] Moveable sliders
-- [ ] Images
+- [x] Images
 - [ ] Camera Images
 - [x] Ez Style Images
 - [x] Scroll Areas (both directions)

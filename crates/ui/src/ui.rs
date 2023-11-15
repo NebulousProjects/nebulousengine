@@ -6,19 +6,15 @@ use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollL
 pub enum UI {
     #[default]
     Panel,
-    ScrollPanel {
-        flex_direction: FlexDirection
-    },
-    Text {
-        text: String
-    },
+    ScrollPanel { flex_direction: FlexDirection },
+    Text { text: String },
     Button {
         hover_bg: Option<HoverColor>,
         press_bg: Option<PressColor>
-    }
+    },
 }
 
-pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
+pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBuilder, ui: &mut UINode) {
     // setup style
     let mut style = ui.style.clone();
     if ui.border.is_some() {
@@ -38,7 +34,7 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
             // add children
             spawned.with_children(|builder| {
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(builder, child);
+                    render_ui(asset_server, builder, child);
                 });
             });
 
@@ -72,7 +68,7 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
                     ..Default::default()
                 }).insert(UIScrollList::default()).with_children(|builder| {
                     ui.children.iter_mut().for_each(|child| {
-                        render_ui(builder, child);
+                        render_ui(asset_server, builder, child);
                     });
                 });
             });
@@ -91,7 +87,7 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
             // add children
             spawned.with_children(|builder| {
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(builder, child);
+                    render_ui(asset_server, builder, child);
                 });
             });
 
@@ -118,7 +114,7 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
             // add children
             spawned.with_children(|builder| {
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(builder, child);
+                    render_ui(asset_server, builder, child);
                 });
             });
 
@@ -129,6 +125,11 @@ pub fn render_ui(commands: &mut ChildBuilder, ui: &mut UINode) {
     // give border color
     if ui.border.is_some() {
         entity.insert(BorderColor(ui.border.unwrap().1));
+    }
+
+    // give image
+    if ui.image.is_some() {
+        entity.insert(UiImage::new(asset_server.load(ui.image.as_ref().unwrap())));
     }
 
     // add id

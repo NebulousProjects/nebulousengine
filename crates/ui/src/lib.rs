@@ -33,7 +33,8 @@ impl Plugin for ConfigurableUIPlugin {
 
 fn update_ui(
     mut commands: Commands,
-    mut ui: ResMut<UINode>
+    mut ui: ResMut<UINode>,
+    mut asset_server: ResMut<AssetServer>
 ) {
     // if no root representation, create one and stop, otherwise, return entity reference
     let entity = if ui.representation.is_none() {
@@ -52,11 +53,11 @@ fn update_ui(
 
     // check if each child should render
     ui.children.iter_mut().for_each(|child| {
-        check_should_render(&mut commands, &entity, child);
+        check_should_render(&mut commands, &mut asset_server, &entity, child);
     });
 }
 
-fn check_should_render(commands: &mut Commands, parent: &Entity, ui: &mut UINode) {
+fn check_should_render(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>, parent: &Entity, ui: &mut UINode) {
     // if should render, remove old representation and render
     if ui.is_dirty || ui.representation.is_none() {
         // remove old representation
@@ -66,13 +67,13 @@ fn check_should_render(commands: &mut Commands, parent: &Entity, ui: &mut UINode
 
         // call render
         commands.entity(*parent).with_children(|builder| {
-            render_ui(builder, ui);
+            render_ui(asset_server, builder, ui);
         });
     } 
     // otherwise, check if children need to render
     else {
         ui.children.iter_mut().for_each(|child| {
-            check_should_render(commands, ui.representation.as_ref().unwrap(), child);
+            check_should_render(commands, asset_server, ui.representation.as_ref().unwrap(), child);
         });
     }
 }
