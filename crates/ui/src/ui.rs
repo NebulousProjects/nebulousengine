@@ -122,6 +122,10 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             spawned
         }
         UI::Slider { left, right, amount } => {
+            // make sure width and height are something
+            // if matches!(style.width, Val::Auto) { style.width = Val::Px(100.0); }
+            // if matches!(style.height, Val::Auto) { style.height = Val::Px(10.0); }
+
             // spawn root
             let mut spawned = commands.spawn(NodeBundle { 
                 style, 
@@ -129,10 +133,11 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 ..Default::default() 
             });
             
-            // add children
             spawned.with_children(|builder| {
                 // add left and right displays
+                // builder.spawn(bundle)
 
+                // add children
                 ui.children.iter_mut().for_each(|child| {
                     render_ui(asset_server, builder, child);
                 });

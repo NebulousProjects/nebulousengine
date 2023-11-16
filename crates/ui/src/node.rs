@@ -38,6 +38,7 @@ impl UINode {
     pub fn scroll_panel(&mut self, flex_direction: FlexDirection) -> &mut UINode { self.add(UI::ScrollPanel { flex_direction }) }
     pub fn text(&mut self, text: impl Into<String>) -> &mut UINode { self.add(UI::Text { text: text.into() }) }
     pub fn button(&mut self) -> &mut UINode { self.add(UI::Button { hover_bg: None, press_bg: None }) }
+    pub fn slider(&mut self, left: Color, right: Color, amount: f32) -> &mut Self { self.add(UI::Slider { left, right, amount }) }
 
     // style ez functions
     pub fn display(&mut self, display: Display) -> &mut Self { self.style.display = display; self.mark_dirty() }
