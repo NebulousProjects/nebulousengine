@@ -38,7 +38,7 @@ impl UINode {
     pub fn scroll_panel(&mut self, flex_direction: FlexDirection) -> &mut UINode { self.add(UI::ScrollPanel { flex_direction }) }
     pub fn text(&mut self, text: impl Into<String>) -> &mut UINode { self.add(UI::Text { text: text.into() }) }
     pub fn button(&mut self) -> &mut UINode { self.add(UI::Button { hover_bg: None, press_bg: None }) }
-    pub fn slider(&mut self, left: Color, right: Color, amount: f32) -> &mut Self { self.add(UI::Slider { left, right, amount }) }
+    pub fn slider(&mut self, direction: FlexDirection, first: Color, second: Color, amount: f32) -> &mut Self { self.add(UI::Slider { direction, first, second, amount, moveable: false }) }
 
     // style ez functions
     pub fn display(&mut self, display: Display) -> &mut Self { self.style.display = display; self.mark_dirty() }
@@ -71,7 +71,44 @@ impl UINode {
     pub fn flex_basis(&mut self, flex_basis: Val) -> &mut Self { self.style.flex_basis = flex_basis; self.mark_dirty() }
     pub fn row_gap(&mut self, row_gap: Val) -> &mut Self { self.style.row_gap = row_gap; self.mark_dirty() }
     pub fn column_gap(&mut self, column_gap: Val) -> &mut Self { self.style.column_gap = column_gap; self.mark_dirty() }
-    
+
+    // slider ez functions
+    pub fn first_color(&mut self, new: Color) -> &mut Self {
+        match &self.ui {
+            UI::Slider { direction, first: _, second, amount, moveable } =>
+                self.ui = UI::Slider { direction: *direction, first: new, second: *second, amount: *amount, moveable: *moveable },
+            _ => warn!("Attempted to get a slider from a non slider element!")
+        };
+        self.mark_dirty()
+    }
+
+    pub fn second_color(&mut self, new: Color) -> &mut Self {
+        match &self.ui {
+            UI::Slider { direction, first, second: _, amount, moveable } =>
+                self.ui = UI::Slider { direction: *direction, first: *first, second: new, amount: *amount, moveable: *moveable },
+            _ => warn!("Attempted to get a slider from a non slider element!")
+        };
+        self.mark_dirty()
+    }
+
+    pub fn amount(&mut self, new: f32) -> &mut Self {
+        match &self.ui {
+            UI::Slider { direction, first, second, amount: _, moveable } =>
+                self.ui = UI::Slider { direction: *direction, first: *first, second: *second, amount: new, moveable: *moveable },
+            _ => warn!("Attempted to get a slider from a non slider element!")
+        };
+        self.mark_dirty()
+    }
+
+    pub fn moveable(&mut self, new: bool) -> &mut Self {
+        match &self.ui {
+            UI::Slider { direction, first, second, amount, moveable: _ } =>
+                self.ui = UI::Slider { direction: *direction, first: *first, second: *second, amount: *amount, moveable: new },
+            _ => warn!("Attempted to get a slider from a non slider element!")
+        };
+        self.mark_dirty()
+    }
+   
     // button ez functions
     pub fn hover_color(&mut self, color: Color, border: Option<Color>) -> &mut UINode {
         match self.ui {
@@ -109,6 +146,7 @@ impl UINode {
             children: Vec::new(), is_dirty: true,
         });
         self.is_dirty = true;
+        println!("Adding too {:?}", self.ui);
         return self.children.last_mut().unwrap(); // kinda clunky but necessary for memory safety rust reasons
     }
 

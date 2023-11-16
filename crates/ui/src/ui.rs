@@ -12,7 +12,7 @@ pub enum UI {
         hover_bg: Option<HoverColor>,
         press_bg: Option<PressColor>
     },
-    Slider { left: Color, right: Color, amount: f32 }
+    Slider { direction: FlexDirection, first: Color, second: Color, amount: f32, moveable: bool }
 }
 
 pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBuilder, ui: &mut UINode) {
@@ -121,10 +121,19 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
 
             spawned
         }
-        UI::Slider { left, right, amount } => {
+        UI::Slider { direction, first, second, amount, moveable } => {
             // make sure width and height are something
-            // if matches!(style.width, Val::Auto) { style.width = Val::Px(100.0); }
-            // if matches!(style.height, Val::Auto) { style.height = Val::Px(10.0); }
+            style.flex_direction = *direction;
+
+            // sort width and heights by direction
+            let left_size = Val::Percent(*amount * 100.0);
+            let right_size = Val::Percent((1.0 - *amount) * 100.0);
+            let (left_width, left_height, right_width, right_height) = match direction {
+                FlexDirection::Column | FlexDirection::ColumnReverse => 
+                (Val::Percent(100.0), left_size, Val::Percent(100.0), right_size),
+                FlexDirection::Row    | FlexDirection::RowReverse    => 
+                (left_size, Val::Percent(100.0), right_size, Val::Percent(100.0))
+            };
 
             // spawn root
             let mut spawned = commands.spawn(NodeBundle { 
@@ -135,12 +144,32 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             
             spawned.with_children(|builder| {
                 // add left and right displays
-                // builder.spawn(bundle)
-
-                // add children
-                ui.children.iter_mut().for_each(|child| {
-                    render_ui(asset_server, builder, child);
+                builder.spawn(NodeBundle {
+                    style: Style {
+                        width: left_width,
+                        height: left_height,
+                        ..Default::default()
+                    },
+                    background_color: BackgroundColor(*first),
+                    ..Default::default()
                 });
+                builder.spawn(NodeBundle {
+                    style: Style {
+                        width: right_width,
+                        height: right_height,
+                        ..Default::default()
+                    },
+                    background_color: BackgroundColor(*second),
+                    ..Default::default()
+                });
+
+                // add children normally if not moveable
+                println!("Moveable: {}", moveable);
+                // if !moveable {
+                //     ui.children.iter_mut().for_each(|child| {
+                //         render_ui(asset_server, builder, child);
+                //     });
+                // }
             });
 
             spawned
