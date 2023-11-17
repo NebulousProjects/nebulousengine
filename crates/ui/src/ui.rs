@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider};
+use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond};
 
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
@@ -130,22 +130,12 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
 
             spawned
         }
-        UI::Slider { direction, first, second, amount, moveable } => {
+        UI::Slider { direction, first, second, amount: _, moveable } => {
             // make sure width and height are something
             style.flex_direction = *direction;
 
             // if no id, throw error
             if ui.id.is_none() { error!("Slider does not have ID!  It will fail!") }
-
-            // sort width and heights by direction
-            let left_size = Val::Percent(*amount * 100.0);
-            let right_size = Val::Percent((1.0 - *amount) * 100.0);
-            let (left_width, left_height, right_width, right_height) = match direction {
-                FlexDirection::Column | FlexDirection::ColumnReverse => 
-                (Val::Percent(100.0), left_size, Val::Percent(100.0), right_size),
-                FlexDirection::Row    | FlexDirection::RowReverse    => 
-                (left_size, Val::Percent(100.0), right_size, Val::Percent(100.0))
-            };
 
             // spawn root
             let mut spawned = commands.spawn(NodeBundle { 
@@ -159,24 +149,14 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             
             spawned.with_children(|builder| {
                 // add left and right displays
-                builder.spawn(NodeBundle {
-                    style: Style {
-                        width: left_width,
-                        height: left_height,
-                        ..Default::default()
-                    },
+                builder.spawn((NodeBundle {
                     background_color: BackgroundColor(*first),
                     ..Default::default()
-                });
-                builder.spawn(NodeBundle {
-                    style: Style {
-                        width: right_width,
-                        height: right_height,
-                        ..Default::default()
-                    },
+                }, UISliderFirst));
+                builder.spawn((NodeBundle {
                     background_color: BackgroundColor(*second),
                     ..Default::default()
-                });
+                }, UISliderSecond));
 
                 // add children normally if not moveable
                 ui.children.iter_mut().for_each(|child| {

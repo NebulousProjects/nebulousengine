@@ -23,6 +23,12 @@ pub struct UIScrollList { pub position: f32 }
 #[derive(Component, Default, Debug, Clone, Copy)]
 pub struct UISlider;
 
+#[derive(Component, Default, Debug, Clone, Copy)]
+pub struct UISliderFirst;
+
+#[derive(Component, Default, Debug, Clone, Copy)]
+pub struct UISliderSecond;
+
 // plugin for uis
 pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {
@@ -144,10 +150,12 @@ fn update_sliders(
     mut ui: ResMut<UINode>,
     window: Query<&Window, With<PrimaryWindow>>,
     sliders: Query<(&Node, &GlobalTransform, &Style, &UIID, &Children), With<UISlider>>,
-    mut buttons: Query<(&Node, &GlobalTransform, &mut Style, &Interaction), Without<UISlider>>
+    mut buttons: Query<(&Node, &mut Style, Option<&Interaction>, Option<&UISliderFirst>, Option<&UISliderSecond>), Without<UISlider>>,
+
 ) {
     // get mouse position
-    let mouse_position = window.single().cursor_position().unwrap_or(Vec2 { x: 0.0, y: 0.0 });
+    let window = window.single();
+    let mouse_position = window.cursor_position().unwrap_or(Vec2 { x: 0.0, y: 0.0 });
 
     // update all sliders
     sliders.for_each(|(slider, slider_transform, slider_style, slider_id, children)| {
@@ -159,9 +167,11 @@ fn update_sliders(
             _ => return
         };
 
-        // todo properly calculate this
-        let border_width = 10.0;
-        let border_height = 10.0;
+        // calculate border width and height
+        let border_width = slider_style.border.left.resolve(slider.size().x, slider.size()).unwrap_or(0.0) +
+            slider_style.border.right.resolve(slider.size().x, slider.size()).unwrap_or(0.0);
+        let border_height = slider_style.border.top.resolve(slider.size().y, slider.size()).unwrap_or(0.0) +
+            slider_style.border.bottom.resolve(slider.size().y, slider.size()).unwrap_or(0.0);
 
         // update children and if any are pressed, allow amount changes
         let mut allow_changes = false;
@@ -169,16 +179,52 @@ fn update_sliders(
             // unpack child
             let button = buttons.get_mut(*child);
             if button.is_err() { return }
-            let (button, button_transform, mut style, interaction) = button.unwrap();
+            let (button, mut style, interaction, first, second) = button.unwrap();
 
             // if has interaction and interaction is pressed, allow changes
-            if interaction == &Interaction::Pressed { allow_changes = true; }
+            if interaction.unwrap_or(&Interaction::None) == &Interaction::Pressed { allow_changes = true; }
 
-            // todo what if column instead of row
-            // center
-            style.position_type = PositionType::Absolute;
-            style.top = Val::Px((button.size().y + border_height - slider.size().y) / -2.0);
-            style.left = Val::Px((slider.size().x - button.size().y) * current_amount - (border_width / 2.0));
+            // update any moveable buttons, center on amount point
+            if interaction.is_some() {
+                match direction {
+                    FlexDirection::Column | FlexDirection::ColumnReverse => {
+                        style.position_type = PositionType::Absolute;
+                        style.top = Val::Px((slider.size().y - button.size().y) * current_amount - (border_height / 2.0));
+                        style.left = Val::Px((button.size().x + border_width - slider.size().x) / -2.0);
+                    },
+                    FlexDirection::Row | FlexDirection::RowReverse => {
+                        style.position_type = PositionType::Absolute;
+                        style.top = Val::Px((button.size().y + border_height - slider.size().y) / -2.0);
+                        style.left = Val::Px((slider.size().x - button.size().x) * current_amount - (border_width / 2.0));
+                    }
+                }
+            } 
+            // update first (left side) slider part
+            else if first.is_some() {
+                match direction {
+                    FlexDirection::Column | FlexDirection::ColumnReverse => {
+                        style.width = Val::Percent(100.0);
+                        style.height = Val::Percent(current_amount * 100.0);
+                    },
+                    FlexDirection::Row | FlexDirection::RowReverse => {
+                        style.width = Val::Percent(current_amount * 100.0);
+                        style.height = Val::Percent(100.0);
+                    }
+                }
+            } 
+            // update second (right side) slider part
+            else if second.is_some() {
+                match direction {
+                    FlexDirection::Column | FlexDirection::ColumnReverse => {
+                        style.width = Val::Percent(100.0);
+                        style.height = Val::Percent((1.0 - current_amount) * 100.0);
+                    },
+                    FlexDirection::Row | FlexDirection::RowReverse => {
+                        style.width = Val::Percent((1.0 - current_amount) * 100.0);
+                        style.height = Val::Percent(100.0);
+                    }
+                }
+            }
         });
 
         // if changes allowed
