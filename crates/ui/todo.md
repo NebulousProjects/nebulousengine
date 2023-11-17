@@ -11,8 +11,8 @@
 
 - [ ] Text inputs
 - [x] Split up button functions
-- [ ] Sliders 
-- [ ] Moveable sliders
+- [x] Sliders 
+- [x] Moveable sliders
 - [x] Images
 - [ ] Camera Images
 - [x] Ez Style Images
