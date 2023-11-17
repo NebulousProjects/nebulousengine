@@ -1,7 +1,7 @@
 use bevy::{prelude::*, input::mouse::{MouseWheel, MouseScrollUnit}, window::PrimaryWindow};
 use events::*;
 use node::UINode;
-use ui::render_ui;
+use ui::{render_ui, UI};
 
 pub mod events;
 pub mod node;
@@ -30,7 +30,7 @@ impl Plugin for ConfigurableUIPlugin {
         app
             .add_plugins(UIEventsPlugin)
             .init_resource::<UINode>()
-            .add_systems(Update, (update_ui, update_hover_press, update_scroll));
+            .add_systems(Update, (update_ui, update_hover_press, update_scroll, update_sliders));
     }
 }
 
@@ -138,4 +138,62 @@ fn update_scroll(
         list.position = list.position.clamp(-max_scroll, 0.);
         style.top = Val::Px(list.position);
     }
+}
+
+fn update_sliders(
+    mut ui: ResMut<UINode>,
+    window: Query<&Window, With<PrimaryWindow>>,
+    sliders: Query<(&Node, &GlobalTransform, &Style, &UIID, &Children), With<UISlider>>,
+    mut buttons: Query<(&Node, &GlobalTransform, &mut Style, &Interaction), Without<UISlider>>
+) {
+    // get mouse position
+    let mouse_position = window.single().cursor_position().unwrap_or(Vec2 { x: 0.0, y: 0.0 });
+
+    // update all sliders
+    sliders.for_each(|(slider, slider_transform, slider_style, slider_id, children)| {
+        // get slider info
+        let info = ui.get_mut(slider_id.0.clone());
+        let info = if info.is_none() { return } else { info.unwrap() };
+        let (direction, current_amount, moveable) = match &info.ui {
+            ui::UI::Slider { direction, amount, moveable, .. } => (*direction, *amount, *moveable),
+            _ => return
+        };
+
+        // todo properly calculate this
+        let border_width = 10.0;
+        let border_height = 10.0;
+
+        // update children and if any are pressed, allow amount changes
+        let mut allow_changes = false;
+        children.iter().for_each(|child| {
+            // unpack child
+            let button = buttons.get_mut(*child);
+            if button.is_err() { return }
+            let (button, button_transform, mut style, interaction) = button.unwrap();
+
+            // if has interaction and interaction is pressed, allow changes
+            if interaction == &Interaction::Pressed { allow_changes = true; }
+
+            // todo what if column instead of row
+            // center
+            style.position_type = PositionType::Absolute;
+            style.top = Val::Px((button.size().y + border_height - slider.size().y) / -2.0);
+            style.left = Val::Px((slider.size().x - button.size().y) * current_amount - (border_width / 2.0));
+        });
+
+        // if changes allowed
+        if allow_changes && moveable {
+            // get amount the mouse position would represent
+            let dist = slider_transform.translation().x - mouse_position.x;
+            let amount = (-dist / slider.size().x + 0.5).clamp(0.0, 1.0);
+            
+            // update ui if possible
+            match &info.ui {
+                ui::UI::Slider { direction, first, second, moveable, .. } => {
+                    info.ui = UI::Slider { direction: *direction, first: *first, second: *second, amount, moveable: *moveable };
+                },
+                _ => {}
+            }
+        }
+    });
 }

@@ -154,7 +154,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 ..Default::default() 
             });
 
-            // if moveable, add slider component
+            // if moveable, add slider
             if *moveable { spawned.insert(UISlider); }
             
             spawned.with_children(|builder| {

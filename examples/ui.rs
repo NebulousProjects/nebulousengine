@@ -61,14 +61,14 @@ fn setup(
         .position_type(PositionType::Absolute)
         .bottom(Val::Px(50.0))
         .left(Val::Percent(30.0))
-        .width(Val::Percent(20.0))
+        .width(Val::Px(200.0))
         .height(Val::Px(20.0))
         .bg(Color::WHITE)
         .moveable(true)
         .children(|ui| {
             ui.button()
-                .width(Val::Px(40.0))
-                .height(Val::Px(40.0))
+                .width(Val::Px(20.0))
+                .height(Val::Px(20.0))
                 .bg(Color::PURPLE)
                 .border(UiRect::all(Val::Px(5.0)), Color::BLACK);
         });
