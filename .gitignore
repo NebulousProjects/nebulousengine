@@ -1,3 +1,6 @@
 target
 out
 *.lock
+/.idea
+/.fleet
+/.vscode
