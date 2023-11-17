@@ -146,7 +146,6 @@ impl UINode {
             children: Vec::new(), is_dirty: true,
         });
         self.is_dirty = true;
-        println!("Adding too {:?}", self.ui);
         return self.children.last_mut().unwrap(); // kinda clunky but necessary for memory safety rust reasons
     }
 

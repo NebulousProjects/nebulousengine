@@ -20,6 +20,9 @@ pub struct UIID(String);
 #[derive(Component, Default, Debug, Clone, Copy)]
 pub struct UIScrollList { pub position: f32 }
 
+#[derive(Component, Default, Debug, Clone, Copy)]
+pub struct UISlider;
+
 // plugin for uis
 pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {
@@ -71,7 +74,7 @@ fn check_should_render(commands: &mut Commands, asset_server: &mut ResMut<AssetS
         });
     } 
     // otherwise, check if children need to render
-    else {
+    else if ui.ui.do_children_render_check() {
         ui.children.iter_mut().for_each(|child| {
             check_should_render(commands, asset_server, ui.representation.as_ref().unwrap(), child);
         });

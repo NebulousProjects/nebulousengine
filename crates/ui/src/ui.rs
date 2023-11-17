@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList};
+use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider};
 
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
@@ -13,6 +13,15 @@ pub enum UI {
         press_bg: Option<PressColor>
     },
     Slider { direction: FlexDirection, first: Color, second: Color, amount: f32, moveable: bool }
+}
+
+impl UI {
+    pub fn do_children_render_check(&self) -> bool {
+        match self {
+            UI::Slider { .. } => false,
+            _ => true
+        }
+    }
 }
 
 pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBuilder, ui: &mut UINode) {
@@ -125,6 +134,9 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             // make sure width and height are something
             style.flex_direction = *direction;
 
+            // if no id, throw error
+            if ui.id.is_none() { error!("Slider does not have ID!  It will fail!") }
+
             // sort width and heights by direction
             let left_size = Val::Percent(*amount * 100.0);
             let right_size = Val::Percent((1.0 - *amount) * 100.0);
@@ -141,6 +153,9 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 background_color: BackgroundColor(ui.background_color), 
                 ..Default::default() 
             });
+
+            // if moveable, add slider component
+            if *moveable { spawned.insert(UISlider); }
             
             spawned.with_children(|builder| {
                 // add left and right displays
@@ -164,12 +179,9 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 });
 
                 // add children normally if not moveable
-                println!("Moveable: {}", moveable);
-                // if !moveable {
-                //     ui.children.iter_mut().for_each(|child| {
-                //         render_ui(asset_server, builder, child);
-                //     });
-                // }
+                ui.children.iter_mut().for_each(|child| {
+                    render_ui(asset_server, builder, child);
+                });
             });
 
             spawned
