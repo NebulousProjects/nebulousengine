@@ -29,6 +29,13 @@ pub struct UISliderFirst;
 #[derive(Component, Default, Debug, Clone, Copy)]
 pub struct UISliderSecond;
 
+#[derive(Component, Default, Debug, Clone)]
+pub struct UITextArea {
+    current: String,
+    cursor_position: usize,
+    multiline: bool
+}
+
 // plugin for uis
 pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {

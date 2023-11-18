@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond};
+use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, UITextArea};
 
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
@@ -12,7 +12,19 @@ pub enum UI {
         hover_bg: Option<HoverColor>,
         press_bg: Option<PressColor>
     },
-    Slider { direction: FlexDirection, first: Color, second: Color, amount: f32, moveable: bool }
+    Slider {
+        direction: FlexDirection,
+        first: Color,
+        second: Color,
+        amount: f32,
+        moveable: bool
+    },
+    TextArea {
+        selected_bg: Option<Color>,
+        selected_border: Option<Color>,
+        font_size: f32,
+        multiline: bool
+    }
 }
 
 impl UI {
@@ -164,6 +176,30 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 });
             });
 
+            spawned
+        },
+        UI::TextArea { selected_bg, selected_border, font_size, multiline } => {
+            // get border color
+            let border_color = if ui.border.is_some() { Some(ui.border.unwrap().1) } else { None };
+
+            // create button as background for text area
+            let mut spawned = commands.spawn((
+                ButtonBundle {
+                    style,
+                    background_color: BackgroundColor(ui.background_color),
+                    ..Default::default()
+                },
+                OriginalColor(ui.background_color, border_color),
+                UITextArea::default()
+            ));
+        
+            // add children
+            spawned.with_children(|builder| {
+                ui.children.iter_mut().for_each(|child| {
+                    render_ui(asset_server, builder, child);
+                });
+            });
+        
             spawned
         }
     };
