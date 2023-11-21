@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, UITextArea};
+use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, text_area::{UITextArea, UITextAreaText}};
 
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
@@ -190,11 +190,24 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                     ..Default::default()
                 },
                 OriginalColor(ui.background_color, border_color),
-                UITextArea::default()
+                UITextArea {
+                    selected_bg: *selected_bg,
+                    selected_border: *selected_border,
+                    multiline: *multiline,
+                    ..Default::default()
+                }
             ));
         
             // add children
             spawned.with_children(|builder| {
+                builder.spawn((
+                    TextBundle {
+                        text: Text::from_section("", TextStyle {  color: Color::BLACK, font_size: *font_size, ..Default::default() }),
+                        ..Default::default()
+                    },
+                    UITextAreaText
+                ));
+
                 ui.children.iter_mut().for_each(|child| {
                     render_ui(asset_server, builder, child);
                 });

@@ -1,10 +1,12 @@
 use bevy::{prelude::*, input::mouse::{MouseWheel, MouseScrollUnit}, window::PrimaryWindow};
 use events::*;
 use node::UINode;
+use text_area::UITextAreaPlugin;
 use ui::{render_ui, UI};
 
 pub mod events;
 pub mod node;
+pub mod text_area;
 pub mod ui;
 
 #[derive(Component, Default, Debug, Clone, Copy)]
@@ -29,19 +31,12 @@ pub struct UISliderFirst;
 #[derive(Component, Default, Debug, Clone, Copy)]
 pub struct UISliderSecond;
 
-#[derive(Component, Default, Debug, Clone)]
-pub struct UITextArea {
-    current: String,
-    cursor_position: usize,
-    multiline: bool
-}
-
 // plugin for uis
 pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins(UIEventsPlugin)
+            .add_plugins((UIEventsPlugin, UITextAreaPlugin))
             .init_resource::<UINode>()
             .add_systems(Update, (update_ui, update_hover_press, update_scroll, update_sliders));
     }
