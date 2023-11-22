@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashMap};
 
 use crate::UIID;
 
@@ -7,13 +7,35 @@ use crate::UIID;
 pub struct UIEvents {
     just_pressed: Vec<String>,
     just_released: Vec<String>,
-    pressed: Vec<String>
+    pressed: Vec<String>,
+    sliders: HashMap<String, f32>,
+    text_inputs: HashMap<String, String>
 }
 
 impl UIEvents {
     pub fn is_pressed(&self, name: impl Into<String>) -> bool { self.pressed.contains(&name.into()) }
     pub fn just_pressed(&self, name: impl Into<String>) -> bool { self.just_pressed.contains(&name.into()) }
     pub fn just_released(&self, name: impl Into<String>) -> bool { self.just_released.contains(&name.into()) }
+
+    pub fn text_input(&self, name: impl Into<String>) -> Option<String> {
+        let name = name.into();
+        if self.text_inputs.contains_key(&name) { Some(self.text_inputs[&name].clone()) }
+        else { None }
+    }
+
+    pub fn slider(&self, name: impl Into<String>) -> Option<f32> { 
+        let name = name.into();
+        if self.sliders.contains_key(&name) { Some(self.sliders[&name]) } 
+        else { None } 
+    }
+
+    pub(crate) fn update_text_input(&mut self, name: String, value: String) {
+        self.text_inputs.insert(name, value);
+    }
+
+    pub(crate) fn update_slider(&mut self, name: String, amount: f32) {
+        self.sliders.insert(name, amount);
+    }
 
     pub(crate) fn reset_button_events(&mut self) {
         self.just_pressed.clear();

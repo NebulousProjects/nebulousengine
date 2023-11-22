@@ -1,6 +1,6 @@
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, text_area::{UITextArea, UITextAreaText}};
+use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, text_area::{UITextArea, UITextAreaText}, events::UIEvents};
 
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
@@ -38,7 +38,7 @@ impl UI {
     }
 }
 
-pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBuilder, ui: &mut UINode) {
+pub fn render_ui(asset_server: &mut ResMut<AssetServer>, events: &mut ResMut<UIEvents>, commands: &mut ChildBuilder, ui: &mut UINode) {
     // setup style
     let mut style = ui.style.clone();
     if ui.border.is_some() {
@@ -58,7 +58,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             // add children
             spawned.with_children(|builder| {
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(asset_server, builder, child);
+                    render_ui(asset_server, events, builder, child);
                 });
             });
 
@@ -92,7 +92,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                     ..Default::default()
                 }).insert(UIScrollList::default()).with_children(|builder| {
                     ui.children.iter_mut().for_each(|child| {
-                        render_ui(asset_server, builder, child);
+                        render_ui(asset_server, events, builder, child);
                     });
                 });
             });
@@ -111,7 +111,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             // add children
             spawned.with_children(|builder| {
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(asset_server, builder, child);
+                    render_ui(asset_server, events, builder, child);
                 });
             });
 
@@ -138,18 +138,21 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             // add children
             spawned.with_children(|builder| {
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(asset_server, builder, child);
+                    render_ui(asset_server, events, builder, child);
                 });
             });
 
             spawned
         }
-        UI::Slider { direction, first, second, amount: _, moveable } => {
+        UI::Slider { direction, first, second, amount, moveable } => {
             // make sure width and height are something
             style.flex_direction = *direction;
 
             // if no id, throw error
             if ui.id.is_none() { error!("Slider does not have ID!  It will fail!") }
+            else {
+                events.update_slider(ui.id.clone().unwrap(), *amount);
+            }
 
             // spawn root
             let mut spawned = commands.spawn(NodeBundle { 
@@ -174,7 +177,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
 
                 // add children normally if not moveable
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(asset_server, builder, child);
+                    render_ui(asset_server, events, builder, child);
                 });
             });
 
@@ -183,6 +186,11 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
         UI::TextArea { default_text, ghost_text, selected_bg, selected_border, text_color, font_size } => {
             // get border color
             let border_color = if ui.border.is_some() { Some(ui.border.unwrap().1) } else { None };
+
+            // if id given, add default text input
+            if ui.id.is_some() {
+                events.update_text_input(ui.id.clone().unwrap(), default_text.clone());
+            }
 
             // create button as background for text area
             let mut spawned = commands.spawn((
@@ -221,7 +229,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 ));
 
                 ui.children.iter_mut().for_each(|child| {
-                    render_ui(asset_server, builder, child);
+                    render_ui(asset_server, events, builder, child);
                 });
             });
         

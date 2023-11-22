@@ -45,6 +45,7 @@ impl Plugin for ConfigurableUIPlugin {
 fn update_ui(
     mut commands: Commands,
     mut ui: ResMut<UINode>,
+    mut events: ResMut<UIEvents>,
     mut asset_server: ResMut<AssetServer>
 ) {
     // if no root representation, create one and stop, otherwise, return entity reference
@@ -64,11 +65,11 @@ fn update_ui(
 
     // check if each child should render
     ui.children.iter_mut().for_each(|child| {
-        check_should_render(&mut commands, &mut asset_server, &entity, child);
+        check_should_render(&mut commands, &mut asset_server, &mut events, &entity, child);
     });
 }
 
-fn check_should_render(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>, parent: &Entity, ui: &mut UINode) {
+fn check_should_render(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>, events: &mut ResMut<UIEvents>, parent: &Entity, ui: &mut UINode) {
     // if should render, remove old representation and render
     if ui.is_dirty || ui.representation.is_none() {
         // remove old representation
@@ -78,13 +79,13 @@ fn check_should_render(commands: &mut Commands, asset_server: &mut ResMut<AssetS
 
         // call render
         commands.entity(*parent).with_children(|builder| {
-            render_ui(asset_server, builder, ui);
+            render_ui(asset_server, events, builder, ui);
         });
     } 
     // otherwise, check if children need to render
     else if ui.ui.do_children_render_check() {
         ui.children.iter_mut().for_each(|child| {
-            check_should_render(commands, asset_server, ui.representation.as_ref().unwrap(), child);
+            check_should_render(commands, asset_server, events, ui.representation.as_ref().unwrap(), child);
         });
     }
 }
@@ -150,10 +151,10 @@ fn update_scroll(
 
 fn update_sliders(
     mut ui: ResMut<UINode>,
+    mut events: ResMut<UIEvents>,
     window: Query<&Window, With<PrimaryWindow>>,
     sliders: Query<(&Node, &GlobalTransform, &Style, &UIID, &Children), With<UISlider>>,
     mut buttons: Query<(&Node, &mut Style, Option<&Interaction>, Option<&UISliderFirst>, Option<&UISliderSecond>), Without<UISlider>>,
-
 ) {
     // get mouse position
     let window = window.single();
@@ -234,6 +235,8 @@ fn update_sliders(
             // get amount the mouse position would represent
             let dist = slider_transform.translation().x - mouse_position.x;
             let amount = (-dist / slider.size().x + 0.5).clamp(0.0, 1.0);
+
+            events.update_slider(slider_id.0.clone(), amount);
             
             // update ui if possible
             match &info.ui {

@@ -1,6 +1,6 @@
 use bevy::{prelude::*, input::{keyboard::KeyboardInput, ButtonState}};
 
-use crate::OriginalColor;
+use crate::{OriginalColor, events::UIEvents, UIID};
 
 #[derive(Component, Default, Debug, Clone)]
 pub struct UITextArea {
@@ -51,13 +51,14 @@ fn select_text_areas(
 }
 
 fn do_typing(
-    mut selection: Query<&mut UITextArea, With<UITextAreaSelected>>,
+    mut events: ResMut<UIEvents>,
+    mut selection: Query<(&mut UITextArea, Option<&UIID>), With<UITextAreaSelected>>,
     mut typing: EventReader<ReceivedCharacter>,
     mut keys: EventReader<KeyboardInput>
 ) {
     // get selection
     let selection = selection.get_single_mut();
-    let mut selection = if selection.is_ok() { selection.unwrap() } else { return };
+    let (mut selection, id) = if selection.is_ok() { selection.unwrap() } else { return };
 
     // update from keyboard inputs
     keys.read().for_each(|event| {
@@ -107,6 +108,11 @@ fn do_typing(
                 selection.current.insert(cursor, event.char);
                 selection.cursor_position += 1;
             }
+        }
+
+        // if this text area has an id, update text input in events
+        if id.is_some() {
+            events.update_text_input(id.unwrap().0.clone(), selection.current.clone());
         }
     });
 }

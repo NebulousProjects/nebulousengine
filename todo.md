@@ -1,5 +1,5 @@
 - [ ] Examples for all systems
-- [ ] Finish UI todo
+- [x] Finish UI todo
 - [ ] Player Character w/ networking ability
 - [ ] Navigation Controller w/ networking ability
 - [ ] Camera controllers (draw to UI elements?)
