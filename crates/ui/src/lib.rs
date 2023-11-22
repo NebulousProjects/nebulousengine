@@ -1,9 +1,11 @@
 use bevy::{prelude::*, input::mouse::{MouseWheel, MouseScrollUnit}, window::PrimaryWindow};
+use camera::UICameraPlugin;
 use events::*;
 use node::UINode;
 use text_area::UITextAreaPlugin;
 use ui::{render_ui, UI};
 
+pub mod camera;
 pub mod events;
 pub mod node;
 pub mod text_area;
@@ -36,7 +38,7 @@ pub struct ConfigurableUIPlugin;
 impl Plugin for ConfigurableUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins((UIEventsPlugin, UITextAreaPlugin))
+            .add_plugins((UIEventsPlugin, UITextAreaPlugin, UICameraPlugin))
             .init_resource::<UINode>()
             .add_systems(Update, (update_ui, update_hover_press, update_scroll, update_sliders));
     }
