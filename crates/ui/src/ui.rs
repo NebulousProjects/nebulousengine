@@ -236,7 +236,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
 
     // give image
     if ui.image.is_some() {
-        entity.insert(UiImage::new(asset_server.load(ui.image.as_ref().unwrap())));
+        entity.insert(UiImage::new(ui.image.clone().unwrap()));
     }
 
     // add id

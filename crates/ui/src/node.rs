@@ -15,7 +15,7 @@ pub struct UINode {
     pub style: Style,
     pub background_color: Color,
     pub border: Option<BorderInfo>,
-    pub image: Option<String>,
+    pub image: Option<Handle<Image>>,
 
     pub representation: Option<Entity>,
     pub children: Vec<UINode>,
@@ -31,7 +31,7 @@ impl UINode {
     pub fn style(&mut self, style: Style) -> &mut UINode { self.style = style; self.mark_dirty() }
     pub fn bg(&mut self, color: Color) -> &mut UINode { self.background_color = color; self.mark_dirty() }
     pub fn border(&mut self, shape: UiRect, color: Color) -> &mut UINode { self.border = Some(BorderInfo(shape, color)); self.mark_dirty() }
-    pub fn image(&mut self, path: impl Into<String>) -> &mut Self { self.image = Some(path.into()); self.bg(Color::WHITE) }
+    pub fn image(&mut self, handle: Handle<Image>) -> &mut Self { self.image = Some(handle); self.bg(Color::WHITE) }
 
     // enum ez functions
     pub fn panel(&mut self) -> &mut UINode { self.add(UI::Panel) }

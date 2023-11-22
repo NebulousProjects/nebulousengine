@@ -12,6 +12,7 @@ fn main() {
 
 fn setup(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut ui: ResMut<UINode>
 ) {
     // camera
@@ -48,7 +49,7 @@ fn setup(
         });
 
     ui.panel()
-        .image("image.png").id("Test Image")
+        .image(asset_server.load("image.png")).id("Test Image")
         .position_type(PositionType::Absolute)
         .width(Val::Percent(20.0))
         .height(Val::Percent(20.0))
