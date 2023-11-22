@@ -35,6 +35,7 @@ fn setup(
         // main box
         ui.text_area(Color::BLACK, 20.0)
             .ghost_text("Enter text...")
+            .multiline(true)
             .selected_border(Color::BLACK)
             .width(Val::Percent(100.0))
             .height(Val::Percent(84.0))

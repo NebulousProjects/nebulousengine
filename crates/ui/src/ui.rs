@@ -25,7 +25,8 @@ pub enum UI {
         selected_bg: Option<Color>,
         selected_border: Option<Color>,
         text_color: Color,
-        font_size: f32
+        font_size: f32,
+        multiline: bool
     }
 }
 
@@ -183,7 +184,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, events: &mut ResMut<UIE
 
             spawned
         },
-        UI::TextArea { default_text, ghost_text, selected_bg, selected_border, text_color, font_size } => {
+        UI::TextArea { default_text, ghost_text, selected_bg, selected_border, text_color, font_size, multiline } => {
             // get border color
             let border_color = if ui.border.is_some() { Some(ui.border.unwrap().1) } else { None };
 
@@ -204,6 +205,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, events: &mut ResMut<UIE
                     ghost_text: ghost_text.clone(),
                     selected_bg: *selected_bg,
                     selected_border: *selected_border,
+                    multiline: *multiline,
                     ..Default::default()
                 }
             ));

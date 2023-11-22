@@ -9,6 +9,7 @@ pub struct UITextArea {
     pub cursor_position: usize,
     pub selected_bg: Option<Color>,
     pub selected_border: Option<Color>,
+    pub multiline: bool
 }
 
 #[derive(Component, Default, Debug, Clone, Copy)]
@@ -97,11 +98,11 @@ fn do_typing(
                 }
             },
             '\r' => { // enter
-                // if selection.multiline {
-                //     let cursor = selection.cursor_position;
-                //     selection.current.insert(cursor, '\n');
-                //     selection.cursor_position += 1;
-                // }
+                if selection.multiline {
+                    let cursor = selection.cursor_position;
+                    selection.current.insert(cursor, '\n');
+                    selection.cursor_position += 1;
+                }
             }
             _ => {
                 let cursor = selection.cursor_position;
@@ -109,6 +110,8 @@ fn do_typing(
                 selection.cursor_position += 1;
             }
         }
+
+        println!("Selection {:?}", selection.current);
 
         // if this text area has an id, update text input in events
         if id.is_some() {

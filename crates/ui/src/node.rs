@@ -37,7 +37,7 @@ impl UINode {
     pub fn panel(&mut self) -> &mut UINode { self.add(UI::Panel) }
     pub fn scroll_panel(&mut self, flex_direction: FlexDirection) -> &mut UINode { self.add(UI::ScrollPanel { flex_direction }) }
     pub fn text(&mut self, text: impl Into<String>) -> &mut UINode { self.add(UI::Text { text: text.into() }) }
-    pub fn text_area(&mut self, text_color: Color, font_size: f32) -> &mut Self { self.add(UI::TextArea { text_color, font_size, default_text: String::new(), ghost_text: String::new(), selected_bg: None, selected_border: None }) }
+    pub fn text_area(&mut self, text_color: Color, font_size: f32) -> &mut Self { self.add(UI::TextArea { text_color, font_size, default_text: String::new(), ghost_text: String::new(), selected_bg: None, selected_border: None, multiline: false }) }
     pub fn button(&mut self) -> &mut UINode { self.add(UI::Button { hover_bg: None, press_bg: None }) }
     pub fn slider(&mut self, direction: FlexDirection, first: Color, second: Color, amount: f32) -> &mut Self { self.add(UI::Slider { direction, first, second, amount, moveable: false }) }
 
@@ -76,8 +76,8 @@ impl UINode {
     // text area ez functions
     pub fn default_text(&mut self, default: impl Into<String>) -> &mut Self {
         match &self.ui {
-            UI::TextArea { ghost_text, selected_bg, selected_border, text_color, font_size, .. } => 
-                self.ui = UI::TextArea { default_text: default.into(), ghost_text: ghost_text.clone(), selected_bg: *selected_bg, selected_border: *selected_border, text_color: *text_color, font_size: *font_size },
+            UI::TextArea { ghost_text, selected_bg, selected_border, text_color, font_size, multiline, .. } => 
+                self.ui = UI::TextArea { default_text: default.into(), ghost_text: ghost_text.clone(), selected_bg: *selected_bg, selected_border: *selected_border, text_color: *text_color, font_size: *font_size, multiline: *multiline },
             _ => warn!("Attempted to get a text area from a non text area element!")
         }
         self.mark_dirty()
@@ -85,8 +85,8 @@ impl UINode {
 
     pub fn ghost_text(&mut self, ghost: impl Into<String>) -> &mut Self {
         match &self.ui {
-            UI::TextArea { default_text, selected_bg, selected_border, text_color, font_size, .. } => 
-                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost.into(), selected_bg: *selected_bg, selected_border: *selected_border, text_color: *text_color, font_size: *font_size },
+            UI::TextArea { default_text, selected_bg, selected_border, text_color, font_size, multiline, .. } => 
+                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost.into(), selected_bg: *selected_bg, selected_border: *selected_border, text_color: *text_color, font_size: *font_size, multiline: *multiline },
             _ => warn!("Attempted to get a text area from a non text area element!")
         }
         self.mark_dirty()
@@ -94,8 +94,8 @@ impl UINode {
 
     pub fn selected_background(&mut self, background: Color) -> &mut Self {
         match &self.ui {
-            UI::TextArea { default_text, ghost_text, selected_border, text_color, font_size, .. } => 
-                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost_text.clone(), selected_bg: Some(background), selected_border: *selected_border, text_color: *text_color, font_size: *font_size },
+            UI::TextArea { default_text, ghost_text, selected_border, text_color, font_size, multiline, .. } => 
+                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost_text.clone(), selected_bg: Some(background), selected_border: *selected_border, text_color: *text_color, font_size: *font_size, multiline: *multiline },
             _ => warn!("Attempted to get a text area from a non text area element!")
         }
         self.mark_dirty()
@@ -103,8 +103,17 @@ impl UINode {
 
     pub fn selected_border(&mut self, border: Color) -> &mut Self {
         match &self.ui {
-            UI::TextArea { default_text, ghost_text, selected_bg, text_color, font_size, .. } => 
-                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost_text.clone(), selected_bg: *selected_bg, selected_border: Some(border), text_color: *text_color, font_size: *font_size },
+            UI::TextArea { default_text, ghost_text, selected_bg, text_color, font_size, multiline, .. } => 
+                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost_text.clone(), selected_bg: *selected_bg, selected_border: Some(border), text_color: *text_color, font_size: *font_size, multiline: *multiline },
+            _ => warn!("Attempted to get a text area from a non text area element!")
+        }
+        self.mark_dirty()
+    }
+
+    pub fn multiline(&mut self, multiline: bool) -> &mut Self {
+        match &self.ui {
+            UI::TextArea { default_text, ghost_text, selected_bg, selected_border, text_color, font_size, .. } => 
+                self.ui = UI::TextArea { default_text: default_text.clone(), ghost_text: ghost_text.clone(), selected_bg: *selected_bg, selected_border: *selected_border, text_color: *text_color, font_size: *font_size, multiline },
             _ => warn!("Attempted to get a text area from a non text area element!")
         }
         self.mark_dirty()
