@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, text_area::{UITextArea, UITextAreaText}};
 
@@ -20,10 +20,12 @@ pub enum UI {
         moveable: bool
     },
     TextArea {
+        default_text: String,
+        ghost_text: String,
         selected_bg: Option<Color>,
         selected_border: Option<Color>,
-        font_size: f32,
-        multiline: bool
+        text_color: Color,
+        font_size: f32
     }
 }
 
@@ -178,7 +180,7 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
 
             spawned
         },
-        UI::TextArea { selected_bg, selected_border, font_size, multiline } => {
+        UI::TextArea { default_text, ghost_text, selected_bg, selected_border, text_color, font_size } => {
             // get border color
             let border_color = if ui.border.is_some() { Some(ui.border.unwrap().1) } else { None };
 
@@ -191,9 +193,9 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
                 },
                 OriginalColor(ui.background_color, border_color),
                 UITextArea {
+                    ghost_text: ghost_text.clone(),
                     selected_bg: *selected_bg,
                     selected_border: *selected_border,
-                    multiline: *multiline,
                     ..Default::default()
                 }
             ));
@@ -202,7 +204,17 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, commands: &mut ChildBui
             spawned.with_children(|builder| {
                 builder.spawn((
                     TextBundle {
-                        text: Text::from_section("", TextStyle {  color: Color::BLACK, font_size: *font_size, ..Default::default() }),
+                        // text: Text::from_section("", TextStyle {  color: Color::BLACK, font_size: *font_size, ..Default::default() }),
+                        text: Text {
+                            sections: vec![
+                                TextSection {
+                                    value: default_text.clone(),
+                                    style: TextStyle {  color: *text_color, font_size: *font_size, ..Default::default() }
+                                }
+                            ],
+                            linebreak_behavior: BreakLineOn::WordBoundary,
+                            ..Default::default()
+                        },
                         ..Default::default()
                     },
                     UITextAreaText

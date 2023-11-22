@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_ui::{node::UINode, ui::UI};
+use nebulousengine_ui::node::UINode;
 
 fn main() {
     App::new()
@@ -24,23 +24,19 @@ fn setup(
     .children(|ui| {
 
         // title
-        ui.add(UI::TextArea {
-            selected_bg: None,
-            selected_border: Some(Color::BLACK),
-            font_size: 25.0,
-            multiline: false,
-        }).width(Val::Percent(100.0))
+        ui.text_area(Color::BLACK, 25.0)
+            .ghost_text("Enter text...")
+            .selected_border(Color::BLACK)
+            .width(Val::Percent(100.0))
             .height(Val::Percent(8.0))
             .bg(Color::WHITE)
             .border(UiRect::all(Val::Px(5.0)), Color::GRAY);
 
         // main box
-        ui.add(UI::TextArea {
-            selected_bg: None,
-            selected_border: Some(Color::BLACK),
-            font_size: 15.0,
-            multiline: false,
-        }).width(Val::Percent(100.0))
+        ui.text_area(Color::BLACK, 20.0)
+            .ghost_text("Enter text...")
+            .selected_border(Color::BLACK)
+            .width(Val::Percent(100.0))
             .height(Val::Percent(84.0))
             .bg(Color::WHITE)
             .border(UiRect::all(Val::Px(5.0)), Color::GRAY);
