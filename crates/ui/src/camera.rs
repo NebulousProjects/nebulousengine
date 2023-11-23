@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::{render_resource::{TextureDescriptor, TextureFormat, TextureDimension, TextureUsages, Extent3d}, camera::RenderTarget}};
 
-use crate::{node::UINode, UIID};
+use crate::node::UINode;
 
 // component represents a camera that should be attached to a ui node with the given id
 #[derive(Component, Default, Debug, Clone)]
@@ -28,7 +28,7 @@ fn update_ui_cameras(
     mut images: ResMut<Assets<Image>>,
     mut ui: ResMut<UINode>,
     mut query: Query<(&mut Camera, &mut UICamera)>,
-    nodes: Query<(&Node, &UIID)>
+    nodes: Query<&Node>
 ) {
     // loop through all ui cameras to update them
     query.for_each_mut(|(mut camera, mut ui_camera)| {
@@ -36,8 +36,11 @@ fn update_ui_cameras(
         let ui = ui.get_mut(&ui_camera.id);
         let ui = if ui.is_some() { ui.unwrap() } else { return };
 
-        let node = nodes.iter().find(|(_, id)| id.0 == ui_camera.id);
-        let (node, _) = if node.is_some() { node.unwrap() } else { return };
+        let node = if ui.representation.is_some() { ui.representation.unwrap() } else { return };
+        let node = nodes.get(node);
+        let node = if node.is_ok() { node.unwrap() } else { return };
+        // let node = nodes.iter().find(|(_, id)| id.0 == ui_camera.id);
+        // let (node, _) = if node.is_some() { node.unwrap() } else { return };
 
         // attempt to get image from ui
         let image_handle = ui.image.as_ref();

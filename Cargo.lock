@@ -2466,6 +2466,7 @@ dependencies = [
  "json",
  "nebulousengine_camera",
  "nebulousengine_input",
+ "nebulousengine_levels",
  "nebulousengine_models",
  "nebulousengine_networking",
  "nebulousengine_ui",
@@ -2486,6 +2487,13 @@ dependencies = [
  "bevy",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "nebulousengine_levels"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
@@ -2514,6 +2522,7 @@ name = "nebulousengine_ui"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "nebulousengine_levels",
  "serde",
  "serde_json",
 ]

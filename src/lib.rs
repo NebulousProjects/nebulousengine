@@ -4,8 +4,11 @@ use input::ConfigurableInputPlugin;
 use models::ModelPlugins;
 use ui::ConfigurableUIPlugin;
 use utils::NebulousEngineUtils;
+use levels::LevelsPlugin;
 
 // reexport all internal modules
+pub use bevy as bevy;
+pub use nebulousengine_levels as levels;
 pub use nebulousengine_models as models;
 pub use nebulousengine_utils as utils;
 pub use nebulousengine_input as input;
@@ -17,6 +20,6 @@ pub use nebulousengine_networking as networking;
 pub struct NebulousEngine;
 impl Plugin for NebulousEngine {
     fn build(&self, app: &mut App) {
-        app.add_plugins((BetterCameraPlugin, ConfigurableInputPlugin, ModelPlugins, ConfigurableUIPlugin, NebulousEngineUtils));
+        app.add_plugins((BetterCameraPlugin, ConfigurableInputPlugin, LevelsPlugin, ModelPlugins, ConfigurableUIPlugin, NebulousEngineUtils));
     }
 }

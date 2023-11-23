@@ -2,6 +2,8 @@ use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::{node::UINode, OriginalColor, HoverColor, PressColor, UIID, UIScrollList, UISlider, UISliderFirst, UISliderSecond, text_area::{UITextArea, UITextAreaText}, events::UIEvents};
 
+use nebulousengine_levels::CurrentLevel;
+
 #[derive(Resource, Default, Debug, Clone)]
 pub enum UI {
     #[default]
@@ -252,6 +254,11 @@ pub fn render_ui(asset_server: &mut ResMut<AssetServer>, events: &mut ResMut<UIE
     // add id
     if ui.id.is_some() {
         entity.insert(UIID(ui.id.clone().unwrap()));
+    }
+
+    // if marker not global, add current level marker
+    if ui.global {
+        entity.insert(CurrentLevel);
     }
 
     // update ui node

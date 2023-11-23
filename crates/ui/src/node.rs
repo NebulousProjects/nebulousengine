@@ -10,6 +10,7 @@ pub struct BorderInfo(pub UiRect, pub Color);
 pub struct UINode {
     pub id: Option<String>,
     pub data: Option<Value>,
+    pub global: bool,
 
     pub ui: UI,
     pub style: Style,
@@ -72,6 +73,7 @@ impl UINode {
     pub fn flex_basis(&mut self, flex_basis: Val) -> &mut Self { self.style.flex_basis = flex_basis; self.mark_dirty() }
     pub fn row_gap(&mut self, row_gap: Val) -> &mut Self { self.style.row_gap = row_gap; self.mark_dirty() }
     pub fn column_gap(&mut self, column_gap: Val) -> &mut Self { self.style.column_gap = column_gap; self.mark_dirty() }
+    pub fn global(&mut self, global: bool) -> &mut Self { self.global = global; self.mark_dirty() }
 
     // text ez functions
     pub fn set_text(&mut self, text: impl Into<String>) -> &mut Self {
@@ -199,7 +201,7 @@ impl UINode {
             style: Style::default(), 
             background_color: Color::Rgba { red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0 },
             border: None, representation: None, image: None,
-            children: Vec::new(), is_dirty: true,
+            children: Vec::new(), is_dirty: true, global: false
         });
         self.is_dirty = true;
         return self.children.last_mut().unwrap(); // kinda clunky but necessary for memory safety rust reasons

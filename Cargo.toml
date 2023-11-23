@@ -18,6 +18,7 @@ nebulousengine_models = { path = "./crates/models" }
 nebulousengine_networking = { path = "./crates/networking" }
 nebulousengine_ui = { path = "./crates/ui" }
 nebulousengine_camera = { path = "./crates/camera" }
+nebulousengine_levels = { path = "./crates/levels" }
 
 [features]
 editor = []
