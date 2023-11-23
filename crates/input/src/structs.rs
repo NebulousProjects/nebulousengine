@@ -2,13 +2,19 @@ use bevy::{prelude::*, reflect::{TypeUuid, TypePath}, utils::HashMap};
 use serde::*;
 
 // A serializable version of input map
-#[derive(Serialize, Deserialize, Component, TypeUuid, TypePath, Asset, Debug, Default)]
+#[derive(Serialize, Deserialize, Component, TypeUuid, TypePath, Asset, Debug, Default, Clone)]
 #[uuid = "135601b6-2de3-4497-8f4b-3f4841948584"]
 pub struct InputDescription {
     pub elements: HashMap<String, Vec<InputType>>
 }
 
 impl InputDescription {
+    pub fn create<F>(f: F) -> Self where F: Fn(&mut Self) {
+        let mut me = InputDescription::default();
+        f(&mut me);
+        me
+    }
+
     pub fn insert(&mut self, name: impl Into<String>, inputs: Vec<InputType>) -> &mut Self {
         self.elements.insert(name.into(), inputs);
         self
@@ -28,11 +34,30 @@ impl InputDescription {
     }
 }
 
-#[derive(Component, Debug, Default, Clone)]
-pub struct InputValues {
+#[derive(Debug, Clone)]
+pub enum InputDescriptionContainer {
+    Raw(InputDescription),
+    Handle(Handle<InputDescription>)
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct Inputs {
+    pub description: InputDescriptionContainer,
     pub values: HashMap<String, f32>
 }
-impl InputValues {
+impl Inputs {
+    pub fn from_handle(handle: Handle<InputDescription>) -> Self {
+        Self { description: InputDescriptionContainer::Handle(handle), values: HashMap::new() }
+    }
+
+    pub fn from_description(description: InputDescription) -> Self {
+        Self { description: InputDescriptionContainer::Raw(description), values: HashMap::new() }
+    }
+
+    pub fn new<F>(f: F) -> Self where F: Fn(&mut InputDescription) {
+        Self { description: InputDescriptionContainer::Raw(InputDescription::create(f)), values: HashMap::new() }
+    }
+
     pub fn get(&self, name: &String) -> f32 {
         return *self.values.get(name).unwrap_or(&0.0);
     }

@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashMap, asset::{AssetLoader, AsyncReadExt}};
+use bevy::{prelude::*, asset::{AssetLoader, AsyncReadExt}};
 use structs::*;
 
 pub mod structs;
@@ -16,7 +16,7 @@ impl Plugin for ConfigurableInputPlugin {
             .add_event::<InputChangedEvent>()
             .init_asset::<InputDescription>()
             .init_asset_loader::<InputLoader>()
-            .add_systems(Update, (spawn_input_value, update_inputs));
+            .add_systems(Update, update_inputs);
     }
 }
 
@@ -68,20 +68,10 @@ impl AssetLoader for InputLoader {
     }
 }
 
-// System that spawns input values component to all input descriptions
-fn spawn_input_value(
-    mut commands: Commands,
-    mut inputs: Query<(Entity, With<Handle<InputDescription>>, Without<InputValues>)>
-) {
-    inputs.for_each_mut(|(entity, _, _)| {
-        commands.entity(entity).insert(InputValues { values: HashMap::new() });
-    })
-}
-
 // System that loads all active input maps
 fn update_inputs(
     // general
-    mut inputs: Query<(&Handle<InputDescription>, &mut InputValues)>,
+    mut inputs: Query<&mut Inputs>,
     descriptions: Res<Assets<InputDescription>>,
 
     // inputs
@@ -95,14 +85,20 @@ fn update_inputs(
     mut depressed_events: EventWriter<InputDepressedEvent>,
     mut changed_events: EventWriter<InputChangedEvent>
 ) {
-    inputs.for_each_mut(|(description_handle, mut values)| {
-        // make sure description handle exists
-        if !descriptions.contains(description_handle) { return }
+    inputs.for_each_mut(|mut inputs| {
+        let copy = inputs.clone(); // yes I know this is horribly inefficient
+        let description = match &copy.description {
+            InputDescriptionContainer::Raw(desc) => desc,
+            InputDescriptionContainer::Handle(handle) => {
+                // make sure description handle exists
+                if !descriptions.contains(handle) { return }
 
-        // load description
-        let description = descriptions.get(description_handle);
-        if description.is_none() { return }
-        let description = description.unwrap();
+                // load description
+                let description = descriptions.get(handle);
+                if description.is_none() { return }
+                description.unwrap()
+            },
+        };
 
         // for each description element and read and save its input
         description.elements.iter().for_each(|(name, input_types)| {
@@ -119,7 +115,7 @@ fn update_inputs(
             let value = value.min(1.);
 
             // get last value
-            let old_value = values.get(&name);
+            let old_value = inputs.get(&name);
             
             // pressed events
             if old_value < 1. && value >= 1. {
@@ -137,7 +133,7 @@ fn update_inputs(
             }
 
             // update values map with the resulting value
-            values.set(name.clone(), value);
+            inputs.set(name.clone(), value);
         });
     })
 }

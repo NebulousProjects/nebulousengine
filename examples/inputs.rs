@@ -13,25 +13,25 @@ fn main() {
 
 fn setup(
     mut commands: Commands,
-    mut descriptions: ResMut<Assets<InputDescription>>,
     mut ui: ResMut<UINode>
 ) {
     commands.spawn(Camera2dBundle::default());
 
     // create input description
-    let mut description = InputDescription::default();
-    description.insert("vertical", vec![
-        InputType::AXIS { positive: InputElement::Keyboard { key: KeyCode::W }, negative: InputElement::Keyboard { key: KeyCode::S } },
-        InputType::SCALAR { element: InputElement::GamepadAxis { axis: GamepadAxisType::LeftStickY, mult: 1.0 } }
-    ]);
-    description.insert("horizontal", vec![
-        InputType::AXIS { positive: InputElement::Keyboard { key: KeyCode::D }, negative: InputElement::Keyboard { key: KeyCode::A } },
-        InputType::SCALAR { element: InputElement::GamepadAxis { axis: GamepadAxisType::LeftStickX, mult: 1.0 } }
-    ]);
-    description.insert("click", vec![
-        InputType::SCALAR { element: InputElement::Mouse { button: MouseButton::Left } },
-        InputType::SCALAR { element: InputElement::GamepadButton { button: GamepadButtonType::North } }
-    ]);
+    let description = InputDescription::create(|inputs| {
+        inputs.insert("vertical", vec![
+            InputType::AXIS { positive: InputElement::Keyboard { key: KeyCode::W }, negative: InputElement::Keyboard { key: KeyCode::S } },
+            InputType::SCALAR { element: InputElement::GamepadAxis { axis: GamepadAxisType::LeftStickY, mult: 1.0 } }
+        ]);
+        inputs.insert("horizontal", vec![
+            InputType::AXIS { positive: InputElement::Keyboard { key: KeyCode::D }, negative: InputElement::Keyboard { key: KeyCode::A } },
+            InputType::SCALAR { element: InputElement::GamepadAxis { axis: GamepadAxisType::LeftStickX, mult: 1.0 } }
+        ]);
+        inputs.insert("click", vec![
+            InputType::SCALAR { element: InputElement::Mouse { button: MouseButton::Left } },
+            InputType::SCALAR { element: InputElement::GamepadButton { button: GamepadButtonType::North } }
+        ]);
+    });
 
     // create ui
     let panel = ui.scroll_panel(FlexDirection::Column)
@@ -48,11 +48,11 @@ fn setup(
     });
 
     // spawn input description
-    commands.spawn(descriptions.add(description));
+    commands.spawn(Inputs::from_description(description));
 }
 
 fn update(
-    input: Query<&InputValues>,
+    input: Query<&Inputs>,
     mut ui: ResMut<UINode>
 ) {
     let input = input.get_single();
