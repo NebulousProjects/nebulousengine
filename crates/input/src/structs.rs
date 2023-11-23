@@ -2,13 +2,33 @@ use bevy::{prelude::*, reflect::{TypeUuid, TypePath}, utils::HashMap};
 use serde::*;
 
 // A serializable version of input map
-#[derive(Serialize, Deserialize, Component, TypeUuid, TypePath, Asset)]
+#[derive(Serialize, Deserialize, Component, TypeUuid, TypePath, Asset, Debug, Default)]
 #[uuid = "135601b6-2de3-4497-8f4b-3f4841948584"]
 pub struct InputDescription {
     pub elements: HashMap<String, Vec<InputType>>
 }
 
-#[derive(Component)]
+impl InputDescription {
+    pub fn insert(&mut self, name: impl Into<String>, inputs: Vec<InputType>) -> &mut Self {
+        self.elements.insert(name.into(), inputs);
+        self
+    }
+
+    pub fn remove(&mut self, name: impl Into<String>) -> &mut Self {
+        self.elements.remove(&name.into());
+        self
+    }
+
+    pub fn get(&mut self, name: impl Into<String>) -> Option<&Vec<InputType>> {
+        self.elements.get(&name.into())
+    }
+
+    pub fn get_mut(&mut self, name: impl Into<String>) -> Option<&mut Vec<InputType>> {
+        self.elements.get_mut(&name.into())
+    }
+}
+
+#[derive(Component, Debug, Default, Clone)]
 pub struct InputValues {
     pub values: HashMap<String, f32>
 }
@@ -23,7 +43,7 @@ impl InputValues {
 }
 
 // Represents all possible input, types, scalar (0 -> 1, 1 input) or axis (-1 -> 1, 2 inputs)
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum InputType {
     SCALAR { element: InputElement },
@@ -31,7 +51,7 @@ pub enum InputType {
 }
 
 // Represents an input element like a keyboard key or a mouse axis
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum InputElement {
     Keyboard {

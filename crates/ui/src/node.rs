@@ -73,6 +73,15 @@ impl UINode {
     pub fn row_gap(&mut self, row_gap: Val) -> &mut Self { self.style.row_gap = row_gap; self.mark_dirty() }
     pub fn column_gap(&mut self, column_gap: Val) -> &mut Self { self.style.column_gap = column_gap; self.mark_dirty() }
 
+    // text ez functions
+    pub fn set_text(&mut self, text: impl Into<String>) -> &mut Self {
+        match &self.ui {
+            UI::Text { .. } => self.ui = UI::Text { text: text.into() },
+            _ => warn!("Attempted to get a text from a non text element!")
+        }
+        self.mark_dirty()
+    }
+
     // text area ez functions
     pub fn default_text(&mut self, default: impl Into<String>) -> &mut Self {
         match &self.ui {
