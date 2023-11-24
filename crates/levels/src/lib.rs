@@ -1,12 +1,13 @@
+use std::{fmt::Debug, hash::Hash, marker::PhantomData};
+
 use bevy::prelude::*;
-use levels::Levels;
+use levels::Level;
 
 pub mod levels;
 
 /**
  * The levels system is designed to make the seperation of cabailities and entities across levels.
  * 
- * TODO add global option to UI elements, if not set, give current level marker
  * TODO builder
  * TODO add on start, exit, and update systems for levels
  * TODO auto spawn and despawn in those systems
@@ -16,27 +17,36 @@ pub mod levels;
 pub struct CurrentLevel;
 
 // create plugin for loading/unloading/updating levels
-pub struct LevelsPlugin;
-impl Plugin for LevelsPlugin {
+#[derive(Default)]
+pub struct Levels<T: States + Default + Debug + Eq + PartialEq + Hash>(pub PhantomData<T>);
+impl <T: States + Default + Debug + Eq + PartialEq + Hash> Plugin for Levels<T> {
     fn build(&self, app: &mut App) {
         app
-            .init_resource::<Levels>()
-            .add_systems(Update, update);
+            .add_state::<T>()            
+            .init_resource::<Level::<T>>()
+            .add_systems(Update, update::<T>);
     }
 }
 
-fn update(
+fn update<T: States + Default + Debug + Eq + PartialEq + Hash>(
     mut commands: Commands,
-    mut levels: ResMut<Levels>,
-    in_level: Query<Entity, With<CurrentLevel>>
+    mut levels: ResMut<Level<T>>,
+    mut next_state: ResMut<NextState<T>>,
+    in_level: Query<Entity, With<CurrentLevel>>,
 ) {
-    // check if should change level
+    // check if should change level     
     if levels.next_state.is_some() {
-        // despawn all in level objects
-        in_level.for_each(|entity| commands.entity(entity).despawn_recursive());
 
         // change saved level ID
-        levels.current_state = levels.next_state.clone().unwrap();
-        levels.next_state = None;
+        let next = levels.next_state.clone().unwrap();
+        if next != levels.current() {
+            // perform state swap
+            levels.state = next.clone();
+            levels.next_state = None;
+            next_state.set(next);
+            
+            // despawn all in level objects
+            in_level.for_each(|entity| commands.entity(entity).despawn_recursive());
+        }
     }
 }

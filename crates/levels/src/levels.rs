@@ -1,12 +1,14 @@
+use std::{fmt::Debug, hash::Hash};
+
 use bevy::prelude::*;
 
 #[derive(Resource, Debug, Default)]
-pub struct Levels {
-    pub(crate) current_state: String,
-    pub(crate) next_state: Option<String>
+pub struct Level<T: States + Default + Debug + Eq + PartialEq + Hash> {
+    pub(crate) state: T,
+    pub(crate) next_state: Option<T>
 }
 
-impl Levels {
-    pub fn current(&self) -> String { self.current_state.clone() }
-    pub fn goto(&mut self, next_state: impl Into<String>) { self.next_state = Some(next_state.into()); }
+impl <T: States + Default + Debug + Eq + PartialEq + Hash> Level<T> {
+    pub fn current(&self) -> T { self.state.clone() }
+    pub fn goto(&mut self, next_state: T) { self.next_state = Some(next_state); }
 }
