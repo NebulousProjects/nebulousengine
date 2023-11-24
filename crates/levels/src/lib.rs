@@ -8,7 +8,6 @@ pub mod levels;
 /**
  * The levels system is designed to make the seperation of cabailities and entities across levels.
  * 
- * TODO builder
  * TODO add on start, exit, and update systems for levels
  * TODO auto spawn and despawn in those systems
  */
@@ -36,8 +35,7 @@ fn update<T: States + Default + Debug + Eq + PartialEq + Hash>(
 ) {
     // check if should change level     
     if levels.next_state.is_some() {
-
-        // change saved level ID
+        // change saved level ID if next is different
         let next = levels.next_state.clone().unwrap();
         if next != levels.current() {
             // perform state swap

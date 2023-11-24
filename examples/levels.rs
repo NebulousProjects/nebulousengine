@@ -32,14 +32,6 @@ fn setup(
         ..default()
     });
     
-    // cube
-    // commands.spawn(PbrBundle {
-    //     mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-    //     material: materials.add(Color::rgb_u8(124, 144, 255).into()),
-    //     transform: Transform::from_xyz(0.0, 0.5, 0.0),
-    //     ..default()
-    // });
-    
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -70,31 +62,34 @@ fn update(
 }
 
 fn start_a(
+    level: ResMut<Level<TestLevels>>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
+    let a = level.spawn(&mut commands, 
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
             material: materials.add(Color::rgb_u8(124, 144, 255).into()),
             transform: Transform::from_xyz(0.0, 0.5, 0.0),
             ..default()
-        }, CurrentLevel
-    ));
+        }
+    );
+    a.insert(VisibilityBundle::default());
 }
 
 fn start_b(
+    level: ResMut<Level<TestLevels>>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
+    level.spawn(&mut commands, 
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
             material: materials.add(Color::rgb_u8(255, 144, 124).into()),
             transform: Transform::from_xyz(0.0, 0.5, 0.0),
             ..default()
-        }, CurrentLevel
-    ));
+        }
+    );
 }
