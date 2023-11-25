@@ -6,7 +6,6 @@ use ui::ConfigurableUIPlugin;
 use utils::NebulousEngineUtils;
 
 // reexport all internal modules
-pub use bevy as bevy;
 pub use nebulousengine_levels as levels;
 pub use nebulousengine_models as models;
 pub use nebulousengine_utils as utils;
