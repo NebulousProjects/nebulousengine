@@ -10,7 +10,7 @@ use url::Url;
 
 pub mod builder;
 pub mod events;
-pub mod states;
+pub mod levels;
 pub mod structs;
 
 #[derive(Resource, Debug, Default)]

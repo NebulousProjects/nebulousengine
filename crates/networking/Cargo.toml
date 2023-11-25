@@ -7,9 +7,11 @@ edition = "2021"
 bevy = "0.12.0"
 
 # serde
-serde = "1.0.183"
+serde = "1.0.193"
 serde_json = "1.0.105"
 
 # networking
 url = "2.4.0"
 tungstenite = "0.20.0"
+
+nebulousengine_levels = { path = "../levels" }

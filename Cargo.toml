@@ -20,5 +20,8 @@ nebulousengine_ui = { path = "./crates/ui" }
 nebulousengine_camera = { path = "./crates/camera" }
 nebulousengine_levels = { path = "./crates/levels" }
 
+[dev-dependencies]
+serde = "1.0.193"
+
 [features]
 editor = []

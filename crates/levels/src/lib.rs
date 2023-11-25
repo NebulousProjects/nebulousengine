@@ -5,13 +5,6 @@ use levels::Level;
 
 pub mod levels;
 
-/**
- * The levels system is designed to make the seperation of cabailities and entities across levels.
- * 
- * TODO add on start, exit, and update systems for levels
- * TODO auto spawn and despawn in those systems
- */
-
 #[derive(Component, Debug, Default, Clone, Copy)]
 pub struct CurrentLevel;
 

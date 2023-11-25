@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use nebulousengine::NebulousEngine;
-use nebulousengine_levels::{Levels, levels::Level};
+use nebulousengine_levels::levels::Level;
+use nebulousengine_networking::{*, levels::*};
+use serde::*;
 
-#[derive(States, Default, Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(States, Default, Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 enum TestLevels {
     #[default]
     TestA,
@@ -11,7 +13,7 @@ enum TestLevels {
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, NebulousEngine, Levels::<TestLevels>::default()))
+        .add_plugins((DefaultPlugins, NebulousEngine, GameNetworkingPlugin, SyncedLevel::<TestLevels>::default()))
         .add_systems(Startup, setup)
         .add_systems(Update, update)
         .add_systems(OnEnter(TestLevels::TestA), start_a)
@@ -51,13 +53,16 @@ fn setup(
 }
 
 fn update(
+    net: Res<Networking>,
     mut levels: ResMut<Level<TestLevels>>,
     key_inputs: Res<Input<KeyCode>>
 ) {     
-    if key_inputs.just_released(KeyCode::Space) {
-        levels.goto(TestLevels::TestB);
-    } else if key_inputs.just_released(KeyCode::B) {
-        levels.goto(TestLevels::TestA);
+    if net.is_server() {
+        if key_inputs.just_released(KeyCode::Space) {
+            levels.goto(TestLevels::TestB);
+        } else if key_inputs.just_released(KeyCode::B) {
+            levels.goto(TestLevels::TestA);
+        }
     }
 }
 
